@@ -82,6 +82,7 @@ export class LoginFormComponent implements OnInit {
               this.storeSession(this.loginResponse);
               this.verify_PostOfficeCredencial_Data();
             } else if (response.flag == 2) {
+              this.sharedService.triggerLoadComponent(false);
               const result = confirm(
                 'You are already logged in on another device. Do you want to force the login process?',
                 'Force Login'
@@ -90,6 +91,7 @@ export class LoginFormComponent implements OnInit {
               result.then((dialogResult: boolean) => {
                 if (dialogResult) {
                   const forcelogin = true;
+                  this.sharedService.triggerLoadComponent(true);
                   this.authService
                     .logIn(username, password, forcelogin)
                     .subscribe((response: any) => {
