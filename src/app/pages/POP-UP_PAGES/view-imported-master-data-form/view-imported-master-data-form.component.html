@@ -1,0 +1,95 @@
+<dx-data-grid
+  #dataGrid
+  [showBorders]="true"
+  [paging]="{ pageSize: 10 }"
+  [pager]="{ showPageSizeSelector: true, allowedPageSizes: [50, 100, 1000] }"
+  [allowColumnResizing]="true"
+  [allowColumnReordering]="true"
+  [rowAlternationEnabled]="true"
+  rowAlternationInterval="2"
+  [columnAutoWidth]="true"
+  [columnFixing]="{ enabled: true }"
+  [height]="'80vh'"
+  [width]="'100%'"
+  [dataSource]="dataSource"
+>
+
+<dxo-load-panel 
+    [showPane]="false"
+></dxo-load-panel>
+
+  <dxo-toolbar class="toolBarDiv p-0 m-0">
+    <!-- <dxi-item location="" *ngIf="isFileNameAvailable">
+      <div class="">Selected File: {{importedFileName}}</div>
+    </dxi-item> -->
+    <!-- <dxi-item class="me-2" name="columnChooserButton" locateInMenu="auto"></dxi-item> -->
+    <!-- <dxi-item location="after" locateInMenu="auto">
+      <div class="separator"></div>
+    </dxi-item> -->
+    <!-- <dxi-item class="me-2"
+      location="after"
+      locateInMenu="auto"
+      showText="inMenu"
+      widget="dxButton"
+      [options]="{
+        text: 'Refresh',
+        icon: 'refresh',
+        stylingMode: 'text'
+      }"
+    ></dxi-item> -->
+    <!-- <dxi-item location="after" locateInMenu="auto">
+      <div class="separator"></div>
+    </dxi-item> -->
+    <dxi-item location="before" locateInMenu="auto" class="me-3">
+        <dx-text-box
+            label="Document No."
+            labelMode="floating"
+            [readOnly]="true"
+            [(value)]="docNo"
+        >
+        </dx-text-box>
+    </dxi-item>
+    <dxi-item location="before" locateInMenu="auto"  class="me-3">
+        <dx-text-box
+            label="Master"
+            labelMode="floating"
+            [readOnly]="true"
+            [(value)]="master"
+        >
+        </dx-text-box>
+    </dxi-item>
+    <dxi-item location="before" locateInMenu="auto"  class="me-3">
+        <dx-text-box
+            label="Imported Date"
+            labelMode="floating"
+            [readOnly]="true"
+            [(value)]="importedDate"
+            [width]="200"
+        >
+        </dx-text-box>
+    </dxi-item>
+    <dxi-item location="before" locateInMenu="auto">
+        <dx-text-box
+            label="User"
+            labelMode="floating"
+            [readOnly]="true"
+            [(value)]="user"
+        >
+        </dx-text-box>
+    </dxi-item>
+
+  </dxo-toolbar>
+ 
+</dx-data-grid>
+
+<dx-load-panel
+  #loadPanel
+  shadingColor="rgba(0,0,0,0.4)"
+  [position]="{ of: '#dataGrid' }"
+  [(visible)]="isLoading"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  message="Loading..."
+> </dx-load-panel>
+

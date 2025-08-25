@@ -1,0 +1,115 @@
+.headingText {
+  font-size: large;
+  font-weight: bold;
+  padding-left: 10px;
+}
+.label-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.custom-label {
+  width: 35%;
+  margin-left: 15px;
+  font-size: larger;
+}
+.flex-custom-label {
+  width: 55%;
+  margin-left: 15px;
+  font-size: larger;
+}
+.parentDiv {
+  height: 84vh;
+  width: 100%;
+  margin: 0px;
+  overflow-y: auto;
+}
+.RowgroupDiv {
+  padding: 5px;
+  width: 100%;
+  background-color: var(--base-bg);
+  border-radius: 8px;
+  // box-shadow: -2px 2px 2px rgba(0, 0, 0, 0.1), 2px 2px 2px rgba(0, 0, 0, 0.1),
+  //   0 2px 2px rgba(0, 0, 0, 0.1);
+}
+.RowgroupDiv2 {
+  width: 100%;
+  height: 82vh;
+  border-radius: 8px;
+  box-shadow: -2px 2px 2px rgba(0, 0, 0, 0.1), 2px 2px 2px rgba(0, 0, 0, 0.1),
+    0 2px 2px rgba(0, 0, 0, 0.1);
+}
+.BorderBox {
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  width: 45%;
+  height: auto;
+  margin-left: 10px;
+}
+.gridDataDiv {
+  padding-bottom: 10px;
+  background-color: var(--base-bg);
+  border-radius: 8px;
+  border: 1px dotted;
+}
+.grid {
+  padding-left: 5px;
+  border-radius: 5px;
+}
+.DetailsDrillDown .view-wrapper .grid .dx-datagrid-content .dx-row {
+  cursor: pointer;
+  height: 1rem;
+}
+
+.button-container {
+  padding: 0px;
+  height: 0.3vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.toggleButton {
+  border-radius: 7px;
+  background-color: cadetblue;
+  color: var(--div-border-color);
+}
+
+.data-container {
+  transition: transform 0.5s ease, opacity 0.5s ease, max-height 0.5s ease;
+  transform: translateY(0);
+  opacity: 1;
+  max-height: 500px; /* Set this to the maximum height of your content */
+  background-color: var(--base-bg);
+  box-shadow: -2px 2px 2px rgba(0, 0, 0, 0.1), 2px 2px 2px rgba(0, 0, 0, 0.1),
+    0 2px 2px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.hide-content {
+  transform: translateY(-20px);
+  opacity: 0;
+  max-height: 0; /* Transition from max-height to 0 */
+  padding: 0;
+  margin: 0;
+  overflow: hidden; /* Prevents content overflow */
+}
+
+.po-title {
+  font-size: 15px;
+  font-weight: bold;
+  font-style: italic;
+  margin-bottom: 5px;
+  margin-left: 20px;
+}
+.innerGriddata {
+  border: 1px solid var(--div-border-color);
+  border-radius: 5px;
+}
+.mainInnerGridDiv {
+  padding: 5px;
+  padding-top: 5px;
+  padding-bottom: 10px;
+  border-radius: 5px;
+}

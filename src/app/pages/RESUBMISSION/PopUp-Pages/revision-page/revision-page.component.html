@@ -1,0 +1,384 @@
+<div class="view-wrapper p-2 m-0">
+  <div
+    class="filterparams SearchParams-container p-2"
+    [ngClass]="{ 'hide-content': !isContentVisible }"
+  >
+    <div class="d-flex gap-2">
+      <dx-drop-down-box
+        #dropDownRef
+        class="flex-fill"
+        [(value)]="AllocationUid"
+        valueExpr="AllocationID"
+        displayExpr="AllocationID"
+        [readOnly]="IsEditing"
+        [showClearButton]="true"
+        [dataSource]="Allocation_DataSource"
+        [dropDownOptions]="{ width: 'auto' }"
+        label="Allocation UID"
+        labelMode="floating"
+        validationMessagePosition="top"
+        [dropDownOptions]="{ width: 'auto' }"
+        (onValueChanged)="onAllocationChange($event)"
+      >
+        <div *dxTemplate="let data of 'content'">
+          <dx-data-grid
+            [dataSource]="Allocation_DataSource"
+            [columns]="allocationMasterDatacolumns"
+            [selection]="{ mode: 'single' }"
+            [hoverStateEnabled]="true"
+            [paging]="{ enabled: true, pageSize: 10 }"
+            [filterRow]="{ visible: true }"
+            [headerFilter]="{ visible: true }"
+            [scrolling]="{ mode: 'virtual' }"
+            [height]="'auto'"
+            [width]="'auto'"
+            [(selectedRowKeys)]="AllocationUid"
+            (onSelectionChanged)="onGridSelectionChanged($event, dropDownRef)"
+          ></dx-data-grid>
+        </div>
+      </dx-drop-down-box>
+
+      <dx-select-box
+        class="flex-fill"
+        [(value)]="ReceiverID"
+        [dataSource]="receiverList"
+        displayExpr="DESCRIPTION"
+        valueExpr="ID"
+        label="Receiver"
+        labelMode="floating"
+        [searchEnabled]="true"
+        [readOnly]="IsEditing"
+        [showClearButton]="true"
+        (onValueChanged)="filterByReceiver()"
+      ></dx-select-box>
+
+      <dx-check-box
+        class="mt-2 ms-1"
+        [(value)]="IsFinalized"
+        [iconSize]="25"
+        text="Finalize"
+        [readOnly]="IsEditing"
+        [hint]="'Finalized entries will be available in batch upload'"
+      ></dx-check-box>
+    </div>
+
+    <div class="d-flex gap-2">
+      <dx-text-box
+        class="flex-fill"
+        [(value)]="AllotedByValue"
+        label="Alloted By"
+        labelMode="floating"
+        [readOnly]="true"
+      ></dx-text-box>
+
+      <dx-select-box
+        class="flex-fill"
+        [(value)]="PayerID"
+        [dataSource]="payerDataList"
+        displayExpr="DESCRIPTION"
+        valueExpr="ID"
+        label="Payer"
+        labelMode="floating"
+        [searchEnabled]="true"
+        [showClearButton]="true"
+        [readOnly]="IsEditing"
+        (onValueChanged)="filterByPayerId()"
+      ></dx-select-box>
+
+      <dx-text-box
+        class="flex-fill"
+        label="Remarks"
+        labelMode="floating"
+        [(value)]="Remarks"
+        [readOnly]="IsEditing"
+      ></dx-text-box>
+    </div>
+  </div>
+
+  <div class="button-container mb-2">
+    <dx-button
+      class="toggleButton"
+      icon="{{ isContentVisible ? 'chevronup' : 'chevrondown' }}"
+      stylingMode="outlined"
+      type="normal"
+      [hint]="isContentVisible ? 'Hide Filter Contend' : 'Show Filter Contend'"
+      [width]="200"
+      [height]="13"
+      (onClick)="toggleContent()"
+    >
+    </dx-button>
+  </div>
+  <div class="parentBody">
+    <div class="mt-2">
+      <dx-data-grid
+        #mainDatagrid
+        class="my-custom-grid grid theme-dependent ms-1 me-1"
+        noDataText="No Claim Data Available"
+        [dataSource]="FilteredRevisionDataSource"
+        [columns]="ClaimDataColumns"
+        [showBorders]="true"
+        [allowColumnResizing]="true"
+        [allowColumnReordering]="true"
+        [rowAlternationEnabled]="true"
+        rowAlternationInterval="2"
+        [height]="'45vh'"
+        [columnAutoWidth]="true"
+        [focusedRowEnabled]="true"
+        [(focusedRowKey)]="focusedRow"
+        [keyExpr]="
+          IsEditing
+            ? 'ResubmissionRevisionBillUID'
+            : 'ResubmissionAllocationBillUID'
+        "
+        (onFocusedRowChanged)="get_activity_diagnosis_dataSource($event)"
+        (onSelectionChanged)="onMainGridSelectionChanged($event)"
+        (onCellPrepared)="onCellPrepared($event)"
+        (onRowUpdated)="onRowUpdated($event)"
+      >
+        <dxo-toolbar>
+          <dxi-item location="before">
+            <div class="grid-header">Resubmission Revision</div>
+          </dxi-item>
+          <dxi-item
+            class="grid"
+            location="after"
+            widget="dxButton"
+            [options]="saveButtonOptions"
+          ></dxi-item>
+        </dxo-toolbar>
+        <dxo-selection
+          *ngIf="FilteredRevisionDataSource"
+          mode="multiple"
+        ></dxo-selection>
+        <dxo-load-panel [showPane]="false"></dxo-load-panel>
+        <dxo-scrolling mode="virtual"></dxo-scrolling>
+        <dxo-sorting mode="multiple"></dxo-sorting>
+        <dxo-header-filter [visible]="true"></dxo-header-filter>
+        <dxo-load-panel [enabled]="false"> </dxo-load-panel>
+
+        <dxo-header-filter [visible]="true">
+          <dxo-search [enabled]="true"></dxo-search>
+        </dxo-header-filter>
+
+        <dxo-editing
+          *ngIf="FilteredRevisionDataSource"
+          mode="cell"
+          [allowUpdating]="true"
+          [allowAdding]="false"
+          [allowDeleting]="false"
+        ></dxo-editing>
+      </dx-data-grid>
+    </div>
+
+    <div class="griddatadiv custom-tab mt-2 p-3">
+      <dx-tabs
+        width="300"
+        [selectedIndex]="selectedIndex"
+        [dataSource]="SubmissiontabsWithText"
+        (selectedIndexChange)="onTabChange($event)"
+      ></dx-tabs>
+      <!-- Different DataGrid for each tab -->
+      <div class="mt-1 w-100" *ngIf="selectedIndex === 0">
+        <div class="d-flex gap-2 w-100" style="height: auto">
+          <!-- First Resizable Panel -->
+          <div
+            style="
+              resize: horizontal;
+              overflow: auto;
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+              min-width: 200px;
+              max-width: 80%;
+              height: auto;
+              border: 1px solid var(--border-color);
+              flex: 0 0 auto;
+              padding: 5px;
+              border-radius: 6px;
+            "
+          >
+            <div class="DataGridHeading">Activity data</div>
+            <dx-data-grid
+              #dataGrid
+              class="ms-1 me-1 w-100"
+              noDataText="No Data Available"
+              [height]="'45vh'"
+              [dataSource]="ActivityDataSource"
+              [columns]="Activitycolumns"
+              [keyExpr]="'compositeKey'"
+              [focusedRowEnabled]="true"
+              [allowColumnResizing]="true"
+              [allowColumnReordering]="true"
+              [hoverStateEnabled]="true"
+              [columnAutoWidth]="true"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [autoNavigateToFocusedRow]="false"
+              [headerFilter]="{ visible: true }"
+              [columnFixing]="{
+                enabled: true,
+                texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+              }"
+              (onRowClick)="ActivityRowDrillDownClick($event)"
+              (onCellPrepared)="onCellPrepared($event)"
+            >
+              <dxo-editing
+                mode="row"
+                [allowUpdating]="true"
+                [allowAdding]="ActivityDataSource ? true : false"
+                [allowDeleting]="true"
+              ></dxo-editing>
+              <dxo-load-panel [enabled]="false"></dxo-load-panel>
+            </dx-data-grid>
+          </div>
+
+          <!-- Second Auto-Sized Panel -->
+          <div
+            style="
+              overflow: auto;
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+              min-width: 100px;
+              height: auto;
+              border: 1px solid var(--border-color);
+              flex: 1 1 auto;
+              padding: 5px;
+              border-radius: 6px;
+            "
+          >
+            <div class="DataGridHeading">Observation data</div>
+            <dx-data-grid
+              #dataGrid2
+              class="ms-1 me-1 w-100"
+              noDataText="No Data Available"
+              [height]="'45vh'"
+              [dataSource]="filteredObservationdataSource"
+              [columns]="ObservationColumns"
+              [allowColumnResizing]="true"
+              [allowColumnReordering]="true"
+              [columnAutoWidth]="true"
+              [hoverStateEnabled]="true"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [autoNavigateToFocusedRow]="false"
+              [headerFilter]="{ visible: true }"
+              [columnFixing]="{
+                enabled: true,
+                texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+              }"
+              (onCellPrepared)="onCellPrepared($event)"
+            >
+              <dxo-editing
+                mode="cell"
+                [allowUpdating]="true"
+                [allowAdding]="filteredObservationdataSource ? true : false"
+                [allowDeleting]="true"
+              ></dxo-editing>
+              <dxo-load-panel [enabled]="false"></dxo-load-panel>
+            </dx-data-grid>
+          </div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="selectedIndex === 1"
+        class="mt-1"
+        style="
+          border: 1px solid var(--border-color);
+          padding: 5px;
+          border-radius: 6px;
+        "
+      >
+        <div class="DataGridHeading">Diagnosis data</div>
+        <dx-data-grid
+          #dataGridDiago
+          [dataSource]="DiagnosisDataSource"
+          noDataText="No Diagnosis data Available"
+          [height]="'45vh'"
+          [rowAlternationEnabled]="true"
+          rowAlternationInterval="2"
+        >
+          <dxo-load-panel [enabled]="false"></dxo-load-panel>
+          <dxi-column
+            *ngFor="let column of DiagnosisColumns"
+            [dataField]="column.Name"
+            [caption]="column.ToolTip"
+            [visible]="column.Visibility"
+          ></dxi-column>
+        </dx-data-grid>
+      </div>
+    </div>
+
+    <dx-load-panel
+      [visible]="isLoading"
+      [shading]="true"
+      [showIndicator]="true"
+      [showPane]="true"
+      [closeOnOutsideClick]="false"
+      [message]="'Loading...'"
+    ></dx-load-panel>
+  </div>
+</div>
+
+<dx-popup
+  [(visible)]="popupVisible"
+  [width]="'80vw'"
+  [height]="'80vh'"
+  [showTitle]="true"
+  title="PDF Preview"
+  [dragEnabled]="true"
+  [closeOnOutsideClick]="true"
+>
+  <iframe
+    *ngIf="pdfFileUrl"
+    [src]="pdfFileUrl"
+    width="100%"
+    height="90%"
+  ></iframe>
+
+  <div class="p-3 d-flex justify-content-end gap-2 mt-3">
+    <button class="btn btn-outline-danger" (click)="onCancelAttachment()">
+      Cancel
+    </button>
+    <button class="btn btn-outline-danger" (click)="onClearAttachment()">
+      Clear
+    </button>
+    <button class="btn btn-primary" (click)="onBrowseNewAttachment()">
+      Update
+    </button>
+  </div>
+</dx-popup>
+
+<dx-popup
+  [(visible)]="ObservationpopupVisible"
+  [width]="'80vw'"
+  [height]="'80vh'"
+  [showTitle]="true"
+  title="PDF Preview"
+  [dragEnabled]="true"
+  [closeOnOutsideClick]="true"
+>
+  <iframe
+    *ngIf="pdfFileUrl"
+    [src]="pdfFileUrl"
+    width="100%"
+    height="90%"
+  ></iframe>
+
+  <div class="p-3 d-flex justify-content-end gap-2 mt-3">
+    <button class="btn btn-outline-danger" (click)="onCancelAttachment()">
+      Cancel
+    </button>
+    <button
+      class="btn btn-outline-danger"
+      (click)="Observation_onClearAttachment()"
+    >
+      Clear
+    </button>
+    <button
+      class="btn btn-primary"
+      (click)="Observation_onBrowseNewAttachment()"
+    >
+      Update
+    </button>
+  </div>
+</dx-popup>

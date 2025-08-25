@@ -1,0 +1,132 @@
+@use "../../../../../variables.scss" as *;
+@use "sass:math";
+
+:host {
+  --side-panel-toolbar-height: 72px;
+
+  width: 100%;
+  display: contents;
+}
+
+.view-wrapper {
+
+  .grid {
+    height: 45%;
+    .name-template {
+      .position {
+        font-size: 12px;
+        color: var(--texteditor-label-color);
+      }
+    }
+
+    ::ng-deep & {
+      .dx-datagrid-header-panel {
+        padding: 0 var(--content-padding);
+      }
+
+      .dx-toolbar {
+        margin-bottom: 0;
+        padding: var(--toolbar-margin-bottom) 0;
+      }
+
+      .dx-datagrid-content .dx-row {
+        cursor: pointer;
+      }
+    }
+
+    .grid-header {
+      @include header();
+    }
+  }
+
+  user-panel {
+    display: inherit;
+  }
+}
+
+.dx-datagrid {
+  height: auto;
+}
+
+.filterparams {
+  background-color: var(--base-bg);
+  border-radius: 6px;
+}
+.button-container {
+  padding: 0px;
+  height: 0.3vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.toggleButton {
+  border-radius: 4px;
+  background-color: #0fa6e1d3;
+}
+.SearchParams-container {
+  transition: transform 0.5s ease, opacity 0.5s ease, max-height 0.5s ease;
+  transform: translateY(0);
+  opacity: 1;
+  max-height: 500px; /* Set this to the maximum height of your content */
+}
+
+.hide-content {
+  transform: translateY(-20px);
+  opacity: 0;
+  max-height: 0; /* Transition from max-height to 0 */
+  padding: 0;
+  margin: 0;
+  overflow: hidden; /* Prevents content overflow */
+}
+.griddatadiv {
+  padding-bottom: 10px;
+  background-color: var(--base-bg);
+  border-radius: 8px;
+  border: 1px dotted;
+}
+
+/* Scroll thumb */
+::ng-deep .view-wrapper .dx-scrollable-scroll-content {
+  background-color: #007bff !important;
+  border-radius: 10px;
+  opacity: 0.8;
+}
+
+/* Optional: Hover effect on thumb */
+::ng-deep .view-wrapper .dx-scrollable-scroll-content:hover {
+  background-color: #0056b3 !important;
+}
+
+/* Narrower scrollbar */
+::ng-deep .view-wrapper .dx-scrollable-vertical .dx-scrollable-scroll {
+  width: 8px !important;
+}
+
+::ng-deep .view-wrapper .dx-scrollable-horizontal .dx-scrollable-scroll {
+  height: 8px !important;
+}
+.DataGridHeading {
+  font-weight: bold;
+  font-size: medium;
+  padding-left: 5px;
+}
+.parentBody {
+  height: 80vh;
+  overflow-y: auto; /* enables vertical scrolling */
+  overflow-x: hidden; /* hides horizontal scroll if not needed */
+}
+.headingText {
+  font-size: large;
+  font-weight: bold;
+  padding-left: 10px;
+}
+
+::ng-deep
+  .my-custom-grid
+  .dx-datagrid-rowsview
+  .dx-row-focused.dx-data-row
+  > td:not(.dx-focused):not(.dx-cell-modified):not(.dx-datagrid-invalid),
+.dx-datagrid-rowsview .dx-row-focused.dx-data-row .dx-command-edit .dx-link {
+  background-color: #5c6004;
+  color: rgb(255, 255, 255);
+}

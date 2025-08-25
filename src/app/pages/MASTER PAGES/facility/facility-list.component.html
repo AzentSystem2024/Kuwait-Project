@@ -1,0 +1,246 @@
+<div class="view-wrapper list-page">
+  <dx-data-grid
+    class="grid theme-dependent"
+    noDataText=""
+    height="84vh"
+    [dataSource]="dataSource"
+    [showBorders]="true"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [rowAlternationEnabled]="true"
+    rowAlternationInterval="2"
+    (onExporting)="onExporting($event)"
+    (onRowUpdating)="onRowUpdating($event)"
+    (onRowRemoving)="onRowRemoving($event)"
+  >
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-editing
+      mode="popup"
+      [allowUpdating]="true"
+      [allowDeleting]="false"
+      [popup]="{ width: '50%', height: '75vh' }"
+    >
+      <dxo-popup title="Edit facility" [showTitle]="true"></dxo-popup>
+      <dxo-form [colCount]="2">
+        <dxi-item
+          dataField="FacilityLicense"
+          editorType="dxTextBox"
+          [disabled]="true"
+        >
+          <dxo-label text="License"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="FacilityName" editorType="dxTextBox">
+          <dxo-label text="Name"></dxo-label>
+        </dxi-item>
+
+        <dxi-item
+          dataField="Postoffice"
+          editorType="dxTextBox"
+          [disabled]="true"
+        >
+          <dxo-label text="Post office"></dxo-label>
+        </dxi-item>
+        <dxi-item dataField="FacilityShortName" editorType="dxTextBox">
+          <dxo-label text="Short Name"></dxo-label>
+        </dxi-item>
+
+        <dxi-item
+          dataField="RegionID"
+          editorType="dxSelectBox"
+          [editorOptions]="{
+            displayExpr: 'DESCRIPTION',
+            valueExpr: 'ID'
+          }"
+        >
+          <dxo-label text="Region"></dxo-label>
+        </dxi-item>
+
+        <dxi-item
+          dataField="EmirateID"
+          editorType="dxSelectBox"
+          [editorOptions]="{
+            displayExpr: 'DESCRIPTION',
+            valueExpr: 'ID'
+          }"
+        >
+          <dxo-label text="Emirates"></dxo-label>
+        </dxi-item>
+
+        <dxi-item
+          dataField="ZoneID"
+          editorType="dxSelectBox"
+          [editorOptions]="{
+            displayExpr: 'DESCRIPTION',
+            valueExpr: 'ID'
+          }"
+        >
+          <dxo-label text="Zone"></dxo-label>
+        </dxi-item>
+
+        <dxi-item
+          dataField="TypeID"
+          editorType="dxSelectBox"
+          [editorOptions]="{
+            displayExpr: 'DESCRIPTION',
+            valueExpr: 'ID'
+          }"
+        >
+          <dxo-label text="Type"></dxo-label>
+        </dxi-item>
+
+        <dxi-item
+          dataField="CategoryID"
+          editorType="dxSelectBox"
+          [editorOptions]="{
+            displayExpr: 'DESCRIPTION',
+            valueExpr: 'ID'
+          }"
+        >
+          <dxo-label text="Category"></dxo-label>
+        </dxi-item>
+        <dxi-item>
+          <!-- <dxo-label text="Category"></dxo-label> -->
+        </dxi-item>
+
+        <dxi-item
+          colCount="1"
+          dataField="FacilityAddress"
+          editorType="dxTextArea"
+          [colSpan]="2"
+        >
+          <dxo-label text="Address"></dxo-label>
+        </dxi-item>
+      </dxo-form>
+    </dxo-editing>
+    <dxo-pager
+      [visible]="true"
+      [allowedPageSizes]="allowedPageSizes"
+      [displayMode]="displayMode"
+      [showPageSizeSelector]="showPageSizeSelector"
+      [showInfo]="showInfo"
+      [showNavigationButtons]="showNavButtons"
+    >
+    </dxo-pager>
+    <dxo-load-panel [showPane]="false"></dxo-load-panel>
+    <dxo-scrolling mode="virtual"></dxo-scrolling>
+    <dxo-sorting mode="multiple"></dxo-sorting>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-filter-row [visible]="isFilterRowVisible"></dxo-filter-row>
+    <dxo-search-panel [visible]="true" placeholder=" Search"></dxo-search-panel>
+    <dxo-export
+      [enabled]="true"
+      [allowExportSelectedData]="false"
+      [formats]="['xlsx']"
+    >
+    </dxo-export>
+    <dxo-toolbar>
+      <dxi-item location="before">
+        <div class="grid-header">Facility</div>
+      </dxi-item>
+
+      <dxi-item
+        location="after"
+        locateInMenu="auto"
+        showText="inMenu"
+        widget="dxButton"
+        [options]="{
+          icon: isFilterRowVisible ? 'filter' : 'filter',
+          hint: isFilterRowVisible ? 'Hide Filter Row' : 'Show Filter Row',
+          onClick: toggleFilterRow,
+          stylingMode: 'text',
+          elementAttr: { class: 'commonButtons' }
+        }"
+      ></dxi-item>
+      <dxi-item
+        location="after"
+        locateInMenu="auto"
+        showText="inMenu"
+        widget="dxButton"
+        [options]="{
+          text: 'Refresh',
+          icon: 'refresh',
+          hint: 'refresh',
+          onClick: refresh,
+          stylingMode: 'text'
+        }"
+      ></dxi-item>
+
+      <dxi-item
+      name="exportButton"
+      location="after"
+      cssClass="custom-export-button"
+    ></dxi-item>
+    </dxo-toolbar>
+    <dxo-header-filter [visible]="true">
+      <dxo-search [enabled]="true"></dxo-search>
+    </dxo-header-filter>
+    <dxi-column
+      dataField="FacilityLicense"
+      caption="License"
+      [allowEditing]="false"
+      readOnly="true"
+    ></dxi-column>
+    <dxi-column dataField="FacilityName" caption="Name"></dxi-column>
+    <dxi-column
+      dataField="FacilityAddress"
+      caption="Address"
+      [visible]="false"
+    ></dxi-column>
+    <dxi-column dataField="FacilityShortName" caption="Short Name"></dxi-column>
+    <dxi-column dataField="FacilityTypeID" caption="Type">
+      <dxo-lookup
+        [dataSource]="FacilityType_DataSource"
+        displayExpr="DESCRIPTION"
+        valueExpr="ID"
+      >
+      </dxo-lookup>
+    </dxi-column>
+    <dxi-column dataField="RegionID" caption="Region">
+      <dxo-lookup
+        [dataSource]="Facilitygroup_DataSource"
+        displayExpr="DESCRIPTION"
+        valueExpr="ID"
+      >
+      </dxo-lookup>
+    </dxi-column>
+    <dxi-column dataField="EmirateID" caption="Emirates">
+      <dxo-lookup
+        [dataSource]="Facilitygroup_DataSource"
+        displayExpr="DESCRIPTION"
+        valueExpr="ID"
+      >
+      </dxo-lookup>
+    </dxi-column>
+    <dxi-column dataField="ZoneID" caption="Zone">
+      <dxo-lookup
+        [dataSource]="Facilitygroup_DataSource"
+        displayExpr="DESCRIPTION"
+        valueExpr="ID"
+      >
+      </dxo-lookup>
+    </dxi-column>
+    <dxi-column dataField="TypeID" caption="Type">
+      <dxo-lookup
+        [dataSource]="Facilitygroup_DataSource"
+        displayExpr="DESCRIPTION"
+        valueExpr="ID"
+      >
+      </dxo-lookup>
+    </dxi-column>
+    <dxi-column dataField="CategoryID" caption="Category">
+      <dxo-lookup
+        [dataSource]="Facilitygroup_DataSource"
+        displayExpr="DESCRIPTION"
+        valueExpr="ID"
+      >
+      </dxo-lookup>
+    </dxi-column>
+
+    <dxi-column
+      dataField="Postoffice"
+      caption="Post office"
+      [allowEditing]="false"
+    ></dxi-column>
+  </dx-data-grid>
+</div>

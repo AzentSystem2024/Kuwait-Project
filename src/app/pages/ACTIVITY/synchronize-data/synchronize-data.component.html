@@ -1,0 +1,218 @@
+<div [class.disabled-overlay]="showProgressBar" class="view-wrapper list-page">
+  <div class="toolBarData ps-4">
+    <dx-toolbar [items]="toolbarItems"> </dx-toolbar>
+  </div>
+
+  <div class="contentDiv mt-2">
+    <div class="SearchParamsDiv mb-3 mt-1">
+      <dx-select-box
+        labelMode="floating"
+        labelLocation="left"
+        label="Select Facility"
+        [items]="FacilitydropdownItems"
+        displayExpr="FacilityName"
+        valueExpr="FacilityID"
+        [(value)]="FacilityValue"
+        [width]="'60%'"
+      >
+        <dx-validator #facilityValidator>
+          <dxi-validation-rule
+            type="required"
+            message="Facility selection is required"
+          ></dxi-validation-rule>
+        </dx-validator>
+      </dx-select-box>
+
+      <dx-date-box
+        labelMode="floating"
+        labelLocation="left"
+        label="From Date"
+        type="date"
+        displayFormat="dd/MM/yyyy"
+        valueFormat="yyyy/MM/dd"
+        [(value)]="startDate"
+        [min]="minDate"
+        [max]="endDate"
+        [width]="'20%'"
+        (onValueChanged)="onStartDateChange($event)"
+      >
+      </dx-date-box>
+
+      <dx-date-box
+        labelMode="floating"
+        labelLocation="left"
+        label="To Date"
+        type="date"
+        displayFormat="dd/MM/yyyy"
+        valueFormat="yyyy/MM/dd"
+        [(value)]="endDate"
+        [min]="startDate"
+        [max]="maxDate"
+        [width]="'20%'"
+        (onValueChanged)="onEndDateChange($event)"
+      >
+      </dx-date-box>
+    </div>
+
+    <div class="innerContentDiv d-flex">
+      <div class="FacilityDownloadDiv d-flex flex-column">
+        <p class="FacilityCount mb-5">
+          {{ lastClaimSyncTime }}
+        </p>
+        <h1>{{ facilityDownloadedCount }}</h1>
+        <div class="d-flex align-items-center mt-5 gap-2">
+          <!-- Manual Import Button -->
+          <dx-button
+            text="Import Claim"
+            hint="Manually import XML file"
+            type="success"
+            icon="activefolder"
+            stylingMode="contained"
+            class="FacilitycountButton"
+            [width]="'auto'"
+            [height]="40"
+            (onClick)="showImportXMLPopup('claim')"
+          >
+          </dx-button>
+
+          <!-- Sync Claim Data Button -->
+          <dx-button
+            [disabled]="!facilityButtonVisibility || disableButtons"
+            text="Sync Claim Data"
+            type="default"
+            icon="arrowdown"
+            hint="Download Data"
+            stylingMode="contained"
+            class="FacilitycountButton"
+            [width]="'auto'"
+            [height]="40"
+            (onClick)="handleClaimButtonClick()"
+          >
+          </dx-button>
+        </div>
+      </div>
+
+      <div class="RemittanceDownloadDiv d-flex flex-column">
+        <p class="FacilityCount mb-5">
+          {{ lastRemittanceSyncTime }}
+        </p>
+        <h1>{{ RemittanceDownloadedCount }}</h1>
+        <div class="d-flex align-items-center mt-5 gap-2">
+          <!-- Manual Import Button -->
+          <div>
+            <!-- Manual Import Button -->
+            <dx-button
+              text="Import Remittance"
+              hint="Manually import XML file"
+              type="success"
+              icon="activefolder"
+              stylingMode="contained"
+              class="FacilitycountButton"
+              [width]="'auto'"
+              [height]="40"
+              (onClick)="showImportXMLPopup('remittance')"
+            >
+            </dx-button>
+          </div>
+          <!-- Sync Remittance Button -->
+          <dx-button
+            [disabled]="!remittanceButtonVisibility || disableButtons"
+            text="Sync Remittance Data"
+            type="default"
+            icon="arrowdown"
+            hint="Download Data"
+            stylingMode="contained"
+            class="FacilitycountButton"
+            [width]="'auto'"
+            [height]="40"
+            (onClick)="handleRemittanceButtonClick()"
+          >
+          </dx-button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ButtonContentDiv mt-2">
+      <dx-button
+        [disabled]="!processReportButtonVisibility || disableButtons"
+        text="Process Report"
+        type="default"
+        stylingMode="contained"
+        [width]="500"
+        [height]="40"
+        (onClick)="ProcessReportButtonClick()"
+      >
+      </dx-button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="loading-indicator">
+  <dx-load-panel
+    *ngIf="isLoading"
+    [visible]="true"
+    shadingColor="rgba(0,0,0,0)"
+    [position]="{ of: '.view-wrapper' }"
+    message="Processing..."
+  ></dx-load-panel>
+</div>
+
+<dx-progress-bar
+  *ngIf="showProgressBar"
+  #progressBar
+  id="progress-bar-status"
+  width="80%"
+  [class.complete]="progressBar.value === maxValue"
+  [min]="0"
+  [max]="maxValue"
+  [statusFormat]="format"
+  [value]="seconds"
+  class="progress-bar-centered"
+>
+</dx-progress-bar>
+
+<form-popup
+  class="formPopupClass"
+  [(visible)]="isImportClaimXlmPopupVisible"
+  (save)="uploadFiles()"
+  (clear)="clearPopupData()"
+  titleText="import XML"
+  [height]="'auto'"
+  width="70%"
+>
+  <div>
+    <dx-data-grid
+      [dataSource]="xmlFile_DataSource"
+      [showBorders]="true"
+      keyExpr="ID"
+      [selection]="{ mode: 'multiple', showCheckBoxesMode: 'always' }"
+      [height]="'60vh'"
+      [scrolling]="{ mode: 'virtual' }"
+      [selectedRowKeys]="selectedRowKeys"
+    >
+      <dxo-paging [enabled]="false"></dxo-paging>
+      <dxo-toolbar>
+        <dxi-item location="after">
+          <input
+            type="file"
+            id="folderInput"
+            hidden
+            multiple
+            (change)="handleFileSelection($event)"
+          />
+          <dx-button
+            text="Add"
+            type="default"
+            icon="activefolder"
+            (onClick)="triggerFileInput()"
+          ></dx-button>
+        </dxi-item>
+      </dxo-toolbar>
+
+      <!-- Table Columns -->
+      <dxi-column dataField="FileName" caption="File Name"></dxi-column>
+      <dxi-column dataField="FileSize" caption="Size (KB)"></dxi-column>
+      <dxi-column dataField="FileType" caption="Type"></dxi-column>
+    </dx-data-grid>
+  </div>
+</form-popup>

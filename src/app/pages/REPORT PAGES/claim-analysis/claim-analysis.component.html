@@ -1,0 +1,712 @@
+<div id="reportPage" class="view-wrapper list-page drilldown mt-0">
+  <!-- <div class="paramsDiv"> -->
+  <div
+    id="reportPageParams"
+    class="paramsDiv SearchParams-container"
+    [ngClass]="{ 'hide-content': !isContentVisible }"
+  >
+    <dx-form>
+      <dxi-item
+        itemType="group"
+        cssClass="form-group"
+        class="rowGroup"
+        [colCount]="8"
+        [colCountByScreen]="{ xs: 8, sm: 8, md: 8, lg: 8 }"
+      >
+        <dxi-item [colSpan]="8">
+          <dx-drop-down-box
+            labelMode="floating"
+            labelLocation="left"
+            label="Facility value"
+            [(value)]="Facility_Value"
+            valueExpr="ID"
+            displayExpr="FacilityName"
+            [showClearButton]="true"
+            [dataSource]="Facility_DataSource"
+          >
+            <div *dxTemplate="let data of 'content'">
+              <dx-data-grid
+                [dataSource]="Facility_DataSource"
+                [columns]="[
+                  { dataField: 'FacilityLicense', caption: 'License' },
+                  { dataField: 'FacilityName', caption: 'Name' },
+                  { dataField: 'Region', caption: 'Region' },
+                  { dataField: 'Emirate', caption: 'Emirates' },
+                  { dataField: 'Zone', caption: 'Zone' },
+                  { dataField: 'Type', caption: 'Type' },
+                  { dataField: 'Category', caption: 'Category' },
+                  { dataField: 'Postoffice', caption: 'Post office' }
+                ]"
+                [selection]="{ mode: 'multiple' }"
+                [hoverStateEnabled]="true"
+                [paging]="{ enabled: true, pageSize: 10 }"
+                [filterRow]="{ visible: true }"
+                [headerFilter]="{ visible: true }"
+                [scrolling]="{ mode: 'virtual' }"
+                [height]="250"
+                [(selectedRowKeys)]="Facility_Value"
+              >
+              </dx-data-grid>
+            </div>
+          </dx-drop-down-box>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item
+        itemType="group"
+        cssClass="form-group"
+        [colCount]="8"
+        [colCountByScreen]="{ xs: 8, sm: 8, md: 8, lg: 8 }"
+      >
+        <dxi-item [colSpan]="2">
+          <div>
+            <dx-select-box
+              labelMode="floating"
+              labelLocation="left"
+              label="searchOn value"
+              [dataSource]="SearchOn_DataSource"
+              displayExpr="Name"
+              valueExpr="ID"
+              [(value)]="SearchOn_Value"
+              [searchEnabled]="true"
+              (valueChanged)="onDropdownValueChanged()"
+              [dropDownOptions]="{ width: 'auto' }"
+              [showClearButton]="true"
+            >
+            </dx-select-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item [colSpan]="1">
+          <dx-select-box
+            labelMode="floating"
+            labelLocation="left"
+            label="Year"
+            [(value)]="selectedYear"
+            [dataSource]="years"
+            (onValueChanged)="onYearChanged($event)"
+            placeholder="Year"
+            [width]="'auto'"
+          ></dx-select-box>
+        </dxi-item>
+
+        <dxi-item [colSpan]="1">
+          <div>
+            <dx-select-box
+              labelMode="floating"
+              labelLocation="left"
+              label="month"
+              [dataSource]="monthDataSource"
+              displayExpr="name"
+              valueExpr="value"
+              [(value)]="selectedmonth"
+              (onValueChanged)="onMonthValueChanged($event)"
+              [dropDownOptions]="{ width: 'auto' }"
+            >
+            </dx-select-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item [colSpan]="1">
+          <dx-date-box
+            labelMode="floating"
+            labelLocation="left"
+            label="From Date"
+            type="date"
+            displayFormat="dd/MM/yyyy"
+            valueFormat="yyyy/MM/dd"
+            [(value)]="From_Date_Value"
+            [min]="minDate"
+            [max]="maxDate"
+          >
+          </dx-date-box>
+        </dxi-item>
+
+        <dxi-item [colSpan]="1">
+          <dx-date-box
+            labelMode="floating"
+            labelLocation="left"
+            label="To Date"
+            type="date"
+            displayFormat="dd/MM/yyyy"
+            valueFormat="yyyy/MM/dd"
+            [(value)]="To_Date_Value"
+            [min]="minDate"
+            [max]="maxDate"
+          >
+          </dx-date-box>
+        </dxi-item>
+
+        <dxi-item [colSpan]="2">
+          <div>
+            <dx-select-box
+              labelMode="floating"
+              labelLocation="left"
+              label="encounter type"
+              [dataSource]="EncounterType_DataSource"
+              displayExpr="Name"
+              valueExpr="ID"
+              [(value)]="EncounterType_Value"
+              [searchEnabled]="true"
+              (valueChanged)="onDropdownValueChanged()"
+              [showClearButton]="true"
+            >
+            </dx-select-box>
+          </div>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item
+        itemType="group"
+        cssClass="form-group"
+        [colCount]="8"
+        [colCountByScreen]="{ xs: 8, sm: 8, md: 8, lg: 8 }"
+      >
+        <dxi-item [colSpan]="2">
+          <dx-select-box
+            labelMode="floating"
+            labelLocation="left"
+            label="payer"
+            [dataSource]="Payer_DataSource"
+            displayExpr="Name"
+            valueExpr="ID"
+            [(value)]="Payer_Value"
+            [searchEnabled]="true"
+            (valueChanged)="onDropdownValueChanged()"
+          >
+          </dx-select-box>
+        </dxi-item>
+
+        <dxi-item [colSpan]="2">
+          <dx-drop-down-box
+            labelMode="floating"
+            labelLocation="left"
+            label="payer ID"
+            [(value)]="PayerID_Value"
+            valueExpr="ID"
+            displayExpr="Name"
+            [showClearButton]="true"
+            [dataSource]="PayerID_DataSource"
+          >
+            <div *dxTemplate="let data of 'content'">
+              <dx-data-grid
+                [dataSource]="PayerID_DataSource"
+                [columns]="[{ dataField: 'Name', caption: 'ID - Name' }]"
+                [selection]="{ mode: 'multiple' }"
+                [hoverStateEnabled]="true"
+                [paging]="{ enabled: true, pageSize: 10 }"
+                [filterRow]="{ visible: true }"
+                [headerFilter]="{ visible: true }"
+                [scrolling]="{ mode: 'virtual' }"
+                [height]="'50vh'"
+                [(selectedRowKeys)]="PayerID_Value"
+                (onSelectionChanged)="
+                  onSelectionChanged(
+                    $event,
+                    this.PayerIDjsonData,
+                    'PayerID_DataSource'
+                  )
+                "
+              >
+              </dx-data-grid>
+            </div>
+          </dx-drop-down-box>
+        </dxi-item>
+
+        <dxi-item [colSpan]="2">
+          <dx-drop-down-box
+            labelMode="floating"
+            labelLocation="left"
+            label="Clinician"
+            [(value)]="Clinician_Value"
+            valueExpr="ID"
+            displayExpr="Name"
+            [showClearButton]="true"
+            [dataSource]="Clinician_DataSource"
+          >
+            <div *dxTemplate="let data of 'content'">
+              <dx-data-grid
+                [dataSource]="Clinician_DataSource"
+                [columns]="[{ dataField: 'Name', caption: 'ID - Name' }]"
+                [selection]="{ mode: 'multiple' }"
+                [hoverStateEnabled]="true"
+                [paging]="{ enabled: true, pageSize: 10 }"
+                [filterRow]="{ visible: true }"
+                [headerFilter]="{ visible: true }"
+                [scrolling]="{ mode: 'virtual' }"
+                [height]="'50vh'"
+                [(selectedRowKeys)]="Clinician_Value"
+                (onSelectionChanged)="
+                  onSelectionChanged(
+                    $event,
+                    this.ClinicianJsonData,
+                    'Clinician_DataSource'
+                  )
+                "
+              >
+              </dx-data-grid>
+            </div>
+          </dx-drop-down-box>
+        </dxi-item>
+
+        <dxi-item [colSpan]="2">
+          <dx-drop-down-box
+            labelMode="floating"
+            labelLocation="left"
+            label="Ordering Clinician"
+            [(value)]="OrderingClinician_Value"
+            valueExpr="ID"
+            displayExpr="Name"
+            [showClearButton]="true"
+            [dataSource]="OrderingClinician_DataSource"
+          >
+            <div *dxTemplate="let data of 'content'">
+              <dx-data-grid
+                [dataSource]="OrderingClinician_DataSource"
+                [columns]="[{ dataField: 'Name', caption: 'ID - Name' }]"
+                [selection]="{ mode: 'multiple' }"
+                [hoverStateEnabled]="true"
+                [paging]="{ enabled: true, pageSize: 10 }"
+                [filterRow]="{ visible: true }"
+                [headerFilter]="{ visible: true }"
+                [scrolling]="{ mode: 'virtual' }"
+                [height]="'50vh'"
+                [(selectedRowKeys)]="OrderingClinician_Value"
+                (onSelectionChanged)="
+                  onSelectionChanged(
+                    $event,
+                    this.orderingClinicianJsonData,
+                    'OrderingClinician_DataSource'
+                  )
+                "
+              >
+              </dx-data-grid>
+            </div>
+          </dx-drop-down-box>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item
+        itemType="group"
+        cssClass="form-group"
+        [colCount]="10"
+        [colCountByScreen]="{ xs: 10, sm: 10, md: 10, lg: 10 }"
+      >
+        <dxi-item [colSpan]="2">
+          <dx-drop-down-box
+            labelMode="floating"
+            labelLocation="left"
+            label="Reciever ID"
+            [(value)]="ReceiverID_Value"
+            valueExpr="ID"
+            displayExpr="Name"
+            [showClearButton]="true"
+            [dataSource]="RecieverID_DataSource"
+          >
+            <div *dxTemplate="let data of 'content'">
+              <dx-data-grid
+                [dataSource]="RecieverID_DataSource"
+                [columns]="[{ dataField: 'Name', caption: 'ID - Name' }]"
+                [selection]="{ mode: 'multiple' }"
+                [hoverStateEnabled]="true"
+                [paging]="{ enabled: true, pageSize: 10 }"
+                [filterRow]="{ visible: true }"
+                [headerFilter]="{ visible: true }"
+                [scrolling]="{ mode: 'virtual' }"
+                [height]="'50vh'"
+                [(selectedRowKeys)]="ReceiverID_Value"
+                (onSelectionChanged)="
+                  onSelectionChanged(
+                    $event,
+                    this.RecieverIDjsonData,
+                    'RecieverID_DataSource'
+                  )
+                "
+              >
+              </dx-data-grid>
+            </div>
+          </dx-drop-down-box>
+        </dxi-item>
+
+        <dxi-item [colSpan]="2">
+          <dx-select-box
+            labelMode="floating"
+            labelLocation="left"
+            label="Resubmission Type"
+            [dataSource]="ResubmissionType_DataSource"
+            displayExpr="Name"
+            valueExpr="ID"
+            [(value)]="Resubmission_Value"
+            [searchEnabled]="true"
+            (valueChanged)="onDropdownValueChanged()"
+          >
+          </dx-select-box>
+        </dxi-item>
+
+        <dxi-item [colSpan]="2">
+          <dx-select-box
+            labelMode="floating"
+            labelLocation="left"
+            label="Claim Status"
+            [dataSource]="CliamStatus_DataSource"
+            displayExpr="Name"
+            valueExpr="ID"
+            [(value)]="CliamStatus_Value"
+            [searchEnabled]="true"
+            (valueChanged)="onDropdownValueChanged()"
+          >
+          </dx-select-box>
+        </dxi-item>
+
+        <dxi-item [colSpan]="2">
+          <div>
+            <dx-select-box
+              labelMode="floating"
+              labelLocation="left"
+              label="Payment Status"
+              [dataSource]="paymentStatus_DataSource"
+              displayExpr="Name"
+              valueExpr="ID"
+              [(value)]="paymentStatus_Value"
+              [searchEnabled]="true"
+              (valueChanged)="onDropdownValueChanged()"
+              [showClearButton]="true"
+            >
+            </dx-select-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item [colSpan]="1" class="mt-1 ms-5">
+          <dx-button
+            class="add-card"
+            icon="download"
+            text=""
+            hint="import search parameters from your excel"
+            type="default"
+            stylingMode="contained"
+            (onClick)="get_advance_Filter()"
+          >
+          </dx-button>
+        </dxi-item>
+
+        <dxi-item [colSpan]="1" class="mt-1">
+          <dx-button
+            class="add-card"
+            icon="todo"
+            text="Apply"
+            type="default"
+            stylingMode="contained"
+            (onClick)="get_Datagrid_DataSource()"
+          >
+          </dx-button>
+        </dxi-item>
+      </dxi-item>
+
+      <!-- <dxi-item
+        itemType="group"
+        cssClass="form-group"
+        [colCount]="10"
+        [colCountByScreen]="{ xs: 10, sm: 10, md: 10, lg: 10 }"
+      >
+      </dxi-item> -->
+    </dx-form>
+  </div>
+  <!-- </div> -->
+  <div class="button-container mt-1 mb-2">
+    <dx-button
+      class="toggleButton"
+      icon="{{ isContentVisible ? 'chevronup' : 'chevrondown' }}"
+      stylingMode="outlined"
+      type="normal"
+      [hint]="isContentVisible ? 'Hide Filter Contend' : 'Show Filter Contend'"
+      [width]="200"
+      [height]="13"
+      (onClick)="toggleContent()"
+    >
+    </dx-button>
+  </div>
+  <!-- ====================================Data GRid Table started================================ -->
+  <ng-container>
+    <dx-data-grid
+      id="dataGrid"
+      #dataGrid
+      class="grid reportGrid reportGridFooter theme-dependent"
+      [height]="'84vh'"
+      [noDataText]="!isContentVisible ? 'No Data Available' : ' '"
+      [dataSource]="dataGrid_DataSource"
+      [showBorders]="true"
+      [showColumnLines]="true"
+      [showRowLines]="true"
+      [allowColumnResizing]="false"
+      [columnAutoWidth]="true"
+      [rowAlternationEnabled]="true"
+      rowAlternationInterval="2"
+      [allowColumnReordering]="true"
+      [filterRow]="{ visible: false }"
+      [headerFilter]="{ visible: false }"
+      [columnFixing]="{
+        enabled: true,
+        texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+      }"
+      (onExporting)="onExporting($event)"
+      [summary]="summaryColumnsData"
+      (onCellPrepared)="onCellPrepared($event)"
+    >
+     
+
+      <ng-container *ngFor="let column of columnsConfig">
+        <dxi-column
+          *ngIf="column.Band && column.Band !== ''"
+          [caption]="column.Band"
+          [isBand]="true"
+          [alignment]="'center'"
+          [allowResizing]="false"
+          [allowFixing]="false"
+        >
+          <dxi-column
+            *ngFor="let subColumn of column.columns"
+            [dataField]="subColumn.dataField"
+            [caption]="subColumn.caption"
+            [format]="subColumn.format"
+            [visible]="subColumn.visible"
+            [width]="150"
+            [allowFixing]="true"
+            [allowHiding]="true"
+            [allowResizing]="false"
+          ></dxi-column>
+        </dxi-column>
+
+        <dxi-column
+          *ngIf="!column.Band || column.Band === ''"
+          [dataField]="column.dataField"
+          [caption]="column.caption"
+          [format]="column.format"
+          [visible]="column.visible"
+          [width]="150"
+        ></dxi-column>
+      </ng-container>
+
+      <dxo-search-panel [visible]="true"></dxo-search-panel>
+      <dxo-paging [pageSize]="10"></dxo-paging>
+      <dxo-pager
+        [visible]="true"
+        [allowedPageSizes]="allowedPageSizes"
+        [displayMode]="displayMode"
+        [showPageSizeSelector]="showPageSizeSelector"
+        [showInfo]="showInfo"
+        [showNavigationButtons]="showNavButtons"
+      >
+      </dxo-pager>
+      <dxo-load-panel [showPane]="false"></dxo-load-panel>
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+      <dxo-sorting mode="multiple"></dxo-sorting>
+      <dxo-header-filter [visible]="true" highlight="true"></dxo-header-filter>
+
+      <dxo-filter-panel [visible]="isFilterOpened"></dxo-filter-panel>
+      <dxo-filter-builder [allowHierarchicalFields]="true">
+      </dxo-filter-builder>
+
+      <dxo-column-chooser
+        [height]="500"
+        hideOnOutsideClick="true"
+        [enabled]="true"
+        mode="select"
+      >
+      </dxo-column-chooser>
+
+      <dxo-search-panel
+        [visible]="true"
+        placeholder="Search"
+      ></dxo-search-panel>
+
+      <dxo-filter-row
+        [visible]="isFilterOpened"
+        [applyFilter]="applyFilter"
+      ></dxo-filter-row>
+      <dxo-export
+        [enabled]="true"
+        [allowExportSelectedData]="true"
+        [formats]="['xlsx']"
+      >
+      </dxo-export>
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div class="grid-header">Claim Analysis</div>
+        </dxi-item>
+        <dxi-item
+          location="after"
+          locateInMenu="auto"
+          showText="inMenu"
+          widget="dxButton"
+          [options]="{
+            text: 'Refresh',
+            icon: 'refresh',
+            onClick: refresh,
+            stylingMode: 'text',
+            disabled: isEmptyDatagrid,
+            hint: 'Refresh'
+          }"
+        ></dxi-item>
+
+        <dxi-item
+          widget="dxButton"
+          [options]="{
+            text: '',
+            icon: 'filter',
+            onClick: filterClick,
+            disabled: isEmptyDatagrid,
+            hint: 'Search Column'
+          }"
+        ></dxi-item>
+
+        <dxi-item
+          name="columnChooserButton"
+          locateInMenu="auto"
+          [disabled]="isEmptyDatagrid"
+        ></dxi-item>
+
+        <dxi-item
+          widget="dxButton"
+          [options]="{
+            text: '',
+            icon: 'formula',
+            onClick: SummaryClick,
+            hint: 'Hide/Show Summary',
+            disabled: isEmptyDatagrid,
+          }"
+        ></dxi-item>
+
+        <dxi-item name="exportButton" [disabled]="isEmptyDatagrid"></dxi-item>
+
+        <dxi-item
+          widget="dxButton"
+          [options]="{
+            text: '',
+            icon: 'newfolder',
+            onClick: show_Memorise_popup,
+            hint: 'Save Memorize Report',
+            disabled: isEmptyDatagrid
+          }"
+        ></dxi-item>
+
+        <dxi-item
+          widget="dxDropDownButton"
+          [options]="{
+            text: '',
+            dataSource:memorise_Dropdown_DataList,
+            displayExpr:'name',
+            valueExpr:'name',
+            icon: 'datafield',
+            hint: 'Show Memorise Report',
+            noDataText: 'load data and try again',
+            selectable: true,
+            disabled: isEmptyDatagrid,
+            placeholder:'memorise report',
+            onItemClick:ShowMemoriseTable,
+            showClearButton: true,
+            dropDownOptions:{
+              width: 'auto',
+            }
+          }"
+        ></dxi-item>
+
+        <dxi-item
+          class="columnfinderclass"
+          widget="dxDropDownButton"
+          [options]="{
+            dataSource: ColumnNames,
+            onItemClick: findColumnLocation,
+            placeholder: 'Search Column',
+            noDataText: 'Load data and try again',
+            disabled: isEmptyDatagrid,
+            hint: 'Column location finder',
+            icon:'columnproperties',
+            dropDownOptions: {
+              width: 'auto',
+              height: '60vh'
+            },
+
+          }"
+        ></dxi-item>
+      </dxo-toolbar>
+
+      <dxo-grouping
+        [autoExpandAll]="false"
+        [contextMenuEnabled]="true"
+        [expandMode]="'rowClick'"
+      ></dxo-grouping>
+
+      <dxo-selection mode="multiple"></dxo-selection>
+      <dxo-header-filter [visible]="true">
+        <dxo-search [enabled]="true"></dxo-search>
+      </dxo-header-filter>
+    </dx-data-grid>
+  </ng-container>
+
+  <dx-popup
+    class="m-0 p-0"
+    [(visible)]="isSaveMemorisedOpened"
+    [title]="'Memorise Report'"
+    [width]="350"
+    height="60vh"
+  >
+    <dx-form id="form">
+      <dxi-item itemType="group" cssClass="form-group" [colCount]="1">
+        <dxi-item itemType="group">
+          <dxi-item
+            dataField="MemoriseReportName"
+            caption="Memorise Report Name"
+            [editorOptions]="{
+              placeholder: 'Enter Memorise Name',
+              value: MemoriseReportName,
+              onValueChanged: onMemoriseReportNameChanged.bind(this)
+            }"
+            [label]="{
+              text: 'Memorise Report Name',
+              visible: true,
+              location: 'top',
+              alignment: 'left',
+              showColon: false,
+              showRequiredMark: false,
+              textStyle: { fontWeight: 'bold' }
+            }"
+          >
+          </dxi-item>
+        </dxi-item>
+      </dxi-item>
+    </dx-form>
+    <dx-button
+      text="Save"
+      type="default"
+      (onClick)="save_Memorise_Report()"
+      class="save-button"
+    ></dx-button>
+  </dx-popup>
+
+  <form-popup
+    class="formPopupClass hide-buttons dx-popup-content m-0 p-0"
+    [(visible)]="isAdvancefilterOpened"
+    titleText="Advance filter"
+    height="80vh"
+    [width]="350"
+    [width]="filterpopupWidth"
+    [visibleButtons]="true"
+    saveButtonText="Apply"
+    (save)="import_Advance_Filter()"
+  >
+    <app-advance-filter-popup
+      [columnData]="advanceFilterGridColumns"
+    ></app-advance-filter-popup>
+  </form-popup>
+</div>
+<dx-load-panel
+  #loadPanel
+  shadingColor="rgba(0,0,0,0.0)"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  [hideOnOutsideClick]="false"
+  [message]="'Loading...'"
+>
+</dx-load-panel>

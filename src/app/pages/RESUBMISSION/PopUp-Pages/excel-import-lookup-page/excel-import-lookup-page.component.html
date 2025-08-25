@@ -1,0 +1,73 @@
+<div class="view-wrapper list-page">
+  <dx-data-grid
+    class="grid theme-dependent custom-grid"
+    noDataText=""
+    height="80vh"
+    [dataSource]="dataSource"
+    [showBorders]="true"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [rowAlternationEnabled]="true"
+    rowAlternationInterval="2"
+    (onRowPrepared)="onRowPrepared($event)"
+    (onRowExpanding)="rowExpandingClick($event)"
+  >
+    <dxo-paging [pageSize]="10"></dxo-paging>
+
+    <dxo-pager
+      [visible]="true"
+      [allowedPageSizes]="allowedPageSizes"
+      [displayMode]="displayMode"
+      [showPageSizeSelector]="showPageSizeSelector"
+      [showInfo]="showInfo"
+      [showNavigationButtons]="showNavButtons"
+    >
+    </dxo-pager>
+    <dxo-load-panel [showPane]="false"></dxo-load-panel>
+    <dxo-scrolling mode="virtual"></dxo-scrolling>
+    <dxo-sorting mode="multiple"></dxo-sorting>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true">
+      <dxo-search [enabled]="true"></dxo-search>
+    </dxo-header-filter>
+
+    <dxo-master-detail
+      [enabled]="true"
+      [autoExpandAll]="false"
+      template="masterDetail"
+    ></dxo-master-detail>
+
+    <div
+      class="ps-2 pe-2 mainInnerGridDiv"
+      *dxTemplate="let detailData of 'masterDetail'"
+    >
+      <div class="data-grid-container mt-1 mb-2 innerGriddata">
+        <dx-data-grid
+          [columnAutoWidth]="true"
+          [showBorders]="true"
+          [dataSource]="filteredExcelDataList"
+          [width]="'100%'"
+          [height]="'35vh'"
+          (onRowPrepared)="onchildRowPrepared($event)"
+        >
+          <dxi-column dataField="FacilityID" caption="Facility ID"></dxi-column>
+          <dxi-column
+            dataField="ClaimNumber"
+            caption="Claim Number"
+          ></dxi-column>
+          <dxi-column dataField="CPTCode" caption="CPT Code"></dxi-column>
+          <dxi-column
+            dataField="ActivityNumber"
+            caption="Activity Number"
+          ></dxi-column>
+          <dxi-column dataField="Comment" caption="Comment"></dxi-column>
+          <dxi-column
+            dataField="FailureReason"
+            caption="Failure Reason"
+          ></dxi-column>
+        </dx-data-grid>
+      </div>
+    </div>
+  </dx-data-grid>
+</div>

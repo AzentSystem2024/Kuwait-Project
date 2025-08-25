@@ -1,0 +1,543 @@
+<div id="parent" class="parentDiv view-wrapper">
+  <div>
+    <div
+      class="data-container"
+      [ngClass]="{ 'hide-content': !isContentVisible }"
+    >
+      <div class="headingText ps-2">Basic info</div>
+      <div class="d-flex RowgroupDiv">
+        <!-- First Box -->
+        <div class="BorderBox">
+          <div class="mt-1">
+            <dx-drop-down-box
+              [(value)]="FacilityID"
+              valueExpr="FacilityLicense"
+              [displayExpr]="facilityDisplayExpr"
+              [showClearButton]="true"
+              [dataSource]="Facility_DataSource"
+              [dropDownOptions]="{ width: 'auto' }"
+              [(opened)]="isGridBoxOpened"
+              (onOptionChanged)="onGridBoxOptionChanged($event)"
+              label="Facility"
+              labelMode="floating"
+              validationMessagePosition="top"
+            >
+              <div *dxTemplate="let data of 'content'">
+                <dx-data-grid
+                  [dataSource]="Facility_DataSource"
+                  [columns]="[
+                    {
+                      dataField: 'FacilityLicense',
+                      caption: 'License',
+                      width: 'auto'
+                    },
+                    {
+                      dataField: 'FacilityName',
+                      caption: 'Name',
+                      width: 'auto'
+                    }
+                  ]"
+                  [selection]="{ mode: 'single' }"
+                  [hoverStateEnabled]="true"
+                  [paging]="{ enabled: true, pageSize: 10 }"
+                  [filterRow]="{ visible: true }"
+                  [headerFilter]="{ visible: true }"
+                  [scrolling]="{ mode: 'virtual' }"
+                  [height]="250"
+                  [(selectedRowKeys)]="FacilityID"
+                >
+                </dx-data-grid>
+              </div>
+              <dx-validator #facilityValidator>
+                <dxi-validation-rule
+                  type="required"
+                  message="Facility selection is required"
+                ></dxi-validation-rule>
+              </dx-validator>
+            </dx-drop-down-box>
+          </div>
+
+          <div class="mt-1" *ngIf="basicDataAvailable">
+            <dx-text-box
+              [(value)]="MemberIDValue"
+              label="Member ID"
+              labelMode="floating"
+              [readOnly]="true"
+            ></dx-text-box>
+          </div>
+
+          <div class="mt-1" *ngIf="basicDataAvailable">
+            <dx-text-box
+              [(value)]="ReceiverIDValue"
+              label="Receiver ID"
+              labelMode="floating"
+              [readOnly]="true"
+            ></dx-text-box>
+          </div>
+
+          <div class="mt-1" *ngIf="basicDataAvailable">
+            <dx-text-box
+              [(value)]="PayerIDValue"
+              label="Payer"
+              labelMode="floating"
+              [readOnly]="true"
+            ></dx-text-box>
+          </div>
+
+          <div class="mt-1" *ngIf="basicDataAvailable">
+            <dx-text-box
+              [(value)]="EmiratesIDvalue"
+              label="Emirates ID"
+              labelMode="floating"
+              [readOnly]="true"
+            ></dx-text-box>
+          </div>
+        </div>
+
+        <!-- Second Box -->
+        <div class="BorderBox">
+          <div class="mt-1">
+            <dx-text-box
+              [(value)]="ClaimNumber"
+              label="Claim Number"
+              labelMode="floating"
+              validationMessagePosition="top"
+            >
+              <dx-validator #ClaimNumberValidator>
+                <dxi-validation-rule
+                  type="required"
+                  message="Claim Number is required"
+                ></dxi-validation-rule>
+              </dx-validator>
+            </dx-text-box>
+          </div>
+
+          <div class="mt-1" *ngIf="basicDataAvailable">
+            <dx-text-box
+              [(value)]="ClaimCountValue"
+              label="Claim Count"
+              labelMode="floating"
+              [readOnly]="true"
+            ></dx-text-box>
+          </div>
+
+          <div class="mt-1" *ngIf="basicDataAvailable">
+            <dx-text-box
+              [(value)]="RemittanceCountValue"
+              label="Remittance Count"
+              labelMode="floating"
+              [readOnly]="true"
+            ></dx-text-box>
+          </div>
+
+          <div class="mt-1" *ngIf="basicDataAvailable">
+            <dx-text-box
+              [(value)]="IDPayerValue"
+              label="ID Payer"
+              labelMode="floating"
+              [readOnly]="true"
+            ></dx-text-box>
+          </div>
+        </div>
+
+        <!-- Button Group -->
+        <div class="pt-2 d-flex gap-2 buttonGrp">
+          <div class="mt-1">
+            <dx-button
+              text=""
+              type="success"
+              icon="find"
+              hint="Refresh"
+              stylingMode="contained"
+              (onClick)="get_All_DataSource()"
+            ></dx-button>
+          </div>
+          <div class="mt-1">
+            <dx-button
+              text=""
+              icon="refresh"
+              type="danger"
+              hint="Clear"
+              stylingMode="contained"
+              (onClick)="clearButtonAction()"
+            ></dx-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="basicDataAvailable" class="button-container mt-1">
+      <dx-button
+        class="toggleButton"
+        icon="{{ isContentVisible ? 'spinup' : 'spindown' }}"
+        stylingMode="outlined"
+        type="normal"
+        [hint]="isContentVisible ? 'Hide Basic Info' : 'Show Basic Info'"
+        [width]="200"
+        [height]="15"
+        (onClick)="toggleContent()"
+      >
+      </dx-button>
+    </div>
+  </div>
+
+  <div class="DetailsDrillDown RowgroupDiv2 mt-1">
+    <div class="tabs-demo m-0 p-0">
+      <div class="widget-container">
+        <!-- ------------------ Transaction DataGrid (Visible for Tab 0)---------------- -->
+        <div class="gridDataDiv mt-1 mb-2">
+          <div class="headingText">Transaction Details</div>
+          <dx-data-grid
+            class="grid theme-dependent"
+            noDataText="No Data Available"
+            [height]="'30vh'"
+            [dataSource]="TransactionDataSource"
+            [allowColumnResizing]="true"
+            [allowColumnReordering]="true"
+            [hoverStateEnabled]="true"
+            [columnAutoWidth]="true"
+            [focusedRowEnabled]="true"
+            [autoNavigateToFocusedRow]="false"
+            [keyExpr]="'TransactionDate'"
+            [(focusedRowKey)]="focusedRow"
+            [headerFilter]="{ visible: true }"
+            [columnFixing]="{
+              enabled: true,
+              texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+            }"
+            (onFocusedRowChanged)="onTransactionGridFocusedRowChanged($event)"
+          >
+            <dxi-column
+              *ngFor="let column of transactionColumns"
+              [dataField]="column.Title"
+              [caption]="column.ToolTip"
+              [visible]="column.Visibility"
+            ></dxi-column>
+            <!-- <dxi-column
+              *ngIf="!isEmptyDatagrid"
+              type="buttons"
+              caption=""
+              [width]="40"
+              [fixed]="false"
+              fixedPosition="left"
+              [allowFixing]="false"
+              [allowHiding]="false"
+              [allowResizing]="false"
+              [allowReordering]="false"
+              [buttons]="attachmentButton"
+            >
+            </dxi-column> -->
+          </dx-data-grid>
+        </div>
+
+        <!-- ======================== Tab data Loading Space =========================== -->
+        <div *ngIf="isSubmissionClickVisible" class="gridDataDiv mt-1">
+          <dx-tabs
+            *ngIf="isSubmissionClickVisible"
+            #withText
+            [width]="width"
+            keyExpr="id"
+            [selectedItem]="selectedTabId"
+            [rtlEnabled]="rtlEnabled"
+            [scrollByContent]="scrollByContent"
+            [showNavButtons]="showNavButtons"
+            [dataSource]="SubmissiontabsWithText"
+            orientation="horizontal"
+            [stylingMode]="stylingMode"
+            [iconPosition]="iconPosition"
+            (onItemClick)="onTabChange($event.itemData.id)"
+          ></dx-tabs>
+
+          <!-- Different DataGrid for each tab -->
+          <div *ngIf="selectedTabId === 1">
+            <dx-data-grid
+              class="grid theme-dependent"
+              noDataText="No Data Available"
+              [height]="'40vh'"
+              [dataSource]="filteredActivityDataSource"
+              [allowColumnResizing]="true"
+              [allowColumnReordering]="true"
+              [hoverStateEnabled]="true"
+              [columnAutoWidth]="true"
+              [focusedRowEnabled]="true"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [autoNavigateToFocusedRow]="false"
+              [keyExpr]="'ClaimActivityNumber'"
+              [headerFilter]="{ visible: true }"
+              [columnFixing]="{
+                enabled: true,
+                texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+              }"
+              [(focusedRowKey)]="activityFocusRow"
+              (onRowExpanding)="ActivityRowDrillDownClick($event)"
+            >
+              <dxi-column
+                *ngFor="let column of SubmisstionActivityColumns"
+                [dataField]="column.Name"
+                [caption]="column.ToolTip"
+                [visible]="column.Visibility"
+              ></dxi-column>
+
+              <dxo-master-detail
+                [enabled]="true"
+                [autoExpandAll]="false"
+                template="masterDetail"
+              ></dxo-master-detail>
+
+              <div
+                class="ps-2 pe-2 mainInnerGridDiv"
+                *dxTemplate="let detailData of 'masterDetail'"
+              >
+                <div class="data-grid-container mt-1 mb-2 innerGriddata">
+                  <span class="po-title">Observation Details</span>
+                  <dx-data-grid
+                    [columnAutoWidth]="true"
+                    [showBorders]="true"
+                    [dataSource]="filteredObservationdataSource"
+                    [width]="'100%'"
+                    [height]="'25vh'"
+                  >
+                    <dxi-column
+                      *ngFor="let column of ObservationColumns"
+                      [dataField]="column.Name"
+                      [caption]="column.ToolTip"
+                      [visible]="column.Visibility"
+                    ></dxi-column>
+                  </dx-data-grid>
+                </div>
+              </div>
+            </dx-data-grid>
+          </div>
+
+          <div *ngIf="selectedTabId === 2">
+            <dx-data-grid
+              [dataSource]="filteredDiagnosisDataSource"
+              noDataText="No Diagnosis data Available"
+              [height]="'40vh'"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+            >
+              <dxi-column
+                *ngFor="let column of DiagnosisColumns"
+                [dataField]="column.Name"
+                [caption]="column.ToolTip"
+                [visible]="column.Visibility"
+              ></dxi-column>
+            </dx-data-grid>
+          </div>
+
+          <div *ngIf="selectedTabId === 3">
+            <dx-data-grid
+              [dataSource]="encounterDataSource"
+              noDataText="encounter data not available"
+              [height]="'40vh'"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+            ></dx-data-grid>
+          </div>
+
+          <div *ngIf="selectedTabId === 4">
+            <dx-data-grid
+              [dataSource]="othersDataSource"
+              noDataText="other data not available"
+              [height]="'40vh'"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+            ></dx-data-grid>
+          </div>
+
+          <div *ngIf="selectedTabId === 5">
+            <dx-data-grid
+              [dataSource]="AttechmentDataSource"
+              noDataText="not available"
+              [height]="'40vh'"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+            ></dx-data-grid>
+          </div>
+        </div>
+
+        <div *ngIf="isResubmissionClickVisible" class="gridDataDiv mt-1">
+          <dx-tabs
+            *ngIf="isResubmissionClickVisible"
+            #withText
+            [width]="width"
+            keyExpr="id"
+            [selectedItem]="selectedTabId"
+            [rtlEnabled]="rtlEnabled"
+            [scrollByContent]="scrollByContent"
+            [showNavButtons]="showNavButtons"
+            [dataSource]="ResubmissiontabsWithText"
+            orientation="horizontal"
+            [stylingMode]="stylingMode"
+            [iconPosition]="iconPosition"
+            (onItemClick)="onTabChange($event.itemData.id)"
+          ></dx-tabs>
+
+          <!-- Different DataGrid for each tab -->
+          <div *ngIf="selectedTabId === 1">
+            <dx-data-grid
+              class="grid theme-dependent"
+              noDataText="No Data Available"
+              [height]="'40vh'"
+              [dataSource]="filteredActivityDataSource"
+              [allowColumnResizing]="true"
+              [allowColumnReordering]="true"
+              [hoverStateEnabled]="true"
+              [columnAutoWidth]="true"
+              [focusedRowEnabled]="true"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [autoNavigateToFocusedRow]="false"
+              [keyExpr]="'ClaimActivityNumber'"
+              [headerFilter]="{ visible: true }"
+              [columnFixing]="{
+                enabled: true,
+                texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+              }"
+              [(focusedRowKey)]="activityFocusRow"
+              (onRowExpanding)="ActivityRowDrillDownClick($event)"
+            >
+              <dxi-column
+                *ngFor="let column of SubmisstionActivityColumns"
+                [dataField]="column.Name"
+                [caption]="column.ToolTip"
+                [visible]="column.Visibility"
+              ></dxi-column>
+
+              <dxo-master-detail
+                [enabled]="true"
+                [autoExpandAll]="false"
+                template="masterDetail"
+              ></dxo-master-detail>
+
+              <div
+                class="ps-2 pe-2 mainInnerGridDiv"
+                *dxTemplate="let detailData of 'masterDetail'"
+              >
+                <div class="data-grid-container mt-1 mb-2 innerGriddata">
+                  <span class="po-title">Observation Details</span>
+                  <dx-data-grid
+                    [columnAutoWidth]="true"
+                    [showBorders]="true"
+                    [dataSource]="filteredObservationdataSource"
+                    [width]="'100%'"
+                    [height]="'25vh'"
+                  >
+                    <dxi-column
+                      *ngFor="let column of ObservationColumns"
+                      [dataField]="column.Name"
+                      [caption]="column.ToolTip"
+                      [visible]="column.Visibility"
+                    ></dxi-column>
+                  </dx-data-grid>
+                </div>
+              </div>
+            </dx-data-grid>
+          </div>
+
+          <div *ngIf="selectedTabId === 2">
+            <dx-data-grid
+              [dataSource]="ResubmissionDatasource"
+              noDataText="Resubmission data not available"
+              [height]="'40vh'"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+            ></dx-data-grid>
+          </div>
+
+          <div *ngIf="selectedTabId === 3">
+            <dx-data-grid
+              [dataSource]="encounterDataSource"
+              noDataText="Encounter data not available"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [height]="'40vh'"
+            ></dx-data-grid>
+          </div>
+
+          <div *ngIf="selectedTabId === 4">
+            <dx-data-grid
+              [dataSource]="othersDataSource"
+              noDataText="Other data not available"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [height]="'40vh'"
+            ></dx-data-grid>
+          </div>
+          <div *ngIf="selectedTabId === 5">
+            <dx-data-grid
+              [dataSource]="AttechmentDataSource"
+              noDataText="not available"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [height]="'40vh'"
+            ></dx-data-grid>
+          </div>
+        </div>
+
+        <div *ngIf="isRemittanceClickVisible" class="gridDataDiv mt-1">
+          <dx-tabs
+            *ngIf="isRemittanceClickVisible"
+            #withText
+            [width]="width"
+            [selectedItem]="selectedTabId"
+            [rtlEnabled]="rtlEnabled"
+            [scrollByContent]="scrollByContent"
+            [showNavButtons]="showNavButtons"
+            [dataSource]="RemittancetabsWithText"
+            orientation="horizontal"
+            [stylingMode]="stylingMode"
+            [iconPosition]="iconPosition"
+            displayExpr="text"
+            valueExpr="id"
+            (onItemClick)="onTabChange($event.itemData.id)"
+          ></dx-tabs>
+
+          <div *ngIf="selectedTabId === 1">
+            <dx-data-grid
+              [dataSource]="remittanceDataSource"
+              noDataText="Remittance data not available"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [height]="'40vh'"
+            ></dx-data-grid>
+          </div>
+
+          <div *ngIf="selectedTabId === 2">
+            <dx-data-grid
+              [dataSource]="othersDataSource"
+              noDataText="Other data not available"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [height]="'40vh'"
+            ></dx-data-grid>
+          </div>
+          <div *ngIf="selectedTabId === 3">
+            <dx-data-grid
+              [dataSource]="AttechmentDataSource"
+              noDataText="not available"
+              [rowAlternationEnabled]="true"
+              rowAlternationInterval="2"
+              [height]="'40vh'"
+            ></dx-data-grid>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<dx-load-panel
+  #loadPanel
+  shadingColor="rgba(0,0,0,0.0)"
+  [position]="{ of: '#parent' }"
+  [(visible)]="loadingVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  [hideOnOutsideClick]="false"
+  [message]="'Loading...'"
+>
+</dx-load-panel>

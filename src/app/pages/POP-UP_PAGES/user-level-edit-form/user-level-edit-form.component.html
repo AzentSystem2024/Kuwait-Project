@@ -1,0 +1,62 @@
+<div class="dx-theme-fluent dx-theme-fluent">
+  <div class="view-wrapper topDiv d-flex mb-2 mt-0">
+    <div class="headDiv d-flex align-items-center m-0 p-0">
+      <div class="inputBox ms-3">
+        <dx-text-box
+          [(value)]="UserLevelValue"
+          [inputAttr]="{ 'aria-label': 'Name' }"
+          label="Enter User Role Name"
+          labelMode="floating"
+          validationMessagePosition="right"
+          (onValueChanged)="onUserLevelValueChange($event)"
+        >
+          <dx-validator *ngIf="isErrorVisible">
+            <dxi-validation-rule
+              type="required"
+              message="user level is required"
+            ></dxi-validation-rule>
+          </dx-validator>
+        </dx-text-box>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs-demo view-wrapper">
+    <div class="widget-container">
+      <div>
+        <dx-tabs
+          #withIconAndText
+          [width]="width"
+          [selectedIndex]="0"
+          [rtlEnabled]="rtlEnabled"
+          [scrollByContent]="scrollByContent"
+          [showNavButtons]="showNavButtons"
+          [dataSource]="MenuDatasource"
+          [orientation]="orientations"
+          [stylingMode]="stylingMode"
+          [iconPosition]="iconPosition"
+          (onItemClick)="onTabClick($event)"
+        >
+        </dx-tabs>
+        <dx-data-grid
+          *ngIf="selectedTabData"
+          class="grid theme-dependent"
+          noDataText=""
+          [height]="'58vh'"
+          [dataSource]="selectedTabData"
+          keyExpr="MenuId"
+          [allowColumnResizing]="true"
+          [allowColumnReordering]="true"
+          [rowAlternationEnabled]="true"
+          [hoverStateEnabled]="true"
+          rowAlternationInterval="2"
+          (onSelectionChanged)="onSelectionChanged($event)"
+          [(selectedRowKeys)]="selectedRows[selectedTab]"
+        >
+          <dxo-selection mode="multiple"></dxo-selection>
+          <dxi-column dataField="MenuName" caption="Menu List"></dxi-column>
+        </dx-data-grid>
+      </div>
+    </div>
+  </div>
+</div>

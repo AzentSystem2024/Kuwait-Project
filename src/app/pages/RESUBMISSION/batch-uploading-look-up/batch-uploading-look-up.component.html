@@ -1,0 +1,180 @@
+<div class="view-wrapper list-page">
+  <dx-data-grid
+    #mainDataGrid
+    class="grid theme-dependent"
+    height="82vh"
+    noDataText="No data available"
+    [dataSource]="dataSource"
+    [columnAutoWidth]="false"
+    [wordWrapEnabled]="false"
+    [showBorders]="true"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [rowAlternationEnabled]="true"
+    rowAlternationInterval="2"
+    (onEditingStart)="onRowUpdating($event)"
+    (onRowRemoving)="onRowRemoving($event)"
+  >
+    <dxo-editing
+      mode="popup"
+      [allowUpdating]="isEditable"
+      [allowDeleting]="isEditable"
+      [confirmDelete]="false"
+      [popup]="{ width: '40%', height: 'auto' }"
+    >
+    </dxo-editing>
+
+    <dxo-pager
+      [visible]="true"
+      [allowedPageSizes]="allowedPageSizes"
+      [displayMode]="displayMode"
+      [showPageSizeSelector]="showPageSizeSelector"
+      [showInfo]="true"
+      [showNavigationButtons]="true"
+    ></dxo-pager>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-load-panel [showPane]="false"></dxo-load-panel>
+    <dxo-scrolling mode="virtual"></dxo-scrolling>
+    <dxo-sorting mode="multiple"></dxo-sorting>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-filter-row [visible]="true" [applyFilter]="'auto'"></dxo-filter-row>
+
+    <dxo-search-panel
+      [visible]="true"
+      placeholder="Search"
+      [highlightCaseSensitive]="false"
+    ></dxo-search-panel>
+
+    <dxo-export
+      [enabled]="true"
+      [allowExportSelectedData]="false"
+      [formats]="['xlsx']"
+    ></dxo-export>
+
+    <dxo-toolbar>
+      <dxi-item location="before">
+        <div class="grid-header">Resubmission Batch Upload</div>
+      </dxi-item>
+
+      <dxi-item
+        location="after"
+        locateInMenu="auto"
+        showText="inMenu"
+        widget="dxButton"
+        [options]="{
+          text: 'Refresh',
+          hint: 'Refresh',
+          icon: 'refresh',
+          onClick: refresh,
+          stylingMode: 'text',
+          elementAttr: { class: 'commonButtons' }
+        }"
+      ></dxi-item>
+
+      <dxi-item name="exportButton"></dxi-item>
+
+      <dxi-item location="after" locateInMenu="auto" class="me-2">
+        <dx-button
+          text="Add"
+          icon="newfolder"
+          type="default"
+          stylingMode="contained"
+          hint="Add New Allocation"
+          (onClick)="show_new__Form()"
+        ></dx-button>
+      </dxi-item>
+    </dxo-toolbar>
+
+    <dxo-header-filter [visible]="true">
+      <dxo-search [enabled]="true"></dxo-search>
+    </dxo-header-filter>
+
+    <dxi-column
+      dataField="ResubmissionRevisionBatchDate"
+      caption="Batch Date"
+      dataType="date"
+    ></dxi-column>
+    <dxi-column
+      dataField="ResubmissionRevisionUID"
+      caption="Revision UID"
+    ></dxi-column>
+    <dxi-column dataField="FacilityID" caption="Facility"></dxi-column>
+    <dxi-column dataField="PayerID" caption="Payer ID"></dxi-column>
+    <dxi-column dataField="ReceiverID" caption="Receiver ID"></dxi-column>
+    <dxi-column dataField="CreatedBy" caption="Created By"></dxi-column>
+    <dxi-column dataField="Status" caption="Status"></dxi-column>
+  </dx-data-grid>
+</div>
+
+<div *ngIf="isAddPopupOpened">
+  <dx-popup
+    [(visible)]="isAddPopupOpened"
+    [width]="'95%'"
+    [height]="'100vh'"
+    [showTitle]="true"
+    title="New Batch Uploading"
+    [dragEnabled]="true"
+    [closeOnOutsideClick]="false"
+    [showCloseButton]="true"
+    [shading]="false"
+    [resizeEnabled]="false"
+    (onHiding)="On_PopUp_Hiding()"
+  >
+    <div>
+      <app-batch-uploading-page
+        *ngIf="isAddPopupOpened"
+      ></app-batch-uploading-page>
+    </div>
+  </dx-popup>
+</div>
+
+<div *ngIf="iseditPopupOpened">
+  <dx-popup
+    [(visible)]="iseditPopupOpened"
+    [width]="'95%'"
+    [height]="'100vh'"
+    [showTitle]="true"
+    title="Edit Batch Data"
+    [dragEnabled]="true"
+    [closeOnOutsideClick]="false"
+    [showCloseButton]="true"
+    [shading]="false"
+    [resizeEnabled]="false"
+    (onHiding)="On_PopUp_Hiding()"
+  >
+    <div>
+      <app-batch-uploading-page
+        *ngIf="iseditPopupOpened"
+        [EditRowData]="editRowData"
+        [IsEditing]="IsEditing"
+      ></app-batch-uploading-page>
+    </div>
+  </dx-popup>
+</div>
+
+<dx-popup
+  [(visible)]="deletePopupVisible"
+  title="Delete Confirmation"
+  [width]="400"
+  [height]="'auto'"
+  [showTitle]="true"
+  [dragEnabled]="false"
+  [closeOnOutsideClick]="false"
+>
+  <dxi-item itemType="group">
+    <dx-text-box
+      [(value)]="deleteReason"
+      placeholder="Enter reason for deletion"
+    ></dx-text-box>
+  </dxi-item>
+
+  <dxi-item class="mt-2" itemType="group" align="right">
+    <dx-button text="Cancel" (onClick)="deletePopupVisible = false"></dx-button>
+    <dx-button
+      class="ms-2"
+      text="Delete"
+      type="danger"
+      (onClick)="deleteRow()"
+    ></dx-button>
+  </dxi-item>
+</dx-popup>

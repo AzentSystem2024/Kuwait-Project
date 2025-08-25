@@ -1,0 +1,63 @@
+.FullBody {
+  height: 100vh;
+  width: 100%;
+  padding-top: var(--content-padding);
+}
+
+.headerDiv {
+  background-color: var(--base-bg);
+  border-radius: 8px;
+  z-index: 1020;
+  padding: 10px;
+}
+
+.BorderBox {
+  position: relative;
+  margin-top: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+.MFABorderBox {
+  position: relative;
+  margin-top: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  // height: auto;
+  display: flex;
+  flex-direction: column;
+}
+.OthersBorderBox {
+  position: relative;
+  margin-top: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  // height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.headingText {
+  font-size: larger;
+  font-weight: bold;
+}
+.col-md-6 {
+  width: 48%;
+}
+.main-container {
+  height: 80vh;
+}
+
+.main-container .col-md-6 {
+  display: flex;
+  flex-direction: column;
+  // justify-content: space-between;
+  height: 100%;
+}
+
+.main-container .BorderBox,
+.main-container .MFABorderBox {
+  height: 35vh;
+}

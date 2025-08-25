@@ -1,0 +1,85 @@
+/* stylelint-disable no-duplicate-selectors */
+@use "../../../../variables.scss" as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  height: 100%;
+
+  .menu-container {
+    background-color: var(--side-panel-background);
+    min-height: 100%;
+    width: 260px;
+    display: flex;
+    flex: 1;
+    padding-top: var(--toolbar-vertical-padding);
+    // padding-bottom: var(--footer-height);
+
+    ::ng-deep .dx-treeview {
+      // ## Icon width customization
+      .dx-treeview-item {
+        padding-left: 5px;
+        flex-direction: row-reverse;
+        border-radius: 8px;
+
+        .dx-icon.dx-icon {
+          width: var(--side-panel-min-width);
+          font-weight: bold;
+          margin: 0;
+        }
+      }
+
+      // ##
+
+      // ## Arrow customization
+      // .dx-treeview-node.dx-treeview-node {
+      //   // padding: 0 0;
+      // }
+
+      .dx-treeview-toggle-item-visibility {
+        right: 10px;
+        left: auto;
+      }
+
+      .dx-rtl .dx-treeview-toggle-item-visibility {
+        left: 10px;
+        right: auto;
+      }
+
+      // ##
+
+      // ## Item levels customization
+      .dx-treeview-node {
+        &[aria-level="1"] {
+          color: var(--side-menu-text-color);
+          font-weight: bold;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        &[aria-level="2"] .dx-treeview-item-content {
+          font-weight: normal;
+          // padding: 0 0 0 var(--side-panel-min-width);
+          padding-left: 30px;
+        }
+      }
+    }
+  }
+}
+::ng-deep .menu-container .dx-treeview-item.dx-state-hover {
+  // background-color: #a2eaf4 !important;
+  color: #2474f3 !important;
+  border-radius: 6px;
+}
+
+::ng-deep .dx-treeview-item-without-checkbox .dx-state-focused {
+  > .dx-treeview-item {
+    color: #2474f3 !important;
+  }
+}
+
+::ng-deep .dx-treeview-item-without-checkbox.dx-state-selected
+  > .dx-treeview-item {
+  color: rgba(29, 78, 216, 1) !important;
+  background-color: var(--side-menu-selected-bg);
+}

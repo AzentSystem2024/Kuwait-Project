@@ -1,0 +1,29 @@
+@use "../../../../variables.scss" as *;
+
+.login-form {
+  width: 400px;
+  height: 300px;
+  margin-top: 80px;
+  ::ng-deep .form-text {
+    color: var(--base-text-color-alpha);
+  }
+}
+
+.reset-link {
+  text-align: end;
+  /* font-size: 12px; */
+  font-style: normal;
+  margin: 6px 0 50px 0;
+  font-size: medium;
+
+  a {
+    cursor: pointer;
+    color: aliceblue;
+  }
+}
+
+::ng-deep .login-form .dx-button.dx-button-default {
+  border-radius: 4px;
+  background-color: rgb(71, 158, 245);
+  margin-top: 10px;
+}

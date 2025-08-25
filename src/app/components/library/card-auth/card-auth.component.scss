@@ -1,0 +1,91 @@
+@use "../../../../variables.scss" as *;
+
+:host {
+  display: flex;
+  flex-grow: 2;
+  justify-content: center;
+}
+.loginMainDiv {
+  display: flex;
+  justify-content: flex-end;
+  height: 100vh;
+  width: 100%;
+  background-image: url("../../../../assets/projectx\ Login2.png");
+  /* White color with 50% opacity */
+  background-size: cover;
+  background-position: center;
+}
+
+.auth-card {
+  display: flex;
+  flex-grow: 2;
+
+  ::ng-deep .dx-button-text {
+    text-transform: none;
+  }
+
+  .dx-card {
+    margin: auto auto;
+    margin-right: 120px;
+    padding: 28px;
+    flex-grow: 0;
+    max-width: 450px;
+    // width: 500px;
+    height: 80%;
+    border-radius: 8px;
+
+    &.content {
+      height: auto;
+      // height: 70vh;
+      // width: 25%;
+      background-color: rgba(191, 198, 205, 0.486);
+      border-radius: 25px;
+    }
+
+    :host-context(.screen-x-small) & {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      border-radius: 0;
+      box-shadow: none;
+      margin: 0;
+      border: 0;
+      flex-grow: 1;
+    }
+
+    .header {
+      margin-bottom: 24px;
+      margin-top: 35px;
+
+      .title {
+        color: var(--base-text-color);
+        text-align: center;
+        line-height: 24px;
+        font-weight: 500;
+        font-size: 35px;
+      }
+
+      .description {
+        color: var(--base-text-color-alpha);
+        line-height: 16px;
+        font-size: 25px;
+        margin-top: 20px;
+        // text-align: center;
+      }
+    }
+
+    .btnDiv {
+      position: relative;
+      // background-color: rgb(218, 218, 218);
+      border: 1px dotted rgb(255, 255, 255);
+    }
+    // Add these styles to position the close icon
+    .close-icon {
+      position: absolute;
+      right: 1px;
+      font-size: 20px;
+      z-index: 1;
+      border: 1px silid black;
+    }
+  }
+}

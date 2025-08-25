@@ -1,0 +1,45 @@
+@use "../../../variables.scss" as *;
+
+:host {
+  flex-direction: column;
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+.layout-body {
+  flex: 1;
+  min-height: 0;
+  background-color: var(--background-color);
+}
+.tabItems {
+  width: 200px;
+  height: 30px;
+  border-radius: 6px; /* Radius for the top-left corner */
+  padding-left: 5px;
+  margin: 0px;
+  padding: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tabItems:hover {
+  cursor: pointer;
+  border-radius: 6px;
+  // background-color: rgba(86, 145, 227, 0.663);
+}
+.tabSubItems {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.close-icon {
+  // margin-left: auto;
+  font-size: 20px;
+  font-weight: bold;
+  margin-right: 5px;
+  color: var(--text-color);
+}
+.close-icon:hover {
+  color: aliceblue;
+}

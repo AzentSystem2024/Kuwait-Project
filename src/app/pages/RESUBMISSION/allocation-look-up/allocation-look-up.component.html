@@ -1,0 +1,190 @@
+<div class="view-wrapper list-page">
+  <dx-data-grid
+    #mainDataGrid
+    class="grid theme-dependent"
+    noDataText="No data available"
+    [dataSource]="dataSource"
+    [columns]="columns"
+    [showBorders]="true"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [rowAlternationEnabled]="true"
+    rowAlternationInterval="2"
+    (onExporting)="onExporting($event)"
+    (onRowRemoving)="onRowRemoving($event)"
+    (onEditingStart)="onRowUpdating($event)"
+    height="82vh"
+  >
+    <dxo-editing
+      mode="popup"
+      [allowUpdating]="isEditable"
+      [allowDeleting]="isEditable"
+      [confirmDelete]="false"
+      [popup]="{ width: '40%', height: 'auto' }"
+    >
+    </dxo-editing>
+
+    <dxo-pager
+      [visible]="true"
+      [allowedPageSizes]="allowedPageSizes"
+      [displayMode]="displayMode"
+      [showPageSizeSelector]="showPageSizeSelector"
+      [showInfo]="true"
+      [showNavigationButtons]="true"
+    ></dxo-pager>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-load-panel [showPane]="false"></dxo-load-panel>
+    <dxo-scrolling mode="virtual"></dxo-scrolling>
+    <dxo-sorting mode="multiple"></dxo-sorting>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-filter-row [visible]="true" [applyFilter]="'auto'"></dxo-filter-row>
+
+    <dxo-search-panel
+      [visible]="true"
+      placeholder="Search"
+      [highlightCaseSensitive]="false"
+    ></dxo-search-panel>
+
+    <dxo-export
+      [enabled]="true"
+      [allowExportSelectedData]="false"
+      [formats]="['xlsx']"
+    ></dxo-export>
+
+    <dxo-toolbar>
+      <dxi-item location="before">
+        <div class="grid-header">Resubmission Allocation</div>
+      </dxi-item>
+
+      <!-- <dxi-item name="searchPanel" locateInMenu="auto"></dxi-item> -->
+
+      <dxi-item
+        location="after"
+        locateInMenu="auto"
+        showText="inMenu"
+        widget="dxButton"
+        [options]="{
+          text: 'Refresh',
+          hint: 'Refresh',
+          icon: 'refresh',
+          onClick: refresh,
+          stylingMode: 'text',
+          elementAttr: { class: 'commonButtons' }
+        }"
+      ></dxi-item>
+
+      <dxi-item name="exportButton"></dxi-item>
+
+      <dxi-item location="after" locateInMenu="auto" class="me-2">
+        <dx-button
+          text="Add"
+          icon="newfolder"
+          type="default"
+          stylingMode="contained"
+          hint="Add New Allocation"
+          (onClick)="show_new__Form()"
+        ></dx-button>
+      </dxi-item>
+
+      <dxi-item location="after" locateInMenu="auto" class="me-2">
+        <dx-button
+          text="excel data"
+          icon=""
+          type="default"
+          stylingMode="contained"
+          hint="Excel import data lookup"
+          (onClick)="show_excel_data_lookup()"
+        ></dx-button>
+      </dxi-item>
+    </dxo-toolbar>
+
+    <dxo-header-filter [visible]="true">
+      <dxo-search [enabled]="true"></dxo-search>
+    </dxo-header-filter>
+  </dx-data-grid>
+</div>
+
+<div *ngIf="isAddPopupOpened">
+  <dx-popup
+    [(visible)]="isAddPopupOpened"
+    [width]="'95%'"
+    [height]="'95vh'"
+    [showTitle]="true"
+    title="Batch Upload"
+    [dragEnabled]="true"
+    [closeOnOutsideClick]="false"
+    [showCloseButton]="true"
+    [shading]="false"
+    [resizeEnabled]="false"
+    (onHiding)="On_PopUp_Hiding()"
+  >
+    <div>
+      <app-allocation-page *ngIf="isAddPopupOpened"></app-allocation-page>
+    </div>
+  </dx-popup>
+</div>
+
+<dx-popup
+  [(visible)]="deletePopupVisible"
+  title="Delete Confirmation"
+  [width]="400"
+  [height]="'auto'"
+  [showTitle]="true"
+  [dragEnabled]="false"
+  [closeOnOutsideClick]="false"
+>
+  <dxi-item itemType="group">
+    <dx-text-box
+      [(value)]="deleteReason"
+      placeholder="Enter reason for deletion"
+    ></dx-text-box>
+  </dxi-item>
+
+  <dxi-item class="mt-2" itemType="group" align="right">
+    <dx-button text="Cancel" (onClick)="deletePopupVisible = false"></dx-button>
+    <dx-button
+      class="ms-2"
+      text="Delete"
+      type="danger"
+      (onClick)="deleteRow()"
+    ></dx-button>
+  </dxi-item>
+</dx-popup>
+
+<dx-popup
+  [(visible)]="iseditPopupOpened"
+  title="Edit Allocated Data"
+  [width]="'95%'"
+  [height]="'95vh'"
+  [showTitle]="true"
+  [dragEnabled]="false"
+  [closeOnOutsideClick]="false"
+>
+  <div>
+    <app-allocation-page
+      *ngIf="iseditPopupOpened"
+      [editRowData]="editRowData"
+    ></app-allocation-page>
+  </div>
+</dx-popup>
+
+<div *ngIf="isExcelPopupVisible">
+  <dx-popup
+    [(visible)]="isExcelPopupVisible"
+    [width]="'95%'"
+    [height]="'95vh'"
+    [showTitle]="true"
+    title="Excel Import Data"
+    [dragEnabled]="true"
+    [closeOnOutsideClick]="false"
+    [showCloseButton]="true"
+    [shading]="false"
+    [resizeEnabled]="false"
+  >
+    <div>
+      <app-excel-import-lookup-page
+        *ngIf="isExcelPopupVisible"
+      ></app-excel-import-lookup-page>
+    </div>
+  </dx-popup>
+</div>

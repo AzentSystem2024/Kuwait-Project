@@ -1,0 +1,91 @@
+@use "../../../../variables.scss" as *;
+@use "sass:math";
+
+:host {
+  --side-panel-toolbar-height: 72px;
+
+  width: 100%;
+  display: contents;
+}
+.view-wrapper {
+  position: relative;
+  flex-direction: column;
+  margin: 0 10px;
+  padding: 0px;
+  height: 85vh;
+  border-radius: 8px;
+  // background-color: var(--base-bg);
+
+  .grid {
+    .name-template {
+      .position {
+        font-size: 10px;
+        color: var(--texteditor-label-color);
+      }
+    }
+
+    ::ng-deep & {
+      .dx-datagrid-header-panel {
+        padding: 0 var(--content-padding);
+      }
+
+      .dx-toolbar {
+        margin-bottom: 0;
+        padding: var(--toolbar-margin-bottom) 0;
+      }
+
+      .dx-datagrid-content .dx-row {
+        cursor: pointer;
+      }
+    }
+
+    .grid-header {
+      @include header();
+    }
+    .dxo-filter-row {
+      height: 3px;
+      padding: 0;
+      margin: 0;
+    }
+  }
+
+  user-panel {
+    display: inherit;
+  }
+}
+::ng-deep .radioGrp .dx-field-value.dx-radiogroup,
+.dx-field-value:not(.dx-widget) > .dx-radiogroup {
+  margin: 0px 0;
+}
+.formData {
+  background-color: var(--base-bg);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0px;
+}
+.hide-content {
+  transform: translateY(-20px);
+  opacity: 0;
+  max-height: 0; /* Transition from max-height to 0 */
+  padding: 0;
+  margin: 0;
+  overflow: hidden; /* Prevents content overflow */
+}
+.button-container {
+  padding: 0px;
+  height: 0.3vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.toggleButton {
+  border-radius: 4px;
+  background-color: #0fa6e1d3;
+}
+::ng-deep .align-right {
+  margin-left: auto;
+  display: flex;
+  padding-right: 10px;
+  justify-content: flex-end;
+}

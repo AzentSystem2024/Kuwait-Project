@@ -1,0 +1,116 @@
+<div class="d-flex MainDiv">
+  <div class="widget-container">
+    <dx-tabs
+      #withText
+      [width]="width"
+      [selectedIndex]="0"
+      [rtlEnabled]="rtlEnabled"
+      [scrollByContent]="scrollByContent"
+      [showNavButtons]="showNavButtons"
+      [dataSource]="TabViewDataSource"
+      [orientation]="orientation"
+      [stylingMode]="stylingMode"
+      [iconPosition]="iconPosition"
+      (onItemClick)="onTabClick($event)"
+    ></dx-tabs>
+  </div>
+
+  <div class="table-grid claimSummaryGrid">
+    <dx-data-grid
+      [height]="'100%'"
+      [noDataText]="!loadingVisible ? 'No Data Available' : ' '"
+      [dataSource]="GridDataSource"
+      [showBorders]="true"
+      [allowColumnResizing]="false"
+      [columnAutoWidth]="true"
+      [allowColumnReordering]="true"
+      [filterRow]="{ visible: false }"
+      [headerFilter]="{ visible: true }"
+      [columnFixing]="{
+        enabled: true,
+        texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+      }"
+      (onExporting)="onExporting($event)"
+    >
+      <dxi-column
+        *ngIf="!isEmptyDatagrid"
+        type="buttons"
+        [width]="40"
+        [fixed]="true"
+        fixedPosition="left"
+        [allowFixing]="false"
+        [allowHiding]="false"
+        [allowResizing]="false"
+        [allowReordering]="false"
+      >
+        <dxi-button
+          icon="detailslayout"
+          text="Details"
+          hint="View Details"
+          [onClick]="handleRowDrillDownClick"
+        ></dxi-button>
+      </dxi-column>
+
+      <ng-container *ngFor="let column of columnsConfig">
+        <dxi-column
+          *ngIf="column.isBand"
+          [caption]="column.caption"
+          [isBand]="true"
+        >
+          <dxi-column
+            *ngFor="let subColumn of column.columns"
+            [dataField]="subColumn.dataField"
+            [caption]="subColumn.caption"
+            [format]="subColumn.format"
+            [visible]="subColumn.visible"
+            [width]="200"
+          ></dxi-column>
+        </dxi-column>
+
+        <dxi-column
+          *ngIf="!column.isBand"
+          [dataField]="column.dataField"
+          [caption]="column.caption"
+          [format]="column.format"
+          [visible]="column.visible"
+          [width]="200"
+        ></dxi-column>
+      </ng-container>
+
+      <dxo-export
+        [enabled]="true"
+        [allowExportSelectedData]="false"
+      ></dxo-export>
+      <dxo-scrolling mode="virtual"></dxo-scrolling>
+      <dxo-paging [pageSize]="pageSize"> </dxo-paging>
+      <dxo-pager
+        [visible]="true"
+        [displayMode]="displayMode"
+        [showPageSizeSelector]="showPageSizeSelector"
+        [showInfo]="showInfo"
+        [showNavigationButtons]="showNavButtons"
+      >
+      </dxo-pager>
+    </dx-data-grid>
+  </div>
+  <div *ngIf="isSecondDrillOpened">
+    <dx-popup
+      [(visible)]="isSecondDrillOpened"
+      title="Claim Summary"
+      [height]="popupHeight"
+      [width]="popupWidth"
+      [resizeEnabled]="true"
+      [dragEnabled]="true"
+      [shading]="false"
+      [showCloseButton]="false"
+      [closeOnOutsideClick]="true"
+      [showCloseButton]="false"
+      (onResizeEnd)="onResizeEnd($event)"
+      [toolbarItems]="toolbarItems"
+    >
+      <app-claim-detail-activity-drill-down
+        [clickedRowData]="InnerClickedRowData"
+      ></app-claim-detail-activity-drill-down>
+    </dx-popup>
+  </div>
+</div>
