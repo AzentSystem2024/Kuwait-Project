@@ -884,4 +884,5 @@ export class MasterReportService {
   get_Imported_Data_By_Id(id: number) {
     return this.http.post(`${BASE_URL}importmaster/select/` + id, {});
   }
+  
 }

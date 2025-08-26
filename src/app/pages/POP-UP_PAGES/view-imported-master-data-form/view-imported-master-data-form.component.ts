@@ -1,35 +1,43 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, NgModule, SimpleChanges } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { DxButtonModule, DxDataGridModule, DxLoadPanelModule, DxProgressBarModule, DxTemplateModule, DxTextBoxModule, DxTooltipModule, DxValidatorModule } from 'devextreme-angular';
+import {
+  DxButtonModule,
+  DxDataGridModule,
+  DxLoadPanelModule,
+  DxProgressBarModule,
+  DxTemplateModule,
+  DxTextBoxModule,
+  DxTooltipModule,
+  DxValidatorModule,
+} from 'devextreme-angular';
 import { MasterReportService } from '../../MASTER PAGES/master-report.service';
 import DataSource from 'devextreme/data/data_source';
 
 @Component({
   selector: 'app-view-imported-master-data-form',
   templateUrl: './view-imported-master-data-form.component.html',
-  styleUrls: ['./view-imported-master-data-form.component.scss']
+  styleUrls: ['./view-imported-master-data-form.component.scss'],
 })
 export class ViewImportedMasterDataFormComponent {
-
-  dataSource:any;
-  selectedData:any;
-  docNo:any;
-  master:any;
-  importedDate:any;
-  user:any;
-  isLoading:boolean=false;
-  constructor(private service:MasterReportService){}
-
   @Input() formdata: any;
 
-  clearData(){
-    this.dataSource=[];
-    this.isLoading=false;
-    this.docNo='';
-    this.master='';
-    this.importedDate='';
-    this.user='';
+  dataSource: any;
+  selectedData: any;
+  docNo: any;
+  master: any;
+  importedDate: any;
+  user: any;
+  isLoading: boolean = false;
+  constructor(private service: MasterReportService) {}
+
+  clearData() {
+    this.dataSource = [];
+    this.isLoading = false;
+    this.docNo = '';
+    this.master = '';
+    this.importedDate = '';
+    this.user = '';
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -62,27 +70,35 @@ export class ViewImportedMasterDataFormComponent {
                   let data;
                   switch (this.formdata.MasterID) {
                     case 1:
-                      data = res.import_clinician.map(({ ID, LogID, ...rest }) => rest);
+                      data = res.import_clinician.map(
+                        ({ ID, LogID, ...rest }) => rest
+                      );
                       break;
                     case 2:
-                      data = res.import_Denial.map(({ ID, LogID, ...rest }) => rest);
+                      data = res.import_Denial.map(
+                        ({ ID, LogID, ...rest }) => rest
+                      );
                       break;
                     case 3:
-                      data = res.import_Insurance.map(({ ID, LogID, ...rest }) => rest);
+                      data = res.import_Insurance.map(
+                        ({ ID, LogID, ...rest }) => rest
+                      );
                       break;
                     case 4:
-                      data = res.import_Cpt.map(({ ID, LogID, ...rest }) => rest);
+                      data = res.import_Cpt.map(
+                        ({ ID, LogID, ...rest }) => rest
+                      );
                       break;
                     default:
                       data = [];
                   }
                   resolve(data); // Resolve with the data to populate the grid
                 } else {
-                  reject("No data available");
+                  reject('No data available');
                 }
               },
               (error) => {
-                console.error("Error loading data", error);
+                console.error('Error loading data', error);
                 reject(error); // Reject in case of an error
               }
             );
@@ -91,7 +107,6 @@ export class ViewImportedMasterDataFormComponent {
       });
     }
   }
-
 }
 @NgModule({
   imports: [
@@ -104,10 +119,10 @@ export class ViewImportedMasterDataFormComponent {
     DxProgressBarModule,
     BrowserModule,
     DxTooltipModule,
-    DxLoadPanelModule
+    DxLoadPanelModule,
   ],
   providers: [],
   declarations: [ViewImportedMasterDataFormComponent],
   exports: [ViewImportedMasterDataFormComponent],
 })
-export class  ViewImportedMasterDataFormModule {}
+export class ViewImportedMasterDataFormModule {}

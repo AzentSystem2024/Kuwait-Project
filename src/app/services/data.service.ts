@@ -13,6 +13,13 @@ const Token = JSON.parse(localStorage.getItem('Token'));
 export class DataService {
   constructor(private http: HttpClient, private router: Router) {}
 
+  //======Facility Drop down data=====================
+  Get_GropDown(dropDownField: any) {
+    const Url = `${BASE_URL}dropdown`;
+    const reqBody = { name: dropDownField };
+    return this.http.post(Url, reqBody);
+  }
+
   //=================DAte format changing to needed format========
   formatDateTime(date: string): string {
     return formatDate(new Date(date), 'dd-MMM-yyyy hh:mm a', 'en-US');
@@ -213,18 +220,39 @@ export class DataService {
     const reqBody = inputdata;
     return this.http.post(url, reqBody);
   }
-// ======== get column data ========
+  // ======== get column data ========
   get_All_Column_List() {
     const url = `${BASE_URL}insurance/Columnslist`;
     const reqbody = {};
     return this.http.post(url, reqbody);
   }
 
-  
-// ======== get column data ========
+  // ======== get column data ========
   get_His_Data_Column_List() {
     const url = `${BASE_URL}hisData/Columnslist`;
     const reqbody = {};
     return this.http.post(url, reqbody);
+  }
+
+  // ======= import his data ======
+  Import_His_Data(payload: any) {
+    const url = `${BASE_URL}hisData/import`;
+    const reqbody = payload;
+    return this.http.post(url, reqbody);
+  }
+
+  // ============ HIS import LOG list ===========
+  get_Importing_His_Log_List() {
+    const Url = `${BASE_URL}hisdata/list`;
+    const reqBody = {
+      list: [],
+    };
+    return this.http.post(Url, reqBody);
+  }
+
+  // ======= fetch import his data view data ======
+  fetch_His_Data_log_view(id: any) {
+    const url = `${BASE_URL}hisData/select/${id}`;
+    return this.http.post(url, {});
   }
 }

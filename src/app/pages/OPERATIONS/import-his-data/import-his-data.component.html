@@ -68,11 +68,6 @@
         }"
       ></dxi-item>
 
-      <!-- <dxi-item
-        name="exportButton"
-        location="after"
-        cssClass="custom-export-button"
-      ></dxi-item> -->
       <dxi-item
         location="after"
         widget="dxButton"
@@ -85,22 +80,14 @@
     </dxo-header-filter>
 
     <dxi-column
-      dataField="SerialNo"
-      caption="Sl No."
-      [alignment]="'left'"
-    ></dxi-column>
-    <dxi-column
-      dataField="ImportTime"
-      caption="Date"
-      [calculateCellValue]="formatImportTime"
-    ></dxi-column>
-    <dxi-column
       dataField="DocNo"
       caption="Document No"
       [alignment]="'left'"
     ></dxi-column>
-    <dxi-column dataField="Master" caption="Imported Master"></dxi-column>
-    <dxi-column dataField="UserName" caption="User"></dxi-column>
+    <dxi-column dataField="InsuranceName" caption="Insurance Name"></dxi-column>
+    <dxi-column dataField="ImportedUser" caption="User"></dxi-column>
+    <dxi-column dataField="ImportedTime" caption="Imported Time"></dxi-column>
+
     <dxi-column type="buttons" [width]="110" caption=" ">
       <dxi-button
         class="button-info"
@@ -122,19 +109,24 @@
     (onHiding)="onClearData()"
   >
     <app-import-his-data-import
+      *ngIf="isNewFormPopupOpened"
       (closeForm)="CloseEditForm()"
     ></app-import-his-data-import>
   </dx-popup>
 
-  <!-- <dx-popup
-    [(visible)]="ViewImportDataPopup"
-    title="View Imported Master Data"
+  <dx-popup
+    class="formPopupClass"
+    [(visible)]="ViewDataPopup"
+    title="View Imported HIS Data"
+    [height]="'auto'"
+    width="80%"
     [width]="popupwidth"
-    [height]="'100vh'"
-    (onHiding)="onClearViewData()"
+    (onHiding)="onClearData()"
   >
-    <app-view-imported-master-data-form
-      [formdata]="selectedData"
-    ></app-view-imported-master-data-form>
-  </dx-popup> -->
+    <app-import-his-data-import
+      *ngIf="ViewDataPopup"
+      (closeForm)="CloseEditForm()"
+      [viewData]="selectedData"
+    ></app-import-his-data-import>
+  </dx-popup>
 </div>

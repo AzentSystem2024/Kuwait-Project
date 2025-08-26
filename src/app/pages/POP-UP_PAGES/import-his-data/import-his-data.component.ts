@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  Input,
   NgModule,
   OnInit,
   Output,
@@ -12,6 +13,9 @@ import {
   DxButtonModule,
   DxDataGridComponent,
   DxDataGridModule,
+  DxSelectBoxModule,
+  DxTextBoxModule,
+  DxValidatorModule,
 } from 'devextreme-angular';
 import { DataService } from 'src/app/services';
 import * as XLSX from 'xlsx';
@@ -31,6 +35,8 @@ export class ImportHISDataFormComponent implements OnInit {
 
   @Output() closeForm = new EventEmitter();
 
+  @Input() viewData: any = null;
+
   readonly allowedPageSizes: any = [50, 100, 1000];
   displayMode: any = 'full';
   showPageSizeSelector = true;
@@ -43,14 +49,23 @@ export class ImportHISDataFormComponent implements OnInit {
   isSaving: boolean = false;
   gridLoading: boolean = false;
 
+  insuranceList: any = [];
+  selectedInsuranceId: any;
+  selectedInsurance: any;
   isLoading: boolean = false;
 
   constructor(private dataservice: DataService) {}
 
   ngOnInit(): void {
+    if (this.viewData) {
+      this.selectedInsurance = this.viewData.InsuranceName;
+      this.dataSource = this.viewData.import_his_data;
+    } else {
+    }
+    this.fetch_insurance_dropdown_data();
     this.fetch_His_Column_List();
   }
-
+  // ======== column list fetching ======
   fetch_His_Column_List() {
     this.dataservice.get_His_Data_Column_List().subscribe((res: any) => {
       if (res.flag === '1') {
@@ -59,11 +74,19 @@ export class ImportHISDataFormComponent implements OnInit {
           caption: col.ColumnTitle,
         }));
         this.isColumnsLoaded = true;
-        this.dataSource = [];
       }
     });
   }
 
+  //======== get_insurance_dropdown ========
+  fetch_insurance_dropdown_data() {
+    this.dataservice.Get_GropDown('INSURANCE').subscribe((res: any) => {
+      if (res) {
+        this.insuranceList = res;
+      }
+    });
+  }
+  // ========= oncell prepared ======
   onCellPrepared(e: any) {
     if (e.rowType === 'data') {
       const column = this.columnData.find(
@@ -97,7 +120,12 @@ export class ImportHISDataFormComponent implements OnInit {
   onFileSelected(event: any) {
     const target: DataTransfer = <DataTransfer>event.target;
     if (target.files.length !== 1) {
-      alert('Please select a single Excel file');
+      notify({
+        message: 'Please select a single Excel file.',
+        type: 'error',
+        displayTime: 5000,
+        position: { my: 'right top', at: 'right top', of: window },
+      });
       return;
     }
 
@@ -129,15 +157,19 @@ export class ImportHISDataFormComponent implements OnInit {
       );
 
       if (missingInExcel.length > 0 || extraInExcel.length > 0) {
-        alert(
-          `Column mismatch!\n\n` +
+        notify({
+          message:
+            `Column mismatch!\n\n` +
             (missingInExcel.length
               ? `Missing in Excel: ${missingInExcel.join(', ')}\n`
               : '') +
             (extraInExcel.length
               ? `Extra in Excel: ${extraInExcel.join(', ')}\n`
-              : '')
-        );
+              : ''),
+          type: 'error',
+          displayTime: 5000,
+          position: { my: 'right top', at: 'right top', of: window },
+        });
         this.resetFileInput();
         return;
       }
@@ -147,6 +179,13 @@ export class ImportHISDataFormComponent implements OnInit {
       this.dataSource = data;
 
       this.resetFileInput();
+
+      notify({
+        message: 'Excel file loaded successfully!',
+        type: 'success',
+        displayTime: 5000,
+        position: { my: 'right top', at: 'right top', of: window },
+      });
     };
 
     reader.readAsBinaryString(file);
@@ -166,8 +205,61 @@ export class ImportHISDataFormComponent implements OnInit {
     }
     return headers;
   }
+  // ========= main save import data ===========
+  onSaveClick() {
+    const userId = Number(sessionStorage.getItem('UserID')) || 0;
+    const insuranceId = this.selectedInsuranceId || 0;
 
-  onSaveClick() {}
+    if (!insuranceId || insuranceId === 0) {
+      notify({
+        message: 'Please select an Insurance before saving.',
+        type: 'error',
+        displayTime: 3000,
+        position: { at: 'top right', my: 'top right', of: window },
+      });
+      return;
+    }
+
+    this.isSaving = true;
+
+    const payload = {
+      userId: userId,
+      insuranceId: insuranceId,
+      import_his_data: this.dataSource || [],
+    };
+
+    this.dataservice.Import_His_Data(payload).subscribe({
+      next: (res: any) => {
+        if (res.flag === '1') {
+          this.close();
+          notify({
+            message: 'Data imported successfully!',
+            type: 'success',
+            displayTime: 3000,
+            position: { at: 'top right', my: 'top right', of: window },
+          });
+        } else {
+          notify({
+            message: res.message || 'Import failed.',
+            type: 'error',
+            displayTime: 3000,
+            position: { at: 'top right', my: 'top right', of: window },
+          });
+        }
+      },
+      error: () => {
+        notify({
+          message: 'An error occurred while saving.',
+          type: 'error',
+          displayTime: 3000,
+          position: { at: 'top right', my: 'top right', of: window },
+        });
+      },
+      complete: () => {
+        this.isSaving = false;
+      },
+    });
+  }
 
   // Error handler to manage error notifications and state
   handleError(error: any) {
@@ -216,6 +308,7 @@ export class ImportHISDataFormComponent implements OnInit {
   clearData() {
     this.dataSource = [];
     this.columnData = [];
+    this.viewData = null;
   }
 
   close() {
@@ -225,7 +318,14 @@ export class ImportHISDataFormComponent implements OnInit {
 }
 
 @NgModule({
-  imports: [CommonModule, DxDataGridModule, DxButtonModule],
+  imports: [
+    CommonModule,
+    DxDataGridModule,
+    DxButtonModule,
+    DxSelectBoxModule,
+    DxValidatorModule,
+    DxTextBoxModule,
+  ],
   providers: [],
   declarations: [ImportHISDataFormComponent],
   exports: [ImportHISDataFormComponent],

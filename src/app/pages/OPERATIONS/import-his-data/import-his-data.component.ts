@@ -13,7 +13,12 @@ import { Router } from '@angular/router';
 import { DataService } from 'src/app/services';
 import { ImportMasterDataFormComponent } from '../../POP-UP_PAGES/import-master-data-form/import-master-data-form.component';
 import { ViewImportedMasterDataFormComponent } from '../../POP-UP_PAGES/view-imported-master-data-form/view-imported-master-data-form.component';
-import { ImportHISDataFormModule,ImportHISDataFormComponent } from '../../POP-UP_PAGES/import-his-data/import-his-data.component';
+import {
+  ImportHISDataFormModule,
+  ImportHISDataFormComponent,
+} from '../../POP-UP_PAGES/import-his-data/import-his-data.component';
+import { DataSource } from 'devextreme/common/data';
+import notify from 'devextreme/ui/notify';
 
 @Component({
   selector: 'app-import-his-data',
@@ -43,7 +48,7 @@ export class ImportHISDataComponent implements OnInit {
   UserID: any;
   dataSource: any;
   selectedData: any;
-  ViewImportDataPopup: any;
+  ViewDataPopup: any;
   currentPathName: string;
   initialized: boolean;
 
@@ -59,37 +64,91 @@ export class ImportHISDataComponent implements OnInit {
 
   isFilterRowVisible: boolean = false;
 
-  constructor(private service: MasterReportService) {
+  constructor(private service: DataService) {
     this.UserID = sessionStorage.getItem('UserID');
   }
 
   ngOnInit(): void {
-    this.getImportMasterLog();
+    this.loadImportHisLogDataSource();
   }
 
+  // ============ Load Import HIS Log DataSource ============
+  loadImportHisLogDataSource() {
+    this.dataSource = new DataSource<any>({
+      load: () =>
+        new Promise((resolve, reject) => {
+          this.service.get_Importing_His_Log_List().subscribe({
+            next: (res: any) => {
+              if (res.flag === '1') {
+                resolve(res.data || []);
+              } else {
+                reject(res.message || 'Failed to load data');
+              }
+            },
+            error: (err) => reject(err.message || 'Server error'),
+          });
+        }),
+    });
+  }
+  // ======= filtert row enable and hide ======
   toggleFilterRow = () => {
     this.isFilterRowVisible = !this.isFilterRowVisible;
   };
+
+  // =========== close button click ===========
   CloseEditForm() {
     this.isNewFormPopupOpened = false;
+    this.ViewDataPopup = false;
     this.dataGrid.instance.refresh();
-    this.getImportMasterLog();
+    this.loadImportHisLogDataSource();
   }
-
+  // ======== show new inport popup =======
   show_new_Form() {
     this.isNewFormPopupOpened = true;
   }
+  // ============ detailed view click ========
+  viewDetails = (e: any) => {
+    const id = e.row.key.ID;
+    if (!id) {
+      notify({
+        message: 'No valid record selected.',
+        type: 'warning',
+        displayTime: 3000,
+        position: 'top right',
+      });
+      return;
+    }
 
-  viewDetails = (e) => {
-    this.selectedData = e.row.key;
-    this.ViewImportDataPopup = true;
-  };
-
-  getImportMasterLog() {
-    this.service.get_Importing_Master_Log_List().subscribe((res: any) => {
-      this.dataSource = res.data;
+    this.service.fetch_His_Data_log_view(id).subscribe({
+      next: (res: any) => {
+        if (res) {
+          this.selectedData = res;
+          this.ViewDataPopup = true;
+          notify({
+            message: 'Record details loaded successfully.',
+            type: 'success',
+            displayTime: 3000,
+            position: 'top right',
+          });
+        } else {
+          notify({
+            message: 'No details found for this record.',
+            type: 'info',
+            displayTime: 3000,
+            position: 'top right',
+          });
+        }
+      },
+      error: () => {
+        notify({
+          message: 'Failed to fetch record details.',
+          type: 'error',
+          displayTime: 5000,
+          position: 'top right',
+        });
+      },
     });
-  }
+  };
 
   formatImportTime(rowData: any): string {
     const celldate = rowData.ImportTime;
@@ -112,9 +171,7 @@ export class ImportHISDataComponent implements OnInit {
   onClearData() {
     this.ImportHISDataFormComponent.clearData();
   }
-  onClearViewData() {
-    this.viewImportedMasterDataForm.clearData();
-  }
+
 }
 
 @NgModule({
@@ -124,7 +181,7 @@ export class ImportHISDataComponent implements OnInit {
     DxButtonModule,
     FormPopupModule,
     DxPopupModule,
-    ImportHISDataFormModule
+    ImportHISDataFormModule,
   ],
   providers: [],
   exports: [],
