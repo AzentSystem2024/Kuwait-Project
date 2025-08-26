@@ -75,7 +75,7 @@ export class MasterReportService {
     return this.http.post(`${BASE_URL}userroles/delete/${id}`, {});
   }
 
-  //==========================================INSURANCE MASTER==========================================================
+  //==========================================speciality MASTER==========================================================
   //====Insurance List===========
   get_Speciality_List() {
     const Url = `${BASE_URL}speciality/list`;
@@ -131,7 +131,7 @@ export class MasterReportService {
   //==========================================INSURANCE MASTER==========================================================
   //====Insurance List===========
   get_Insurance_List() {
-    const Url = `${BASE_URL}insurancecompany/list`;
+    const Url = `${BASE_URL}insurance/list`;
     const reqBody = {
       list: [],
     };
@@ -139,42 +139,27 @@ export class MasterReportService {
     return this.http.post(Url, reqBody);
   }
   //=====Add Insurance data========
-  Insert_Insurance_Data(
-    InsuranceID: any,
-    InsuranceName: any,
-    InsuranceShortName: any
-  ) {
-    const url = `${BASE_URL}insurancecompany/insert`;
-    const reqBody = {
-      InsuranceID: InsuranceID,
-      InsuranceName: InsuranceName,
-      InsuranceShortName: InsuranceShortName,
-    };
-
+  Insert_Insurance_Data(payload: any) {
+    const url = `${BASE_URL}insurance/insert`;
+    const reqBody = payload;
     return this.http.post(url, reqBody);
   }
 
   //=====Update Insurance data======
-  update_Insurance_data(
-    id: any,
-    InsuranceID: any,
-    InsuranceName: any,
-    InsuranceShortName: any
-  ) {
-    const url = `${BASE_URL}insurancecompany/update`;
-    const reqBody = {
-      ID: id,
-      InsuranceID: InsuranceID,
-      InsuranceName: InsuranceName,
-      InsuranceShortName: InsuranceShortName,
-    };
-
+  update_Insurance_data(payload: any) {
+    const url = `${BASE_URL}insurance/update`;
+    const reqBody = payload;
     return this.http.post(url, reqBody);
   }
 
   //=====Remove Insurance Data=====
+  selected_Insurance_Row_Data(id: any) {
+    return this.http.post(`${BASE_URL}insurance/select/${id}`, {});
+  }
+
+  //=====Remove Insurance Data=====
   Remove_Insurance_Row_Data(id: any) {
-    return this.http.post(`${BASE_URL}insurancecompany/delete/${id}`, {});
+    return this.http.post(`${BASE_URL}insurance/delete/${id}`, {});
   }
 
   //===================================================FACILITY====================================================
@@ -357,7 +342,6 @@ export class MasterReportService {
   }
   //======Add Cpt Master data========
   Insert_CptMaster_Data(
-
     CPTCode: any,
     CPTShortName: any,
     CPTName: any,

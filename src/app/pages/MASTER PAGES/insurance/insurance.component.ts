@@ -15,6 +15,7 @@ import {
   DxTextBoxModule,
   DxLookupModule,
   DxDataGridComponent,
+  DxPopupModule,
 } from 'devextreme-angular';
 import { FormPopupModule } from 'src/app/components';
 import { InsuranceNewFormComponent } from '../../POP-UP_PAGES/insurance-new-form/insurance-new-form.component';
@@ -22,6 +23,7 @@ import notify from 'devextreme/ui/notify';
 import { ReportService } from 'src/app/services/Report-data.service';
 import { MasterReportService } from '../master-report.service';
 import { InsuranceNewFormModule } from '../../POP-UP_PAGES/insurance-new-form/insurance-new-form.component';
+
 import DataSource from 'devextreme/data/data_source';
 import { Router } from '@angular/router';
 import { DataService } from 'src/app/services';
@@ -35,6 +37,7 @@ import { DataService } from 'src/app/services';
 export class InsuranceComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
+
   @ViewChild(InsuranceNewFormComponent, { static: false })
   InsuranceNewForm: InsuranceNewFormComponent;
 
@@ -48,13 +51,20 @@ export class InsuranceComponent {
   showNavButtons = true;
   facilityGroupDatasource: any;
   isAddFormPopupOpened: boolean = false;
+  isUpdateFormPopupOpened: boolean = false;
 
   dataSource = new DataSource<any>({
     load: () =>
       new Promise((resolve, reject) => {
         this.masterService.get_Insurance_List().subscribe({
-          next: (response: any) => resolve(response.data), // Resolve with the data
-          error: (error) => reject(error.message), // Reject with the error message
+          next: (response: any) => {
+            if (response.flag === '1') {
+              resolve(response.data || []);
+            } else {
+              resolve([]);
+            }
+          },
+          error: (error) => reject(error.message),
         });
       }),
   });
@@ -68,15 +78,15 @@ export class InsuranceComponent {
     onClick: () => this.show_new_Form(),
     elementAttr: { class: 'add-button' },
   };
+
   isFilterRowVisible: boolean = false;
   currentPathName: any;
   initialized: boolean;
+  selectedInsurance: any;
 
   constructor(
     private service: ReportService,
-    private masterService: MasterReportService,
-    private router: Router,
-    private dataService: DataService
+    private masterService: MasterReportService
   ) {}
 
   toggleFilterRow = () => {
@@ -98,38 +108,35 @@ export class InsuranceComponent {
     this.isAddFormPopupOpened = false;
   };
 
-  //====================Add data ================================
-  onClickSaveNewData = () => {
-    // // const { InsuranceID, InsuranceName, InsuranceShortName } =
-    // //   this.InsuranceNewForm.getNewInsuranceData();
-    // this.masterService
-    //   .Insert_Insurance_Data(InsuranceID, InsuranceName, InsuranceShortName)
-    //   .subscribe((response: any) => {
-    //     if (response) {
-    //       this.dataGrid.instance.refresh();
-    //       notify(
-    //         {
-    //           message: `New Insurance "${InsuranceID} ${InsuranceName} ${InsuranceShortName}" saved Successfully`,
-    //           position: { at: 'top right', my: 'top right' },
-    //         },
-    //         'success'
-    //       );
-    //     } else {
-    //       notify(
-    //         {
-    //           message: `Your Data Not Saved`,
-    //           position: { at: 'top right', my: 'top right' },
-    //         },
-    //         'error'
-    //       );
-    //     }
-    //   });
-  };
-
   //========================Export data ==========================
   onExporting(event: any) {
     const fileName = 'Insurance';
     this.service.exportDataGrid(event, fileName);
+  }
+
+  onRowUpdating(e: any) {
+    e.cancel = true; //cancel default popup
+    const insuranceId = e.key?.ID;
+    if (insuranceId) {
+      this.masterService.selected_Insurance_Row_Data(insuranceId).subscribe({
+        next: (res: any) => {
+          if (res && res.flag === '1') {
+            this.selectedInsurance = res.data[0];
+            this.isUpdateFormPopupOpened = true;
+          } else {
+            notify(
+              res.message || 'Failed to fetch insurance details',
+              'error',
+              3000
+            );
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching row data:', err);
+          notify('Something went wrong while fetching row data', 'error', 3000);
+        },
+      });
+    }
   }
 
   //====================Row Data Deleting========================
@@ -163,51 +170,22 @@ export class InsuranceComponent {
       });
   }
 
-  //===================RTow Data Update==========================
-  onRowUpdating(event: any) {
-    const updataDate = event.newData;
-    const oldData = event.oldData;
-    const combinedData = { ...oldData, ...updataDate };
-    let id = combinedData.ID;
-    let Insuranceid = combinedData.InsuranceID;
-    let InsuranceName = combinedData.InsuranceName;
-    let InsuranceShortName = combinedData.InsuranceShortName;
-
-    this.masterService
-      .update_Insurance_data(id, Insuranceid, InsuranceName, InsuranceShortName)
-      .subscribe((data: any) => {
-        if (data) {
-          this.dataGrid.instance.refresh();
-
-          notify(
-            {
-              message: `New Insurance updated Successfully`,
-              position: { at: 'top right', my: 'top right' },
-              displayTime: 500,
-            },
-            'success'
-          );
-        } else {
-          notify(
-            {
-              message: `Your Data Not Saved`,
-              position: { at: 'top right', my: 'top right' },
-              displayTime: 500,
-            },
-            'error'
-          );
-        }
-        // event.component.refresh();
-        event.component.cancelEditData(); // Close the popup
-        this.dataGrid.instance.refresh();
-      });
-
-    event.cancel = true; // Prevent the default update operation
-  }
   //=================== Page refreshing==========================
   refresh = () => {
     this.dataGrid.instance.refresh();
   };
+
+  popUpClose() {
+    if (this.InsuranceNewForm) {
+      this.InsuranceNewForm.clear();
+    }
+    if (this.isUpdateFormPopupOpened) {
+      this.InsuranceNewForm.clear();
+    }
+    this.isAddFormPopupOpened = false;
+    this.isUpdateFormPopupOpened = false;
+    this.refresh();
+  }
 }
 
 @NgModule({
@@ -222,6 +200,7 @@ export class InsuranceComponent {
     DxLookupModule,
     FormPopupModule,
     InsuranceNewFormModule,
+    DxPopupModule,
   ],
   providers: [],
   exports: [InsuranceComponent],

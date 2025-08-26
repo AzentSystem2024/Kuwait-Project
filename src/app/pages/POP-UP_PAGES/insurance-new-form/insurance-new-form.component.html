@@ -34,8 +34,8 @@
           labelMode="floating"
           [(value)]="insuranceCompany.classification"
           [items]="classifications"
-          valueExpr="value"
-          displayExpr="text"
+          valueExpr="ID"
+          displayExpr="DESCRIPTION"
         ></dx-select-box>
       </div>
 
@@ -55,16 +55,14 @@
           [(value)]="insuranceCompany.uniqueKey"
           [height]="100"
           [readOnly]="true"
-          style="width: 100%"
         ></dx-text-area>
 
-        <div class="d-flex justify-content-end mt-1">
-          <a
-            href="javascript:void(0)"
-            (click)="manageUniqueKey()"
-            style="font-size: 0.85rem"
-          >
-            Manage Unique Key
+        <div
+          *ngIf="selectedKeys?.length > 0"
+          class="d-flex justify-content-end mt-1"
+        >
+          <a href="javascript:void(0)" (click)="manageUniqueKey()">
+            Set Unique Key
           </a>
         </div>
       </div>
@@ -73,6 +71,7 @@
     <div class="col-md-6">
       <h6 class="mb-0">RA File Columns</h6>
       <dx-data-grid
+        #dataGrid
         [dataSource]="raFileColumns"
         [showBorders]="true"
         [columnAutoWidth]="true"
@@ -80,6 +79,8 @@
         [rowAlternationEnabled]="true"
         rowAlternationInterval="2"
         height="450"
+        [(selectedRowKeys)]="selectedKeys"
+        [selection]="{ mode: 'multiple' }"
       >
         <dxi-column dataField="ColumnName" caption="Column Name"></dxi-column>
         <dxi-column dataField="ColumnTitle" caption="Caption"></dxi-column>
@@ -111,7 +112,16 @@
       text="Save"
       stylingMode="contained"
       type="default"
-      (onClick)="save()"
+      [visible]="!insuranceData"
+      (onClick)="saveInsurance()"
+    ></dx-button>
+
+    <dx-button
+      text="Update"
+      stylingMode="contained"
+      type="default"
+      [visible]="insuranceData"
+      (onClick)="updateInsurance()"
     ></dx-button>
   </div>
 </div>
@@ -186,6 +196,7 @@
       type="normal"
       (onClick)="clearSelected()"
     ></dx-button>
+
     <dx-button
       text="Apply"
       stylingMode="contained"

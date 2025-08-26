@@ -39,7 +39,7 @@ export class UnauthenticatedContentComponent {
     const path = this.router.url.split('/').at(-1);
     switch (path) {
       case 'login':
-        return 'Welcome To Vezta Claims';
+        return 'Vezta Claims';
       case 'create-account':
         return 'Sign Up';
       case 'change-password':

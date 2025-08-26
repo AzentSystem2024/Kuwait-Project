@@ -10,20 +10,17 @@
     [rowAlternationEnabled]="true"
     rowAlternationInterval="2"
     (onExporting)="onExporting($event)"
+    (onEditingStart)="onRowUpdating($event)"
     (onRowRemoving)="onRowRemoving($event)"
-    (onRowUpdating)="onRowUpdating($event)"
     height="84vh"
   >
     <dxo-paging [pageSize]="10"></dxo-paging>
     <dxo-editing
       mode="popup"
       [allowUpdating]="true"
-      [allowDeleting]="true"
       [allowAdding]="true"
-      [popup]="{ width: '30%', height: '50vh' }"
+      [allowDeleting]="true"
     >
-      <dxo-popup title="Edit Insurance" [showTitle]="true"></dxo-popup>
-      <dxo-form [colCount]="1"></dxo-form>
     </dxo-editing>
     <dxo-pager
       [visible]="true"
@@ -76,12 +73,12 @@
           stylingMode: 'text'
         }"
       ></dxi-item>
-
+      <!--
       <dxi-item
         name="exportButton"
         location="after"
         cssClass="custom-export-button"
-      ></dxi-item>
+      ></dxi-item> -->
       <dxi-item
         location="after"
         widget="dxButton"
@@ -99,18 +96,33 @@
   </dx-data-grid>
 
   <!-- =============== add new insurance data =============== -->
-  <form-popup
+  <dx-popup
     class="formPopupClass"
     [(visible)]="isAddFormPopupOpened"
-    [visibleButtons]="false"
-    (save)="onClickSaveNewData()"
     titleText="Insurance Company"
     height="auto"
     width="80%"
-    
+    (onHiding)="popUpClose()"
   >
     <app-insurance-new-form
-      (closePopup)="isAddFormPopupOpened = false"
+      *ngIf="isAddFormPopupOpened"
+      (closePopup)="popUpClose()"
     ></app-insurance-new-form>
-  </form-popup>
+  </dx-popup>
+
+  <!-- =============== add new insurance data =============== -->
+  <dx-popup
+    class="formPopupClass"
+    [(visible)]="isUpdateFormPopupOpened"
+    titleText="Insurance Company"
+    height="auto"
+    width="80%"
+    (onHiding)="popUpClose()"
+  >
+    <app-insurance-new-form
+      *ngIf="isUpdateFormPopupOpened"
+      [insuranceData]="selectedInsurance"
+      (closePopup)="popUpClose()"
+    ></app-insurance-new-form>
+  </dx-popup>
 </div>
