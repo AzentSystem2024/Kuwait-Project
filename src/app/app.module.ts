@@ -25,7 +25,7 @@ import { UserNewFormModule } from './pages/POP-UP_PAGES/user-new-form/user-new-f
 import { UserEditFormModule } from './pages/POP-UP_PAGES/user-edit-form/user-edit-form.component';
 import { ResetPasswordModule } from './pages/POP-UP_PAGES/reset-password/reset-password.component';
 import { ChangePasswordModule } from './pages/PROFILE PAGES/change-password/change-password.component';
-import { ImportMasterDataModule } from './pages/ACTIVITY/import-master-data/import-master-data.component';
+import { ImportMasterDataModule } from './pages/OPERATIONS/import-master-data/import-master-data.component';
 import { ImportMasterDataFormModule } from './pages/POP-UP_PAGES/import-master-data-form/import-master-data-form.component';
 import { ViewImportedMasterDataFormModule } from './pages/POP-UP_PAGES/view-imported-master-data-form/view-imported-master-data-form.component';
 import { RouteReuseStrategy } from '@angular/router';

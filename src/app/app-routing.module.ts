@@ -40,10 +40,10 @@ import { LicenseInfoComponent } from './pages/SYSTEM PAGES/license-info/license-
 import { FacilityRegionComponent } from './pages/MASTER PAGES/facility-region/facility-region.component';
 import { NotificationSettingsComponent } from './pages/SYSTEM PAGES/notificarion-settings/notificarion-settings.component';
 import { ClaimDetailsActivityComponent } from './pages/REPORT PAGES/claim-details-activity/claim-details-activity.component';
-import { ImportMasterDataComponent } from './pages/ACTIVITY/import-master-data/import-master-data.component';
+import { ImportMasterDataComponent } from './pages/OPERATIONS/import-master-data/import-master-data.component';
 import { ClaimDetailsComponent } from './pages/REPORT PAGES/claim-details/claim-details.component';
 import { ClaimSummaryMonthWiseComponent } from './pages/REPORT PAGES/claim-summary-month-wise/claim-summary-month-wise.component';
-import { SynchronizeDataComponent } from './pages/ACTIVITY/synchronize-data/synchronize-data.component';
+import { SynchronizeDataComponent } from './pages/OPERATIONS/synchronize-data/synchronize-data.component';
 import { AutoDownloadSettingsComponent } from './pages/SYSTEM PAGES/download-settings/auto-download-settings.component';
 import { DownloadLogViewComponent } from './pages/LOGS/download-log-view/download-log-view.component';
 import { ResubmissionSummaryComponent } from './pages/REPORT PAGES/resubmission-summary/resubmission-summary.component';
@@ -61,7 +61,8 @@ import { RevisionLookupPageComponent } from './pages/RESUBMISSION/revision-looku
 import { BatchUploadingPageComponent } from './pages/RESUBMISSION/PopUp-Pages/batch-uploading-page/batch-uploading-page.component';
 import { BatchUploadingLookUpComponent } from './pages/RESUBMISSION/batch-uploading-look-up/batch-uploading-look-up.component';
 import { TwoStepVerificationComponent } from './components/library/two-step-verification/two-step-verification.component';
-import { CheckPostOfficeComponent } from './pages/ACTIVITY/check-post-office/check-post-office.component';
+import { CheckPostOfficeComponent } from './pages/OPERATIONS/check-post-office/check-post-office.component';
+import { ImportHISDataComponent } from './pages/OPERATIONS/import-his-data/import-his-data.component';
 const routes: Routes = [
   {
     path: '',
@@ -240,6 +241,11 @@ const routes: Routes = [
       {
         path: 'import-master-data',
         component: ImportMasterDataComponent,
+        canActivate: [AuthGuardService],
+      },
+      {
+        path: 'import-his-data',
+        component: ImportHISDataComponent,
         canActivate: [AuthGuardService],
       },
       {

@@ -1,0 +1,83 @@
+<div>
+  <dx-data-grid
+    #dataGrid
+    [showBorders]="true"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [rowAlternationEnabled]="true"
+    rowAlternationInterval="2"
+    [columnAutoWidth]="true"
+    [columnFixing]="{ enabled: true }"
+    [height]="'80vh'"
+    [width]="'100%'"
+    [dataSource]="dataSource"
+    [columns]="columnData"
+    (onCellPrepared)="onCellPrepared($event)"
+  >
+    <dxo-paging [pageSize]="100"></dxo-paging>
+    <dxo-pager
+      [visible]="true"
+      [allowedPageSizes]="allowedPageSizes"
+      [displayMode]="displayMode"
+      [showPageSizeSelector]="showPageSizeSelector"
+      [showInfo]="true"
+      [showNavigationButtons]="true"
+    ></dxo-pager>
+
+    <dxo-load-panel
+      [enabled]="true"
+      [shading]="true"
+      [showIndicator]="true"
+      [showPane]="false"
+    ></dxo-load-panel>
+    <dxo-scrolling mode="virtual" [useNative]="false"></dxo-scrolling>
+
+    <!-- Toolbar -->
+    <dxo-toolbar class="toolBarDiv p-0 m-0">
+      <dxi-item location="after" locateInMenu="auto">
+        <dx-button
+          hint="Download Template"
+          icon="download"
+          type="default"
+          stylingMode="contained"
+          (onClick)="downloadTemplate()"
+          [visible]="isColumnsLoaded"
+        ></dx-button>
+      </dxi-item>
+
+      <dxi-item location="after" locateInMenu="auto">
+        <dx-button
+          class="me-2"
+          text="Import "
+          icon="import"
+          type="default"
+          stylingMode="contained"
+          (onClick)="selectFile()"
+        ></dx-button>
+      </dxi-item>
+    </dxo-toolbar>
+    <input
+      #fileInput
+      type="file"
+      accept=".xlsx, .xls"
+      style="display: none"
+      (change)="onFileSelected($event)"
+    />
+  </dx-data-grid>
+</div>
+<div class="d-flex justify-content-end gap-2 mt-2">
+  <dx-button
+    text="Cancel"
+    stylingMode="outlined"
+    type="normal"
+    (onClick)="close()"
+  ></dx-button>
+
+  <dx-button
+    text="Save"
+    stylingMode="contained"
+    type="default"
+    [disabled]="isSaving"
+    (onClick)="onSaveClick()"
+  ></dx-button>
+</div>

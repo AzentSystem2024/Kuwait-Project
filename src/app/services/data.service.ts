@@ -213,9 +213,17 @@ export class DataService {
     const reqBody = inputdata;
     return this.http.post(url, reqBody);
   }
-
+// ======== get column data ========
   get_All_Column_List() {
     const url = `${BASE_URL}insurance/Columnslist`;
+    const reqbody = {};
+    return this.http.post(url, reqbody);
+  }
+
+  
+// ======== get column data ========
+  get_His_Data_Column_List() {
+    const url = `${BASE_URL}hisData/Columnslist`;
     const reqbody = {};
     return this.http.post(url, reqbody);
   }

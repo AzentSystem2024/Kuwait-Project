@@ -1,0 +1,140 @@
+<div class="view-wrapper list-page">
+  <dx-data-grid
+    class="grid theme-dependent"
+    noDataText=""
+    height="600"
+    [showBorders]="true"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [rowAlternationEnabled]="true"
+    rowAlternationInterval="2"
+    height="84vh"
+    [dataSource]="dataSource"
+  >
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-editing [allowUpdating]="true"> </dxo-editing>
+    <dxo-pager
+      [visible]="true"
+      [allowedPageSizes]="allowedPageSizes"
+      [displayMode]="displayMode"
+      [showPageSizeSelector]="showPageSizeSelector"
+      [showInfo]="showInfo"
+      [showNavigationButtons]="showNavButtons"
+    ></dxo-pager>
+    <dxo-load-panel [showPane]="false"></dxo-load-panel>
+    <dxo-scrolling mode="virtual"></dxo-scrolling>
+    <dxo-sorting mode="multiple"></dxo-sorting>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-filter-row [visible]="isFilterRowVisible"></dxo-filter-row>
+    <dxo-column-chooser [enabled]="true" [height]="400"></dxo-column-chooser>
+    <dxo-search-panel [visible]="true" placeholder=" Search"></dxo-search-panel>
+    <dxo-export
+      [enabled]="true"
+      [allowExportSelectedData]="true"
+      [formats]="['xlsx', 'pdf']"
+    >
+    </dxo-export>
+
+    <dxo-toolbar>
+      <dxi-item location="before">
+        <div class="grid-header">Import HIS Data (EDI)</div>
+      </dxi-item>
+
+      <dxi-item
+        location="after"
+        locateInMenu="auto"
+        showText="inMenu"
+        widget="dxButton"
+        [options]="{
+          icon: isFilterRowVisible ? 'filter' : 'filter',
+          hint: isFilterRowVisible ? 'Hide Filter Row' : 'Show Filter Row',
+          onClick: toggleFilterRow,
+          stylingMode: 'text',
+          elementAttr: { class: 'commonButtons' }
+        }"
+      ></dxi-item>
+
+      <dxi-item
+        location="after"
+        locateInMenu="auto"
+        showText="inMenu"
+        widget="dxButton"
+        [options]="{
+          text: 'Refresh',
+          icon: 'refresh',
+          stylingMode: 'text',
+          hint: 'refresh',
+          onClick: refresh
+        }"
+      ></dxi-item>
+
+      <!-- <dxi-item
+        name="exportButton"
+        location="after"
+        cssClass="custom-export-button"
+      ></dxi-item> -->
+      <dxi-item
+        location="after"
+        widget="dxButton"
+        [options]="addButtonOptions"
+      ></dxi-item>
+    </dxo-toolbar>
+
+    <dxo-header-filter [visible]="true">
+      <dxo-search [enabled]="true"></dxo-search>
+    </dxo-header-filter>
+
+    <dxi-column
+      dataField="SerialNo"
+      caption="Sl No."
+      [alignment]="'left'"
+    ></dxi-column>
+    <dxi-column
+      dataField="ImportTime"
+      caption="Date"
+      [calculateCellValue]="formatImportTime"
+    ></dxi-column>
+    <dxi-column
+      dataField="DocNo"
+      caption="Document No"
+      [alignment]="'left'"
+    ></dxi-column>
+    <dxi-column dataField="Master" caption="Imported Master"></dxi-column>
+    <dxi-column dataField="UserName" caption="User"></dxi-column>
+    <dxi-column type="buttons" [width]="110" caption=" ">
+      <dxi-button
+        class="button-info"
+        text="Details"
+        icon="info"
+        [onClick]="viewDetails"
+      >
+      </dxi-button>
+    </dxi-column>
+  </dx-data-grid>
+
+  <dx-popup
+    class="formPopupClass"
+    [(visible)]="isNewFormPopupOpened"
+    title="Import HIS Data"
+    [height]="'auto'"
+    width="80%"
+    [width]="popupwidth"
+    (onHiding)="onClearData()"
+  >
+    <app-import-his-data-import
+      (closeForm)="CloseEditForm()"
+    ></app-import-his-data-import>
+  </dx-popup>
+
+  <!-- <dx-popup
+    [(visible)]="ViewImportDataPopup"
+    title="View Imported Master Data"
+    [width]="popupwidth"
+    [height]="'100vh'"
+    (onHiding)="onClearViewData()"
+  >
+    <app-view-imported-master-data-form
+      [formdata]="selectedData"
+    ></app-view-imported-master-data-form>
+  </dx-popup> -->
+</div>

@@ -1,0 +1,133 @@
+import { CommonModule } from '@angular/common';
+import { Component, NgModule, OnInit, ViewChild } from '@angular/core';
+import {
+  DxDataGridModule,
+  DxButtonModule,
+  DxPopupModule,
+  DxDataGridComponent,
+  DxValidationGroupComponent,
+} from 'devextreme-angular';
+import { FormPopupModule } from 'src/app/components';
+import { MasterReportService } from '../../MASTER PAGES/master-report.service';
+import { Router } from '@angular/router';
+import { DataService } from 'src/app/services';
+import { ImportMasterDataFormComponent } from '../../POP-UP_PAGES/import-master-data-form/import-master-data-form.component';
+import { ViewImportedMasterDataFormComponent } from '../../POP-UP_PAGES/view-imported-master-data-form/view-imported-master-data-form.component';
+import { ImportHISDataFormModule,ImportHISDataFormComponent } from '../../POP-UP_PAGES/import-his-data/import-his-data.component';
+
+@Component({
+  selector: 'app-import-his-data',
+  templateUrl: './import-his-data.component.html',
+  styleUrl: './import-his-data.component.scss',
+})
+export class ImportHISDataComponent implements OnInit {
+  @ViewChild(DxDataGridComponent, { static: true })
+  dataGrid: DxDataGridComponent;
+
+  @ViewChild(ImportHISDataFormComponent, { static: false })
+  ImportHISDataFormComponent: ImportHISDataFormComponent;
+
+  @ViewChild(ViewImportedMasterDataFormComponent, { static: false })
+  viewImportedMasterDataForm: ViewImportedMasterDataFormComponent;
+
+  @ViewChild('validationGroup', { static: true })
+  validationGroup: DxValidationGroupComponent;
+
+  isNewFormPopupOpened: boolean = false;
+  readonly allowedPageSizes: any = [5, 10, 'all'];
+  displayMode: any = 'full';
+  showPageSizeSelector = true;
+  showInfo = true;
+  showNavButtons = true;
+  popupwidth: any = '65%';
+  UserID: any;
+  dataSource: any;
+  selectedData: any;
+  ViewImportDataPopup: any;
+  currentPathName: string;
+  initialized: boolean;
+
+  addButtonOptions = {
+    text: 'New',
+    icon: 'bi bi-file-earmark-plus',
+    type: 'default',
+    stylingMode: 'contained',
+    hint: 'Add new entry',
+    onClick: () => this.show_new_Form(),
+    elementAttr: { class: 'add-button' },
+  };
+
+  isFilterRowVisible: boolean = false;
+
+  constructor(private service: MasterReportService) {
+    this.UserID = sessionStorage.getItem('UserID');
+  }
+
+  ngOnInit(): void {
+    this.getImportMasterLog();
+  }
+
+  toggleFilterRow = () => {
+    this.isFilterRowVisible = !this.isFilterRowVisible;
+  };
+  CloseEditForm() {
+    this.isNewFormPopupOpened = false;
+    this.dataGrid.instance.refresh();
+    this.getImportMasterLog();
+  }
+
+  show_new_Form() {
+    this.isNewFormPopupOpened = true;
+  }
+
+  viewDetails = (e) => {
+    this.selectedData = e.row.key;
+    this.ViewImportDataPopup = true;
+  };
+
+  getImportMasterLog() {
+    this.service.get_Importing_Master_Log_List().subscribe((res: any) => {
+      this.dataSource = res.data;
+    });
+  }
+
+  formatImportTime(rowData: any): string {
+    const celldate = rowData.ImportTime;
+    if (!celldate) return '';
+
+    const date = new Date(celldate);
+
+    // Format the date and time using the user's system locale
+    const formattedDate = date.toLocaleDateString(); // Formats according to the user's system date format
+    const formattedTime = date.toLocaleTimeString(); // Formats according to the user's system time format
+
+    // Combine date and time
+    return `${formattedDate}, ${formattedTime}`;
+  }
+
+  refresh = () => {
+    this.dataGrid.instance.refresh();
+  };
+
+  onClearData() {
+    this.ImportHISDataFormComponent.clearData();
+  }
+  onClearViewData() {
+    this.viewImportedMasterDataForm.clearData();
+  }
+}
+
+@NgModule({
+  imports: [
+    CommonModule,
+    DxDataGridModule,
+    DxButtonModule,
+    FormPopupModule,
+    DxPopupModule,
+    ImportHISDataFormModule
+  ],
+  providers: [],
+  exports: [],
+  declarations: [ImportHISDataComponent],
+})
+export class ImportHISDataModule {}

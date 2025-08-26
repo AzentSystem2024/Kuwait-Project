@@ -328,27 +328,7 @@ export class ImportMasterDataFormComponent implements OnInit {
     // }
   }
 
-  // highlightMandatoryHeaders() {
-  //   // Check if dataGrid is defined
-  //   if (!this.dataGrid.nativeElement) {
-  //     console.error('DataGrid reference is not set.');
-  //     return;
-  //   }
-
-  //   // Get all header cells from the data grid
-  //   const headerCells = this.dataGrid.nativeElement.querySelectorAll('.dx-datagrid-header-row .dx-datagrid-header-cell');
-  //   console.log(headerCells,"headercells")
-
-  //   headerCells.forEach((cell: HTMLElement, index: number) => {
-  //     const col = this.columns[index];
-  //     if (col.validationRules?.some(rule => rule.type === 'required')) {
-  //       console.log("haiiiiiii")
-  //       cell.classList.add('mandatory-header');
-  //     } else {
-  //       cell.classList.remove('mandatory-header'); // Remove the highlight if not mandatory
-  //     }
-  //   });
-  // }
+  
 
   getImportingMasterList() {
     this.service.get_Importing_Master_List().subscribe((res: any) => {
