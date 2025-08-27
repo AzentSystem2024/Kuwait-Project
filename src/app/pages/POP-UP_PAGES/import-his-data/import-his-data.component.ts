@@ -44,6 +44,7 @@ export class ImportHISDataFormComponent implements OnInit {
   showInfo = true;
 
   columnData: any[] = [];
+
   isColumnsLoaded = false;
 
   isSaving: boolean = false;
@@ -63,6 +64,19 @@ export class ImportHISDataFormComponent implements OnInit {
     } else {
     }
     this.fetch_insurance_dropdown_data();
+    this.fetch_His_Column_List();
+  }
+  // ======== column list fetching ======
+  fetch_His_Column_List() {
+    this.dataservice.get_His_Data_Column_List().subscribe((res: any) => {
+      if (res.flag === '1') {
+        this.columnData = res.data.map((col: any) => ({
+          dataField: col.ColumnName,
+          caption: col.ColumnTitle,
+        }));
+        this.isColumnsLoaded = true;
+      }
+    });
   }
 
   //======== get_insurance_dropdown ========

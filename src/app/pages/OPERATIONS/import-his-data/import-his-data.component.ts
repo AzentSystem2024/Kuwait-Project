@@ -62,11 +62,11 @@ export class ImportHISDataComponent implements OnInit {
   initialized: boolean;
 
   addButtonOptions = {
-    text: 'New',
+    text: '',
     icon: 'bi bi-file-earmark-plus',
     type: 'default',
     stylingMode: 'contained',
-    hint: 'Add new entry',
+    hint: 'Import Excel Data',
     onClick: () => this.selectFile(),
     elementAttr: { class: 'add-button' },
   };
