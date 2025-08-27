@@ -62,36 +62,7 @@
           </dx-validator>
         </dx-select-box>
       </dxi-item>
-
-      <dxi-item location="after" locateInMenu="auto">
-        <dx-button
-          hint="Download Template"
-          icon="download"
-          type="default"
-          stylingMode="contained"
-          (onClick)="downloadTemplate()"
-          [visible]="isColumnsLoaded"
-        ></dx-button>
-      </dxi-item>
-
-      <dxi-item location="after" locateInMenu="auto">
-        <dx-button
-          class="me-2"
-          text="Import "
-          icon="import"
-          type="default"
-          stylingMode="contained"
-          (onClick)="selectFile()"
-        ></dx-button>
-      </dxi-item>
     </dxo-toolbar>
-    <input
-      #fileInput
-      type="file"
-      accept=".xlsx, .xls"
-      style="display: none"
-      (change)="onFileSelected($event)"
-    />
   </dx-data-grid>
 </div>
 <div *ngIf="!viewData" class="d-flex justify-content-end gap-2 mt-2">

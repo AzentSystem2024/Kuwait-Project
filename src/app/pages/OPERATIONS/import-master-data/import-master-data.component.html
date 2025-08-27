@@ -37,7 +37,7 @@
 
     <dxo-toolbar>
       <dxi-item location="before">
-        <div class="grid-header">Import Master Data</div>
+        <div class="grid-header">Import RA Data</div>
       </dxi-item>
       <dxi-item
         location="after"
@@ -112,8 +112,8 @@
   <dx-popup
     class="formPopupClass"
     [(visible)]="isNewFormPopupOpened"
-    title="Import Master Data"
-    [height]="'100vh'"
+    title="Import RA Data"
+    [height]="'auto'"
     [width]="popupwidth"
     (onHiding)="onClearData()"
   >
@@ -123,9 +123,9 @@
   </dx-popup>
   <dx-popup
     [(visible)]="ViewImportDataPopup"
-    title="View Imported Master Data"
+    title="View Imported RA Data"
     [width]="popupwidth"
-    [height]="'100vh'"
+    [height]="'auto'"
     (onHiding)="onClearViewData()"
   >
     <app-view-imported-master-data-form

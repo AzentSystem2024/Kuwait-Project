@@ -68,12 +68,30 @@
         }"
       ></dxi-item>
 
+      <dxi-item location="after" locateInMenu="auto">
+        <dx-button
+          hint="Download Template"
+          icon="download"
+          type="default"
+          stylingMode="contained"
+          (onClick)="downloadTemplate()"
+          [visible]="isColumnsLoaded"
+        ></dx-button>
+      </dxi-item>
+
       <dxi-item
         location="after"
         widget="dxButton"
         [options]="addButtonOptions"
       ></dxi-item>
     </dxo-toolbar>
+    <input
+      #fileInput
+      type="file"
+      accept=".xlsx, .xls"
+      style="display: none"
+      (change)="onFileSelected($event)"
+    />
 
     <dxo-header-filter [visible]="true">
       <dxo-search [enabled]="true"></dxo-search>
@@ -110,6 +128,7 @@
   >
     <app-import-his-data-import
       *ngIf="isNewFormPopupOpened"
+      [dataSource]="ImportedDataSource"
       (closeForm)="CloseEditForm()"
     ></app-import-his-data-import>
   </dx-popup>
