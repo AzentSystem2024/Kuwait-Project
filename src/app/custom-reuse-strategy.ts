@@ -4,7 +4,7 @@ import {
   DetachedRouteHandle,
 } from '@angular/router';
 import { Injectable } from '@angular/core';
-import { ReuseStrategyService } from './reuse-strategy.service';
+import { ReuseStrategyService } from './reuse-strategy.service'; // Adjust path as needed
 
 @Injectable({
   providedIn: 'root',
@@ -12,43 +12,34 @@ import { ReuseStrategyService } from './reuse-strategy.service';
 export class CustomReuseStrategy implements RouteReuseStrategy {
   constructor(private reuseStrategyService: ReuseStrategyService) {}
 
-  private isAuthRoute(route: ActivatedRouteSnapshot): boolean {
-    const fullUrl = this.getFullUrl(route);
-    return fullUrl.startsWith('/auth');
-  }
-
-  private getFullUrl(route: ActivatedRouteSnapshot): string {
-    return (
-      '/' +
-      route.pathFromRoot
-        .map((r) => r.routeConfig?.path)
-        .filter(Boolean)
-        .join('/')
-    );
-  }
-
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
-    return !this.isAuthRoute(route);
+    const path = route.routeConfig?.path || '';
+    const reuse = this.reuseStrategyService.isReuseAllowed(path);
+    console.log(`shouldDetach: ${path} => ${reuse}`);
+    return reuse;
   }
 
   store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle): void {
-    if (!this.isAuthRoute(route)) {
-      const path = this.getFullUrl(route);
-      if (handle) {
-        this.reuseStrategyService.storeHandler(path, handle);
-        console.log('Stored component:', path);
-      }
+    const path = route.routeConfig?.path || '';
+    if (path && handle) {
+      this.reuseStrategyService.storeHandler(path, handle);
+      console.log(`Stored component for: ${path}`);
     }
   }
 
   shouldAttach(route: ActivatedRouteSnapshot): boolean {
-    const path = this.getFullUrl(route);
-    return this.reuseStrategyService.hasHandler(path);
+    const path = route.routeConfig?.path || '';
+    const has = this.reuseStrategyService.hasHandler(path);
+    const reuse = this.reuseStrategyService.isReuseAllowed(path);
+    console.log(`shouldAttach: ${path} => handler=${has}, allowed=${reuse}`);
+    return has && reuse;
   }
 
   retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
-    const path = this.getFullUrl(route);
-    return this.reuseStrategyService.getHandler(path);
+    const path = route.routeConfig?.path || '';
+    const handler = this.reuseStrategyService.getHandler(path);
+    console.log(`retrieve: ${path} => ${!!handler}`);
+    return handler;
   }
 
   shouldReuseRoute(

@@ -5,27 +5,38 @@ import { DetachedRouteHandle } from '@angular/router';
   providedIn: 'root',
 })
 export class ReuseStrategyService {
-  private handlers = new Map<string, DetachedRouteHandle>();
+  private handlers: { [key: string]: DetachedRouteHandle } = {};
+  private reuseWhitelist: Set<string> = new Set();
 
-  storeHandler(path: string, handle: DetachedRouteHandle): void {
-    this.handlers.set(path, handle);
+  storeHandler(routePath: string, handle: DetachedRouteHandle): void {
+    console.log(`Storing handler for route: ${routePath}`);
+    this.handlers[routePath] = handle;
   }
 
-  hasHandler(path: string): boolean {
-    return this.handlers.has(path);
+  getHandler(routePath: string): DetachedRouteHandle | null {
+    return this.handlers[routePath] || null;
   }
 
-  getHandler(path: string): DetachedRouteHandle | null {
-    return this.handlers.get(path) || null;
+  hasHandler(routePath: string): boolean {
+    return !!this.handlers[routePath];
   }
 
-  removeHandler(path: string): void {
-    if (this.handlers.has(path)) {
-      this.handlers.delete(path);
-    }
+  removeHandler(routePath: string): void {
+    console.log(`Removing handler for route: ${routePath}`);
+    delete this.handlers[routePath];
   }
 
   clearHandlers(): void {
-    this.handlers.clear();
+    console.log('Clearing all handlers');
+    this.handlers = {};
+  }
+
+  isReuseAllowed(path: string): boolean {
+    return this.reuseWhitelist.has(path);
+  }
+
+  updateReuseWhitelist(tabs: any[]): void {
+    this.reuseWhitelist = new Set(tabs.map((tab) => tab.path));
+    console.log('Updated reuse whitelist:', Array.from(this.reuseWhitelist));
   }
 }

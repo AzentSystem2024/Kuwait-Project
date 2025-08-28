@@ -63,6 +63,7 @@ import { BatchUploadingLookUpComponent } from './pages/RESUBMISSION/batch-upload
 import { TwoStepVerificationComponent } from './components/library/two-step-verification/two-step-verification.component';
 import { CheckPostOfficeComponent } from './pages/OPERATIONS/check-post-office/check-post-office.component';
 import { ImportHISDataComponent } from './pages/OPERATIONS/import-his-data/import-his-data.component';
+import { ImportRADataComponent } from './pages/OPERATIONS/import-ra-data/import-ra-data.component';
 const routes: Routes = [
   {
     path: '',
@@ -240,7 +241,7 @@ const routes: Routes = [
       },
       {
         path: 'import-master-data',
-        component: ImportMasterDataComponent,
+        component: ImportRADataComponent,
         canActivate: [AuthGuardService],
       },
       {

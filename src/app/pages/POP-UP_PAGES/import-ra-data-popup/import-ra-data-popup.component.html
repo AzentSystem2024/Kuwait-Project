@@ -1,0 +1,66 @@
+<div>
+  <div class="mb-2 d-flex justify-content-end">
+    <dx-select-box
+      [dataSource]="insuranceList"
+      displayExpr="DESCRIPTION"
+      valueExpr="ID"
+      [(value)]="selectedInsuranceId"
+      label="Insurance"
+      labelMode="floating"
+      [showClearButton]="true"
+      [searchEnabled]="true"
+      [readOnly]="true"
+    >
+    </dx-select-box>
+  </div>
+
+  <dx-data-grid
+    #dataGrid
+    [showBorders]="true"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [rowAlternationEnabled]="true"
+    rowAlternationInterval="2"
+    [columnAutoWidth]="true"
+    [columnFixing]="{ enabled: true }"
+    [height]="'80vh'"
+    [width]="'100%'"
+    [dataSource]="dataSource"
+    [columns]="columnData"
+  >
+    <dxo-paging [pageSize]="100"></dxo-paging>
+    <dxo-pager
+      [visible]="true"
+      [allowedPageSizes]="allowedPageSizes"
+      [displayMode]="displayMode"
+      [showPageSizeSelector]="showPageSizeSelector"
+      [showInfo]="true"
+      [showNavigationButtons]="true"
+    ></dxo-pager>
+
+    <dxo-load-panel
+      [enabled]="true"
+      [shading]="true"
+      [showIndicator]="true"
+      [showPane]="false"
+    ></dxo-load-panel>
+    <dxo-scrolling mode="virtual" [useNative]="false"></dxo-scrolling>
+  </dx-data-grid>
+</div>
+
+<div *ngIf="!viewData" class="d-flex justify-content-end gap-2 mt-2">
+  <dx-button
+    text="Cancel"
+    stylingMode="outlined"
+    type="normal"
+    (onClick)="close()"
+  ></dx-button>
+
+  <dx-button
+    text="Save"
+    stylingMode="contained"
+    type="default"
+    [disabled]="!selectedInsuranceId || isSaving"
+    (onClick)="onSaveClick()"
+  ></dx-button>
+</div>

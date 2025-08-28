@@ -29,6 +29,7 @@ import { Subscription } from 'rxjs';
 import { DxSortableTypes } from 'devextreme-angular/ui/sortable';
 import { InactivityService } from 'src/app/services/inactivity.service';
 import { CustomReuseStrategy } from 'src/app/custom-reuse-strategy';
+import { ReuseStrategyService } from 'src/app/reuse-strategy.service';
 
 @Component({
   selector: 'app-side-nav-outer-toolbar',
@@ -68,7 +69,8 @@ export class SideNavOuterToolbarComponent implements OnInit, OnDestroy {
     public appInfo: AppInfoService,
     private inactiveservice: InactivityService,
     private dataService: DataService,
-    private customReuseStrategy: CustomReuseStrategy
+    private customReuseStrategy: CustomReuseStrategy,
+    private reuseStrategyService: ReuseStrategyService
   ) {
     this.routerSubscription = this.router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
@@ -95,9 +97,17 @@ export class SideNavOuterToolbarComponent implements OnInit, OnDestroy {
     this.updateDrawer();
   }
 
+  handleUnload = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+  };
+
   ngOnDestroy(): void {
     this.routerSubscription.unsubscribe();
     this.screenSubscription.unsubscribe();
+    // localStorage.clear();
+    // sessionStorage.clear();
+    window.removeEventListener('beforeunload', this.handleUnload);
   }
 
   updateDrawer() {
@@ -119,29 +129,28 @@ export class SideNavOuterToolbarComponent implements OnInit, OnDestroy {
   }
 
   //===================================================================
-  navigationChanged(event: DxTreeViewTypes.ItemClickEvent) {
-    const path = (event.itemData as any).path;
+  navigationChanged(event: any) {
+    const path = event.itemData?.path;
     const pointerEvent = event.event;
 
-    if (path && this.menuOpened) {
-      this.dataService
-        .set_pageLoading_And_Closing_Log(0, path)
-        .subscribe((response: any) => {});
+    if (path) {
+      this.dataService.set_pageLoading_And_Closing_Log(0, path).subscribe();
+
       const tabExists = this.tabs.some((tab) => tab.path === path);
       if (!tabExists) {
         this.tabs.push({
           title: event.itemData.text,
           path: path,
         });
-        this.selectedIndex = this.tabs.findIndex((tab) => tab.path === path);
-        this.router.navigate([path]);
-      } else {
-        this.selectedIndex = this.tabs.findIndex((tab) => tab.path === path);
-        this.router.navigate([path]);
       }
-      if (this.menuOpened) {
-        pointerEvent?.preventDefault();
-      }
+      this.selectedIndex = this.tabs.findIndex((tab) => tab.path === path);
+      this.selectedRoute = path;
+      this.router.navigate([path]);
+
+      // update reuse allowed tabs
+      this.reuseStrategyService.updateReuseWhitelist(this.tabs);
+
+      if (this.menuOpened) pointerEvent?.preventDefault();
       if (this.hideMenuAfterNavigation) {
         this.menuOpened = false;
         pointerEvent?.stopPropagation();
@@ -158,9 +167,10 @@ export class SideNavOuterToolbarComponent implements OnInit, OnDestroy {
       this.menuOpened = true;
     }
   }
+
   TabItemClick(tab: any) {
     const path = tab.path;
-    // this.selectedRoute = tab.path;
+    this.selectedRoute = tab.path;
     this.selectedIndex = this.tabs.findIndex((tab) => tab.path === path);
     this.router.navigate([path]);
   }
@@ -173,32 +183,41 @@ export class SideNavOuterToolbarComponent implements OnInit, OnDestroy {
     e.itemData = e.fromData[e.fromIndex];
   }
 
-  onTabDrop(event) {}
-
   showCloseButton() {
     return true;
   }
 
   closeButtonHandler(tab: any) {
+    if (tab.path === 'analytics-dashboard') {
+      return; // Don't allow deleting the home page
+    }
+
     if (this.tabs.length > 1) {
-      // Prevent closing if only one tab remains
       const index = this.tabs.indexOf(tab);
       if (index > -1) {
+        const isCurrentRoute = this.router.url.replace(/^\/+/, '') === tab.path;
         this.tabs.splice(index, 1);
+        // Remove from reuse cache
         this.customReuseStrategy.removeStoredComponent(tab.path);
         this.dataService
           .set_pageLoading_And_Closing_Log(10, tab.path)
-          .subscribe((response: any) => {});
-        if (this.selectedIndex >= this.tabs.length) {
+          .subscribe();
+        // Only update selected tab and navigation if current tab was closed
+        if (isCurrentRoute) {
+          // Always set selected index to the last tab
           this.selectedIndex = this.tabs.length - 1;
+
+          if (this.selectedIndex >= 0) {
+            const selectedTab = this.tabs[this.selectedIndex];
+            this.selectedRoute = selectedTab.path;
+            this.router.navigate([selectedTab.path]);
+          }
         }
       }
-      if (this.selectedIndex >= 0) {
-        const selectedTab = this.tabs[this.selectedIndex];
-        let path = selectedTab.path;
-        this.router.navigate([path]);
-      }
     }
+
+    // update reuse allowed tabs
+    this.reuseStrategyService.updateReuseWhitelist(this.tabs);
   }
 }
 

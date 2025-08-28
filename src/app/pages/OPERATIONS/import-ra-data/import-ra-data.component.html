@@ -1,0 +1,167 @@
+<div class="view-wrapper list-page">
+  <dx-data-grid
+    class="grid theme-dependent"
+    noDataText=""
+    height="600"
+    [showBorders]="true"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [rowAlternationEnabled]="true"
+    rowAlternationInterval="2"
+    height="84vh"
+    [dataSource]="dataSource"
+  >
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-editing [allowUpdating]="true"> </dxo-editing>
+    <dxo-pager
+      [visible]="true"
+      [allowedPageSizes]="allowedPageSizes"
+      [displayMode]="displayMode"
+      [showPageSizeSelector]="showPageSizeSelector"
+      [showInfo]="showInfo"
+      [showNavigationButtons]="showNavButtons"
+    ></dxo-pager>
+    <dxo-load-panel [showPane]="false"></dxo-load-panel>
+    <dxo-scrolling mode="virtual"></dxo-scrolling>
+    <dxo-sorting mode="multiple"></dxo-sorting>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-filter-row [visible]="isFilterRowVisible"></dxo-filter-row>
+    <dxo-column-chooser [enabled]="true" [height]="400"></dxo-column-chooser>
+    <dxo-search-panel [visible]="true" placeholder=" Search"></dxo-search-panel>
+    <dxo-export
+      [enabled]="true"
+      [allowExportSelectedData]="true"
+      [formats]="['xlsx', 'pdf']"
+    >
+    </dxo-export>
+
+    <dxo-toolbar>
+      <dxi-item location="before">
+        <div class="grid-header">Import RA Data</div>
+      </dxi-item>
+
+      <dxi-item location="after">
+        <div *dxTemplate="let data of 'content'">
+          <dx-select-box
+            [dataSource]="insuranceList"
+            displayExpr="DESCRIPTION"
+            valueExpr="ID"
+            [(value)]="selectedInsuranceId"
+            label="Insurance"
+            labelMode="floating"
+            [showClearButton]="true"
+            [searchEnabled]="true"
+            (onValueChanged)="fetch_RA_Column_Data()"
+          >
+          </dx-select-box>
+        </div>
+      </dxi-item>
+
+      <dxi-item
+        location="after"
+        locateInMenu="auto"
+        showText="inMenu"
+        widget="dxButton"
+        [options]="{
+          icon: isFilterRowVisible ? 'filter' : 'filter',
+          hint: isFilterRowVisible ? 'Hide Filter Row' : 'Show Filter Row',
+          onClick: toggleFilterRow,
+          stylingMode: 'text',
+          elementAttr: { class: 'commonButtons' }
+        }"
+      ></dxi-item>
+
+      <dxi-item
+        location="after"
+        locateInMenu="auto"
+        showText="inMenu"
+        widget="dxButton"
+        [options]="{
+          text: 'Refresh',
+          icon: 'refresh',
+          stylingMode: 'text',
+          hint: 'refresh',
+          onClick: refresh
+        }"
+      ></dxi-item>
+
+      <dxi-item
+        *ngIf="selectedInsuranceId"
+        location="after"
+        widget="dxButton"
+        [options]="downloadButtonOptions"
+      >
+      </dxi-item>
+
+      <dxi-item
+        location="after"
+        widget="dxButton"
+        [options]="addButtonOptions"
+      ></dxi-item>
+    </dxo-toolbar>
+    <input
+      #fileInput
+      type="file"
+      accept=".xlsx, .xls"
+      style="display: none"
+      (change)="onFileSelected($event)"
+    />
+
+    <dxo-header-filter [visible]="true">
+      <dxo-search [enabled]="true"></dxo-search>
+    </dxo-header-filter>
+
+    <dxi-column
+      dataField="DocNo"
+      caption="Document No"
+      [alignment]="'left'"
+    ></dxi-column>
+    <dxi-column dataField="InsuranceName" caption="Insurance Name"></dxi-column>
+    <dxi-column dataField="ImportedUser" caption="User"></dxi-column>
+    <dxi-column dataField="ImportedTime" caption="Imported Time"></dxi-column>
+
+    <dxi-column type="buttons" [width]="110" caption=" ">
+      <dxi-button
+        class="button-info"
+        text="Details"
+        icon="info"
+        [onClick]="viewDetails"
+      >
+      </dxi-button>
+    </dxi-column>
+  </dx-data-grid>
+
+  <dx-popup
+    class="formPopupClass"
+    [(visible)]="isNewFormPopupOpened"
+    title="Import RA Data"
+    [height]="'auto'"
+    width="80%"
+    [width]="popupwidth"
+    (onHiding)="onClearData()"
+  >
+    <app-import-ra-data-popup
+      *ngIf="isNewFormPopupOpened"
+      [columnData]="columnData"
+      [selectedInsuranceId]="selectedInsuranceId"
+      [dataSource]="ImportedDataSource"
+      (closeForm)="CloseEditForm()"
+    ></app-import-ra-data-popup>
+  </dx-popup>
+
+  <dx-popup
+    class="formPopupClass"
+    [(visible)]="ViewDataPopup"
+    title="View Imported RA Data"
+    [height]="'auto'"
+    width="80%"
+    [width]="popupwidth"
+    (onHiding)="onClearData()"
+  >
+    <app-import-ra-data-popup
+      *ngIf="ViewDataPopup"
+      (closeForm)="CloseEditForm()"
+      [viewData]="selectedData"
+    ></app-import-ra-data-popup>
+  </dx-popup>
+</div>

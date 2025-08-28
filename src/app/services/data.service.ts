@@ -255,4 +255,33 @@ export class DataService {
     const url = `${BASE_URL}hisData/select/${id}`;
     return this.http.post(url, {});
   }
+
+  // ======== get RA column data ========
+  get_RA_Data_Column_List(payload: any) {
+    const url = `${BASE_URL}RAData/Columnslist`;
+    const reqbody = payload;
+    return this.http.post(url, reqbody);
+  }
+
+  // ============ RA import LOG list ===========
+  get_Importing_RA_Log_List() {
+    const Url = `${BASE_URL}RAdata/list`;
+    const reqBody = {
+      list: [],
+    };
+    return this.http.post(Url, reqBody);
+  }
+
+  // ======= import his data ======
+  Import_RA_Data(payload: any) {
+    const url = `${BASE_URL}RaData/import`;
+    const reqbody = payload;
+    return this.http.post(url, reqbody);
+  }
+
+  // ======= fetch import RA data view data ======
+  fetch_RA_Data_log_view(id: any) {
+    const url = `${BASE_URL}RAData/select/${id}`;
+    return this.http.post(url, {});
+  }
 }
