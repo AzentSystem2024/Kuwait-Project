@@ -120,6 +120,7 @@
     <dxi-column dataField="InsuranceName" caption="Insurance Name"></dxi-column>
     <dxi-column dataField="ImportedUser" caption="User"></dxi-column>
     <dxi-column dataField="ImportedTime" caption="Imported Time"></dxi-column>
+    <dxi-column dataField="Status" caption="Status"></dxi-column>
 
     <dxi-column type="buttons" [width]="110" caption=" ">
       <dxi-button
@@ -137,8 +138,7 @@
     [(visible)]="isNewFormPopupOpened"
     title="Import RA Data"
     [height]="'auto'"
-    width="80%"
-    [width]="popupwidth"
+    width="95%"
     (onHiding)="onClearData()"
   >
     <app-import-ra-data-popup
@@ -155,8 +155,7 @@
     [(visible)]="ViewDataPopup"
     title="View Imported RA Data"
     [height]="'auto'"
-    width="80%"
-    [width]="popupwidth"
+    width="95%"
     (onHiding)="onClearData()"
   >
     <app-import-ra-data-popup

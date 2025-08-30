@@ -61,7 +61,7 @@ export class ImportHISDataFormComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.viewData) {
-      this.selectedInsurance = this.viewData.InsuranceName;
+      this.selectedInsurance = this.viewData.InsuranceID;
       this.dataSource = this.viewData.import_his_data;
     } else {
     }

@@ -17,6 +17,8 @@ import {
   DxValidatorModule,
   DxTextBoxModule,
   DxLoadPanelModule,
+  DxCheckBoxModule,
+  DxPopupModule,
 } from 'devextreme-angular';
 import notify from 'devextreme/ui/notify';
 import { DataService } from 'src/app/services';
@@ -51,6 +53,20 @@ export class ImportRADataPopupComponent implements OnInit {
 
   isLoading: boolean = false;
   insuranceList: any;
+
+  autoProcess: boolean = false;
+
+  statusOptions = [
+    { DESCRIPTION: 'Processed', ID: 'Processed' },
+    { DESCRIPTION: 'Not Processed', ID: 'Not Processed' },
+  ];
+  selectedStatus: string | null = null;
+
+  isProcessPopupVisible: boolean = false;
+  RAGridData: any;
+  RAProcessPopUpColumns: any;
+  HISGridData: any;
+  HISProcessPopUpColumns: any;
 
   constructor(private dataservice: DataService) {}
 
@@ -198,6 +214,79 @@ export class ImportRADataPopupComponent implements OnInit {
     this.isLoading = false;
     this.closeForm.emit();
   }
+
+  // =============================== process popup codes =========
+
+  onStatusChange(e: any) {
+    const statusValue = e.value;
+    if (this.dataGrid && statusValue) {
+      this.dataGrid.instance.filter(['Status', '=', statusValue]);
+    } else {
+      this.dataGrid.instance.clearFilter();
+    }
+  }
+  // =========== process popup open and data fetching =============
+  onProcessClick() {
+    const insurance = this.selectedInsuranceId;
+    const logId = this.viewData.ID;
+
+    const payload = {
+      InsuranceID: insurance,
+      LogID: logId,
+    };
+
+    this.isLoading = true;
+
+    this.dataservice.fetch_RA_Process_Data_list(payload).subscribe({
+      next: (response: any) => {
+        if (response.flag === '1') {
+          this.RAGridData = response.data;
+          this.RAProcessPopUpColumns = response.columns.map((col: any) => ({
+            dataField: col.ColumnName,
+            caption: col.ColumnTitle,
+            width: 150,
+          }));
+          this.isProcessPopupVisible = true;
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      },
+    });
+  }
+
+  // ============== ra data row selction event ==========
+  onRADataRowSelected(e: any) {
+    const selectedRow = e.selectedRowsData[0];
+    if (!selectedRow) return;
+    console.log('selcted row ', selectedRow);
+    const payload = {
+      UniqueKey: selectedRow.UNIQUE_KEY,
+    };
+
+    this.isLoading = true;
+
+    this.dataservice.fetch_HIS_Process_Data_list(payload).subscribe({
+      next: (response: any) => {
+        if (response.flag === '1') {
+          this.HISGridData = response.data;
+          this.HISProcessPopUpColumns = response.columns.map((col: any) => ({
+            dataField: col.ColumnName,
+            caption: col.ColumnTitle,
+            width: 150,
+          }));
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      },
+    });
+  }
+
+  // ============== process submist click =============
+  onSubmitProcess() {}
 }
 
 @NgModule({
@@ -209,6 +298,8 @@ export class ImportRADataPopupComponent implements OnInit {
     DxValidatorModule,
     DxTextBoxModule,
     DxLoadPanelModule,
+    DxCheckBoxModule,
+    DxPopupModule,
   ],
   providers: [],
   declarations: [ImportRADataPopupComponent],

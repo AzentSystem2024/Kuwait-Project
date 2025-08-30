@@ -1,6 +1,7 @@
 <div>
-  <div class="mb-2 d-flex justify-content-end">
+  <div class="mb-2 d-flex justify-content-end gap-2">
     <dx-select-box
+      class="p-0"
       [dataSource]="insuranceList"
       displayExpr="DESCRIPTION"
       valueExpr="ID"
@@ -13,6 +14,29 @@
       [readOnly]="true"
     >
     </dx-select-box>
+
+    <dx-select-box
+      *ngIf="viewData"
+      [dataSource]="statusOptions"
+      [(value)]="selectedStatus"
+      label="Status"
+      labelMode="floating"
+      width="200"
+      displayExpr="DESCRIPTION"
+      valueExpr="ID"
+      [showClearButton]="true"
+      (onValueChanged)="onStatusChange($event)"
+    >
+    </dx-select-box>
+
+    <dx-button
+      class="mt-2"
+      *ngIf="viewData"
+      text="Process"
+      type="default"
+      stylingMode="contained"
+      (onClick)="onProcessClick()"
+    ></dx-button>
   </div>
 
   <dx-data-grid
@@ -34,7 +58,7 @@
       [visible]="true"
       [allowedPageSizes]="allowedPageSizes"
       [displayMode]="displayMode"
-      [showPageSizeSelector]="showPageSizeSelector"
+      [showPageSizeSelector]="false"
       [showInfo]="true"
       [showNavigationButtons]="true"
     ></dxo-pager>
@@ -49,27 +73,91 @@
   </dx-data-grid>
 </div>
 
-<div *ngIf="!viewData" class="d-flex justify-content-end gap-2 mt-2">
-  <dx-button
-    text="Cancel"
-    stylingMode="outlined"
-    type="normal"
-    (onClick)="close()"
-  ></dx-button>
+<div
+  *ngIf="!viewData"
+  class="d-flex justify-content-between align-items-center gap-2 mt-2"
+>
+  <dx-check-box
+    [(value)]="autoProcess"
+    [iconSize]="20"
+    text="Auto Process"
+  ></dx-check-box>
 
-  <dx-button
-    text="Save"
-    stylingMode="contained"
-    type="default"
-    [disabled]="!selectedInsuranceId || isSaving"
-    (onClick)="onSaveClick()"
-  ></dx-button>
+  <div class="d-flex gap-2">
+    <dx-button
+      text="Cancel"
+      stylingMode="outlined"
+      type="normal"
+      (onClick)="close()"
+    ></dx-button>
+
+    <dx-button
+      text="Save"
+      stylingMode="contained"
+      type="default"
+      [disabled]="!selectedInsuranceId || isSaving"
+      (onClick)="onSaveClick()"
+    ></dx-button>
+  </div>
 </div>
+
+<!-- ======================== process popup ============== -->
+
+<!-- Popup -->
+<dx-popup
+  [(visible)]="isProcessPopupVisible"
+  [width]="'95vw'"
+  [height]="'100vh'"
+  [showCloseButton]="true"
+  [dragEnabled]="true"
+  [closeOnOutsideClick]="false"
+  title="Process Data"
+>
+  <div class="h-100 d-flex flex-column">
+    <!-- Top Grid -->
+    <p class="h5 fw-bold border-bottom pb-2 mb-3">RA Data</p>
+    <dx-data-grid
+      [dataSource]="RAGridData"
+      [columns]="RAProcessPopUpColumns"
+      [showBorders]="true"
+      class="mb-4"
+      [height]="'45%'"
+      [paging]="{ enabled: false }"
+      [focusedRowEnabled]="true"
+      [selection]="{ mode: 'single' }"
+      (onSelectionChanged)="onRADataRowSelected($event)"
+    >
+    </dx-data-grid>
+
+    <!-- Bottom Grid -->
+    <p class="h5 fw-bold border-bottom pb-2 mb-3">Claim Data</p>
+    <dx-data-grid
+      [dataSource]="HISGridData"
+      [columns]="HISProcessPopUpColumns"
+      [showBorders]="true"
+      class="flex-grow"
+      [height]="'45%'"
+      [paging]="{ enabled: false }"
+    >
+    </dx-data-grid>
+
+    <!-- Footer Button -->
+    <div class="d-flex justify-content-end mt-3">
+      <dx-button
+        text="submit"
+        type="default"
+        stylingMode="contained"
+        (onClick)="onSubmitProcess()"
+      ></dx-button>
+    </div>
+  </div>
+</dx-popup>
+
 <dx-load-panel
   [(visible)]="isLoading"
   shadingColor="rgba(0,0,0,0.4)"
   [showPane]="true"
-  message="Loading ...!!!!!!!"
+  message="Loading..."
   [closeOnOutsideClick]="false"
 >
 </dx-load-panel>

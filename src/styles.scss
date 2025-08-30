@@ -965,3 +965,51 @@ body {
   background-color: #5486ff;
   color: #fff;
 }
+
+//=======================================
+.dx-scrollbar-horizontal.dx-scrollbar-hoverable .dx-scrollable-scroll {
+  transition: background-color 0.5s linear 1s, height 0.2s linear 0.15s;
+  background-color: rgb(111, 181, 255);
+  height: 15px;
+}
+
+.dx-scrollbar-horizontal.dx-scrollbar-hoverable
+  .dx-scrollable-scroll.dx-state-invisible
+  .dx-scrollable-scroll-content {
+  transition: background-color 0.5s linear 1s;
+  background-color: rgb(111, 181, 255);
+  height: 15px;
+}
+.dx-scrollbar-horizontal.dx-scrollbar-hoverable
+  .dx-scrollable-scroll.dx-state-invisible {
+  transition: background-color 0.5s linear 1s, height 0.2s linear 0.15s;
+  height: 15px;
+}
+.dx-datagrid .dx-datagrid-sticky-columns .dx-scrollable-scrollbar {
+  z-index: 4;
+  height: 15px;
+}
+
+.dx-scrollbar-vertical.dx-scrollbar-hoverable .dx-scrollable-scroll {
+  transition: background-color 0.5s linear 1s, height 0.2s linear 0.15s;
+  background-color: rgb(111, 181, 255);
+  height: 15px;
+}
+
+.dx-scrollbar-vertical.dx-scrollbar-hoverable
+  .dx-scrollable-scroll.dx-state-invisible
+  .dx-scrollable-scroll-content {
+  transition: background-color 0.5s linear 1s;
+  background-color: rgb(111, 181, 255);
+  height: 15px;
+}
+.dx-scrollbar-vertical.dx-scrollbar-hoverable
+  .dx-scrollable-scroll.dx-state-invisible {
+  transition: background-color 0.5s linear 1s, height 0.2s linear 0.15s;
+  height: 15px;
+}
+
+::ng-deep .formPopupClass.dx-popup-content-scrollable {
+  overflow: none;
+  overscroll-behavior: contain;
+}

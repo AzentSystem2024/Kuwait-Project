@@ -284,4 +284,18 @@ export class DataService {
     const url = `${BASE_URL}RAData/select/${id}`;
     return this.http.post(url, {});
   }
+
+  // ======= fetch import RA process data list ======
+  fetch_RA_Process_Data_list(payload: any) {
+    const url = `${BASE_URL}raData/getRAColumnsData`;
+    const reqbody = payload;
+    return this.http.post(url, reqbody);
+  }
+
+  // ======= fetch import RA process data list ======
+  fetch_HIS_Process_Data_list(payload: any) {
+    const url = `${BASE_URL}raData/getHISColumnsData`;
+    const reqbody = payload;
+    return this.http.post(url, reqbody);
+  }
 }
