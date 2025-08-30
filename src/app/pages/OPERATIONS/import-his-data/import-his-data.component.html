@@ -40,6 +40,23 @@
         <div class="grid-header">Import HIS Data (EDI)</div>
       </dxi-item>
 
+      <dxi-item location="after">
+        <div *dxTemplate="let data of 'content'">
+          <dx-select-box
+            [dataSource]="insuranceList"
+            displayExpr="DESCRIPTION"
+            valueExpr="ID"
+            [(value)]="selectedInsuranceId"
+            label="Insurance"
+            labelMode="floating"
+            width="400"
+            [showClearButton]="true"
+            [searchEnabled]="true"
+          >
+          </dx-select-box>
+        </div>
+      </dxi-item>
+
       <dxi-item
         location="after"
         locateInMenu="auto"
@@ -129,6 +146,7 @@
     <app-import-his-data-import
       *ngIf="isNewFormPopupOpened"
       [dataSource]="ImportedDataSource"
+      [selectedInsurance]="selectedInsuranceId"
       (closeForm)="CloseEditForm()"
     ></app-import-his-data-import>
   </dx-popup>
@@ -149,3 +167,12 @@
     ></app-import-his-data-import>
   </dx-popup>
 </div>
+
+<dx-load-panel
+  [(visible)]="isLoading"
+  shadingColor="rgba(0,0,0,0.4)"
+  [showPane]="true"
+  message="Loading ..."
+  [closeOnOutsideClick]="false"
+>
+</dx-load-panel>

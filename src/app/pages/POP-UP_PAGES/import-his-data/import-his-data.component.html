@@ -1,14 +1,4 @@
 <div>
-  <div class="mb-1" *ngIf="viewData">
-    <dx-text-box
-      label="insurance"
-      labelMode="floating"
-      [(value)]="selectedInsurance"
-      [readOnly]="true"
-      width="auto"
-    >
-    </dx-text-box>
-  </div>
   <dx-data-grid
     #dataGrid
     [showBorders]="true"
@@ -42,17 +32,18 @@
     <dxo-scrolling mode="virtual" [useNative]="false"></dxo-scrolling>
 
     <!-- Toolbar -->
-    <dxo-toolbar *ngIf="!viewData" class="toolBarDiv p-0 m-0">
-      <dxi-item location="before" locateInMenu="auto">
+    <dxo-toolbar class="toolBarDiv p-0 m-0">
+      <dxi-item location="after" locateInMenu="auto">
         <dx-select-box
           label="insurance"
           labelMode="floating"
           [dataSource]="insuranceList"
           displayExpr="DESCRIPTION"
           valueExpr="ID"
-          [(value)]="selectedInsuranceId"
+          [(value)]="selectedInsurance"
           [searchEnabled]="true"
-          [readOnly]="viewData"
+          [readOnly]="true"
+          width="400"
         >
           <dx-validator>
             <dxi-validation-rule
@@ -77,7 +68,16 @@
     text="Save"
     stylingMode="contained"
     type="default"
-    [disabled]="!selectedInsuranceId || isSaving"
+    [disabled]="!selectedInsurance || isSaving"
     (onClick)="onSaveClick()"
   ></dx-button>
 </div>
+
+<dx-load-panel
+  [(visible)]="isLoading"
+  shadingColor="rgba(0,0,0,0.4)"
+  [showPane]="true"
+  message="Loading ..."
+  [closeOnOutsideClick]="false"
+>
+</dx-load-panel>

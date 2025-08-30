@@ -14,6 +14,7 @@ import {
   DxPopupModule,
   DxSelectBoxModule,
   DxValidatorModule,
+  DxLoadPanelModule,
 } from 'devextreme-angular';
 import { DataSource } from 'devextreme/common/data';
 import notify from 'devextreme/ui/notify';
@@ -70,6 +71,8 @@ export class ImportRADataComponent implements OnInit {
   addButtonOptions: any;
   selectedInsuranceDesc: any;
 
+  isLoading: boolean = false;
+
   constructor(private service: DataService) {
     this.UserID = sessionStorage.getItem('UserID');
   }
@@ -77,6 +80,7 @@ export class ImportRADataComponent implements OnInit {
   ngOnInit(): void {
     this.loadImportRALogDataSource();
     this.fetch_insurance_dropdown_data();
+    this.isLoading = false;
 
     this.addButtonOptions = {
       text: '',
@@ -127,6 +131,7 @@ export class ImportRADataComponent implements OnInit {
           this.service.get_Importing_RA_Log_List().subscribe({
             next: (res: any) => {
               if (res.flag === '1') {
+                this.isLoading = false;
                 resolve(res.data || []);
               } else {
                 reject(res.message || 'Failed to load data');
@@ -144,7 +149,7 @@ export class ImportRADataComponent implements OnInit {
       notify('No columns to download template.', 'error', 1000);
       return;
     }
-    const headers = this.columnData.map((c) => c.dataField);
+    const headers = this.columnData.map((c) => c.caption);
     const worksheet = XLSX.utils.aoa_to_sheet([headers]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
@@ -155,7 +160,6 @@ export class ImportRADataComponent implements OnInit {
   selectFile() {
     if (this.selectedInsuranceId) {
       this.fileInput.nativeElement.click();
-      console.log('selceted insurance::>', this.selectedInsuranceId);
     } else {
       notify({
         message: 'Please select a insurance.',
@@ -166,7 +170,7 @@ export class ImportRADataComponent implements OnInit {
     }
   }
 
-  // ======= handle file selection and read the Excel file =====
+  // ========= handle file selection and read the Excel file =======
   onFileSelected(event: any) {
     const target: DataTransfer = <DataTransfer>event.target;
     if (target.files.length !== 1) {
@@ -178,6 +182,8 @@ export class ImportRADataComponent implements OnInit {
       });
       return;
     }
+
+    this.isLoading = true;
 
     const file = target.files[0];
     const reader: FileReader = new FileReader();
@@ -193,9 +199,9 @@ export class ImportRADataComponent implements OnInit {
       // Get headers (first row only)
       const sheetHeaders: string[] = this.getHeaders(ws);
 
-      // Expected headers from API columnData
+      // Expected headers (still captions from API)
       const expectedHeaders: string[] = this.columnData.map(
-        (c: any) => c.dataField
+        (c: any) => c.caption
       );
 
       // Compare sets
@@ -207,14 +213,15 @@ export class ImportRADataComponent implements OnInit {
       );
 
       if (missingInExcel.length > 0 || extraInExcel.length > 0) {
+        this.isLoading = false;
         notify({
           message:
-            `Column mismatch!\n\n\n\n` +
+            `Column mismatch!\n\n` +
             (missingInExcel.length
-              ? `Missing in Excel: ${missingInExcel.join(', ')}\n\n\n`
+              ? `Missing in Excel: ${missingInExcel.join(', ')}\n`
               : '') +
             (extraInExcel.length
-              ? `Extra in Excel: ${extraInExcel.join(', ')}\n\n\n`
+              ? `Extra in Excel: ${extraInExcel.join(', ')}\n`
               : ''),
           type: 'error',
           displayTime: 5000,
@@ -224,8 +231,29 @@ export class ImportRADataComponent implements OnInit {
         return;
       }
 
-      const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
-      this.ImportedDataSource = data;
+      // Convert sheet to JSON (with captions as keys)
+      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      // Build mapping { caption -> dataField }
+      const captionToField: Record<string, string> = {};
+      this.columnData.forEach((col: any) => {
+        captionToField[col.caption] = col.dataField;
+      });
+
+      // Map imported rows to use dataField keys instead of caption keys
+      const mappedData = rawData.map((row: any) => {
+        const newRow: any = {};
+        Object.keys(row).forEach((caption) => {
+          const field = captionToField[caption];
+          if (field) {
+            newRow[field] = row[caption];
+          }
+        });
+        return newRow;
+      });
+
+      this.ImportedDataSource = mappedData;
+      this.isLoading = false;
       this.isNewFormPopupOpened = true;
 
       this.resetFileInput();
@@ -287,19 +315,18 @@ export class ImportRADataComponent implements OnInit {
       });
       return;
     }
+    this.isLoading = true;
 
     this.service.fetch_RA_Data_log_view(id).subscribe({
       next: (res: any) => {
         if (res) {
           this.selectedData = res;
+          this.isLoading = false;
+
           this.ViewDataPopup = true;
-          // notify({
-          //   message: 'Record details loaded successfully.',
-          //   type: 'success',
-          //   displayTime: 3000,
-          //   position: 'top right',
-          // });
         } else {
+          this.isLoading = false;
+
           notify({
             message: 'No details found for this record.',
             type: 'info',
@@ -309,6 +336,7 @@ export class ImportRADataComponent implements OnInit {
         }
       },
       error: () => {
+        this.isLoading = false;
         notify({
           message: 'Failed to fetch record details.',
           type: 'error',
@@ -339,6 +367,8 @@ export class ImportRADataComponent implements OnInit {
 
   onClearData() {
     this.ImportRADataFormComponent.clearData();
+    this.isLoading = false;
+    this.selectedInsuranceId = null;
   }
 }
 
@@ -352,6 +382,7 @@ export class ImportRADataComponent implements OnInit {
     ImportRADataPopupModule,
     DxSelectBoxModule,
     DxValidatorModule,
+    DxLoadPanelModule,
   ],
   providers: [],
   exports: [],

@@ -13,6 +13,7 @@ import {
   DxButtonModule,
   DxDataGridComponent,
   DxDataGridModule,
+  DxLoadPanelModule,
   DxSelectBoxModule,
   DxTextBoxModule,
   DxValidatorModule,
@@ -37,6 +38,8 @@ export class ImportHISDataFormComponent implements OnInit {
 
   @Input() viewData: any = null;
   @Input() dataSource: any = null;
+  @Input() selectedInsurance: any = null;
+
 
   readonly allowedPageSizes: any = [50, 100, 1000];
   displayMode: any = 'full';
@@ -48,12 +51,11 @@ export class ImportHISDataFormComponent implements OnInit {
   isColumnsLoaded = false;
 
   isSaving: boolean = false;
-  gridLoading: boolean = false;
+  isLoading: boolean = false;
 
   insuranceList: any = [];
-  selectedInsuranceId: any;
-  selectedInsurance: any;
-  isLoading: boolean = false;
+
+
 
   constructor(private dataservice: DataService) {}
 
@@ -102,7 +104,7 @@ export class ImportHISDataFormComponent implements OnInit {
   // ========= main save import data ===========
   onSaveClick() {
     const userId = Number(sessionStorage.getItem('UserID')) || 0;
-    const insuranceId = this.selectedInsuranceId || 0;
+    const insuranceId = this.selectedInsurance || 0;
 
     if (!insuranceId || insuranceId === 0) {
       notify({
@@ -115,6 +117,7 @@ export class ImportHISDataFormComponent implements OnInit {
     }
 
     this.isSaving = true;
+    this.isLoading = true;
 
     const payload = {
       userId: userId,
@@ -125,6 +128,7 @@ export class ImportHISDataFormComponent implements OnInit {
     this.dataservice.Import_His_Data(payload).subscribe({
       next: (res: any) => {
         if (res.flag === '1') {
+          this.isLoading = false;
           this.close();
           notify({
             message: 'Data imported successfully!',
@@ -133,6 +137,7 @@ export class ImportHISDataFormComponent implements OnInit {
             position: { at: 'top right', my: 'top right', of: window },
           });
         } else {
+          this.isLoading = false;
           notify({
             message: res.message || 'Import failed.',
             type: 'error',
@@ -142,6 +147,7 @@ export class ImportHISDataFormComponent implements OnInit {
         }
       },
       error: () => {
+        this.isLoading = false;
         notify({
           message: 'An error occurred while saving.',
           type: 'error',
@@ -150,6 +156,7 @@ export class ImportHISDataFormComponent implements OnInit {
         });
       },
       complete: () => {
+        this.isLoading = false;
         this.isSaving = false;
       },
     });
@@ -207,6 +214,7 @@ export class ImportHISDataFormComponent implements OnInit {
 
   close() {
     this.clearData();
+    this.isLoading = false;
     this.closeForm.emit();
   }
 }
@@ -219,6 +227,7 @@ export class ImportHISDataFormComponent implements OnInit {
     DxSelectBoxModule,
     DxValidatorModule,
     DxTextBoxModule,
+    DxLoadPanelModule,
   ],
   providers: [],
   declarations: [ImportHISDataFormComponent],

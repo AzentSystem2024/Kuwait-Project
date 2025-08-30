@@ -16,9 +16,11 @@ import {
   DxSelectBoxModule,
   DxValidatorModule,
   DxTextBoxModule,
+  DxLoadPanelModule,
 } from 'devextreme-angular';
 import notify from 'devextreme/ui/notify';
 import { DataService } from 'src/app/services';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-import-ra-data-popup',
@@ -93,44 +95,52 @@ export class ImportRADataPopupComponent implements OnInit {
       return;
     }
 
+    this.isLoading = true;
     this.isSaving = true;
+
     const payload = {
       USerID: userId,
       InsuranceID: insuranceId,
       import_ra_data: this.dataSource || [],
     };
 
-    this.dataservice.Import_RA_Data(payload).subscribe({
-      next: (res: any) => {
-        if (res.flag === '1') {
-          this.close();
+    this.dataservice
+      .Import_RA_Data(payload)
+      .pipe(
+        finalize(() => {
+          // Always executed whether success or error
+          this.isLoading = false;
+          this.isSaving = false;
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          if (res.flag === '1') {
+            notify({
+              message: 'Data imported successfully!',
+              type: 'success',
+              displayTime: 3000,
+              position: { at: 'top right', my: 'top right', of: window },
+            });
+            this.close();
+          } else {
+            notify({
+              message: res.message || 'Import failed.',
+              type: 'error',
+              displayTime: 3000,
+              position: { at: 'top right', my: 'top right', of: window },
+            });
+          }
+        },
+        error: () => {
           notify({
-            message: 'Data imported successfully!',
-            type: 'success',
-            displayTime: 3000,
-            position: { at: 'top right', my: 'top right', of: window },
-          });
-        } else {
-          notify({
-            message: res.message || 'Import failed.',
+            message: 'An error occurred while saving.',
             type: 'error',
             displayTime: 3000,
             position: { at: 'top right', my: 'top right', of: window },
           });
-        }
-      },
-      error: () => {
-        notify({
-          message: 'An error occurred while saving.',
-          type: 'error',
-          displayTime: 3000,
-          position: { at: 'top right', my: 'top right', of: window },
-        });
-      },
-      complete: () => {
-        this.isSaving = false;
-      },
-    });
+        },
+      });
   }
 
   // Error handler to manage error notifications and state
@@ -185,6 +195,7 @@ export class ImportRADataPopupComponent implements OnInit {
 
   close() {
     this.clearData();
+    this.isLoading = false;
     this.closeForm.emit();
   }
 }
@@ -197,6 +208,7 @@ export class ImportRADataPopupComponent implements OnInit {
     DxSelectBoxModule,
     DxValidatorModule,
     DxTextBoxModule,
+    DxLoadPanelModule,
   ],
   providers: [],
   declarations: [ImportRADataPopupComponent],

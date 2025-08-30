@@ -92,15 +92,13 @@ export class InsuranceNewFormComponent implements OnInit {
         ? data.uniqueKeys.map((u: any) => u.ColumnName).join(', ')
         : '',
     };
-    // Unique keys only for info
+
     this.selectedKeys = data.uniqueKeys || [];
-    // All columns go into raFileColumns (default = selected)
+    this.manageUniqueKey();
     this.raFileColumns = (data.columns || []).map((c: any) => ({
       ...c,
       Status: 'selected',
     }));
-    // fullcolumnsData starts the same as raFileColumns
-    // this.fullcolumnsData = [...this.raFileColumns];
 
     setTimeout(() => {
       this.availableGrid?.instance.refresh();
@@ -121,17 +119,27 @@ export class InsuranceNewFormComponent implements OnInit {
       this.dataservice.get_All_Column_List()
     );
     const all = response?.data ?? [];
-    const selectedNames = new Set(
-      (this.raFileColumns || []).map((r: any) =>
-        r.ColumnName?.toLowerCase().trim()
-      )
-    );
-    this.fullcolumnsData = all.map((col: any) => ({
-      ...col,
-      Status: selectedNames.has(col.ColumnName?.toLowerCase().trim())
-        ? 'selected'
-        : 'available',
-    }));
+
+    // Build a lookup { columnName -> RA Caption }
+    const raCaptionMap: Record<string, string> = {};
+    (this.raFileColumns || []).forEach((r: any) => {
+      const key = r.ColumnName?.toLowerCase().trim();
+      if (key) {
+        raCaptionMap[key] = r.ColumnTitle || r.Caption || r.ColumnName;
+      }
+    });
+
+    this.fullcolumnsData = all.map((col: any) => {
+      const key = col.ColumnName?.toLowerCase().trim();
+      const isSelected = raCaptionMap[key] !== undefined;
+
+      return {
+        ...col,
+        // 👇 replace caption with RA version if exists, else keep original
+        ColumnTitle: isSelected ? raCaptionMap[key] : col.ColumnTitle,
+        Status: isSelected ? 'selected' : 'available',
+      };
+    });
   }
 
   // ======= classification dropdown data ========
@@ -259,7 +267,7 @@ export class InsuranceNewFormComponent implements OnInit {
   // ============= update insurance template ==========
   updateInsurance() {
     const userId = Number(sessionStorage.getItem('UserID')) || 1;
-    const insuranceId = this.insuranceCompany.insuranceId || 0; 
+    const insuranceId = this.insuranceCompany.insuranceId || 0;
 
     const uniqueKeys = this.UniqueColumnData.map((col: any) => ({
       ColumnID: col.ID || 0,

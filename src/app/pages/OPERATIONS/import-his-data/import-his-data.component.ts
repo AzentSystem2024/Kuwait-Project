@@ -12,10 +12,11 @@ import {
   DxPopupModule,
   DxDataGridComponent,
   DxValidationGroupComponent,
+  DxLoadPanelModule,
+  DxSelectBoxModule,
 } from 'devextreme-angular';
 import { FormPopupModule } from 'src/app/components';
-import { MasterReportService } from '../../MASTER PAGES/master-report.service';
-import { Router } from '@angular/router';
+
 import { DataService } from 'src/app/services';
 import { ImportMasterDataFormComponent } from '../../POP-UP_PAGES/import-master-data-form/import-master-data-form.component';
 import { ViewImportedMasterDataFormComponent } from '../../POP-UP_PAGES/view-imported-master-data-form/view-imported-master-data-form.component';
@@ -76,6 +77,10 @@ export class ImportHISDataComponent implements OnInit {
   isColumnsLoaded = false;
   ImportedDataSource: any;
 
+  isLoading: boolean = false;
+  insuranceList: any;
+  selectedInsuranceId: any;
+
   constructor(private service: DataService) {
     this.UserID = sessionStorage.getItem('UserID');
   }
@@ -83,6 +88,16 @@ export class ImportHISDataComponent implements OnInit {
   ngOnInit(): void {
     this.loadImportHisLogDataSource();
     this.fetch_His_Column_List();
+    this.fetch_insurance_dropdown_data();
+  }
+
+  //======== get_insurance_dropdown ========
+  fetch_insurance_dropdown_data() {
+    this.service.Get_GropDown('INSURANCE').subscribe((res: any) => {
+      if (res) {
+        this.insuranceList = res;
+      }
+    });
   }
 
   // ======== column list fetching ======
@@ -106,6 +121,7 @@ export class ImportHISDataComponent implements OnInit {
           this.service.get_Importing_His_Log_List().subscribe({
             next: (res: any) => {
               if (res.flag === '1') {
+                this.isLoading = false;
                 resolve(res.data || []);
               } else {
                 reject(res.message || 'Failed to load data');
@@ -131,7 +147,16 @@ export class ImportHISDataComponent implements OnInit {
 
   // ===== trigger file input =======
   selectFile() {
-    this.fileInput.nativeElement.click();
+    if (this.selectedInsuranceId) {
+      this.fileInput.nativeElement.click();
+    } else {
+      notify({
+        message: 'Please select a insurance.',
+        type: 'error',
+        displayTime: 5000,
+        position: { my: 'right top', at: 'right top', of: window },
+      });
+    }
   }
 
   // ========= handle file selection and read the Excel file =======
@@ -147,6 +172,7 @@ export class ImportHISDataComponent implements OnInit {
       return;
     }
 
+    this.isLoading = true;
     const file = target.files[0];
     const reader: FileReader = new FileReader();
 
@@ -163,7 +189,7 @@ export class ImportHISDataComponent implements OnInit {
 
       // Expected headers from API columnData
       const expectedHeaders: string[] = this.columnData.map(
-        (c: any) => c.dataField
+        (c: any) => c.caption
       );
 
       // Compare sets
@@ -175,14 +201,15 @@ export class ImportHISDataComponent implements OnInit {
       );
 
       if (missingInExcel.length > 0 || extraInExcel.length > 0) {
+        this.isLoading = false;
         notify({
           message:
-            `Column mismatch!\n\n\n\n` +
+            `Column mismatch!\n\n` +
             (missingInExcel.length
-              ? `Missing in Excel: ${missingInExcel.join(', ')}\n\n\n`
+              ? `Missing in Excel: ${missingInExcel.join(', ')}\n`
               : '') +
             (extraInExcel.length
-              ? `Extra in Excel: ${extraInExcel.join(', ')}\n\n\n`
+              ? `Extra in Excel: ${extraInExcel.join(', ')}\n`
               : ''),
           type: 'error',
           displayTime: 5000,
@@ -192,8 +219,29 @@ export class ImportHISDataComponent implements OnInit {
         return;
       }
 
-      const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
-      this.ImportedDataSource = data;
+      // Convert sheet to JSON (with captions as keys)
+      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+      // Build mapping { caption -> dataField }
+      const captionToField: Record<string, string> = {};
+      this.columnData.forEach((col: any) => {
+        captionToField[col.caption] = col.dataField;
+      });
+
+      // Map imported rows to use dataField keys instead of caption keys
+      const mappedData = rawData.map((row: any) => {
+        const newRow: any = {};
+        Object.keys(row).forEach((caption) => {
+          const field = captionToField[caption];
+          if (field) {
+            newRow[field] = row[caption];
+          }
+        });
+        return newRow;
+      });
+
+      this.ImportedDataSource = mappedData;
+      this.isLoading = false;
       this.isNewFormPopupOpened = true;
 
       this.resetFileInput();
@@ -242,6 +290,7 @@ export class ImportHISDataComponent implements OnInit {
   show_new_Form() {
     this.isNewFormPopupOpened = true;
   }
+
   // ============ detailed view click ========
   viewDetails = (e: any) => {
     const id = e.row.key.ID;
@@ -255,17 +304,14 @@ export class ImportHISDataComponent implements OnInit {
       return;
     }
 
+    this.isLoading = true; //  show loading
+
     this.service.fetch_His_Data_log_view(id).subscribe({
       next: (res: any) => {
         if (res) {
           this.selectedData = res;
+          this.isLoading = false; //  stop loading
           this.ViewDataPopup = true;
-          notify({
-            message: 'Record details loaded successfully.',
-            type: 'success',
-            displayTime: 3000,
-            position: 'top right',
-          });
         } else {
           notify({
             message: 'No details found for this record.',
@@ -276,6 +322,7 @@ export class ImportHISDataComponent implements OnInit {
         }
       },
       error: () => {
+        this.isLoading = false; // stop loading on error
         notify({
           message: 'Failed to fetch record details.',
           type: 'error',
@@ -306,6 +353,8 @@ export class ImportHISDataComponent implements OnInit {
 
   onClearData() {
     this.ImportHISDataFormComponent.clearData();
+    this.isLoading = false;
+    this.selectedInsuranceId=null
   }
 }
 
@@ -317,6 +366,8 @@ export class ImportHISDataComponent implements OnInit {
     FormPopupModule,
     DxPopupModule,
     ImportHISDataFormModule,
+    DxLoadPanelModule,
+    DxSelectBoxModule,
   ],
   providers: [],
   exports: [],

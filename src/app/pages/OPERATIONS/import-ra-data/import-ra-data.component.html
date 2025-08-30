@@ -49,6 +49,7 @@
             [(value)]="selectedInsuranceId"
             label="Insurance"
             labelMode="floating"
+            width="400"
             [showClearButton]="true"
             [searchEnabled]="true"
             (onValueChanged)="fetch_RA_Column_Data()"
@@ -165,3 +166,11 @@
     ></app-import-ra-data-popup>
   </dx-popup>
 </div>
+<dx-load-panel
+  [(visible)]="isLoading"
+  shadingColor="rgba(0,0,0,0.4)"
+  [showPane]="true"
+  message="Loading ..."
+  [closeOnOutsideClick]="false"
+>
+</dx-load-panel>

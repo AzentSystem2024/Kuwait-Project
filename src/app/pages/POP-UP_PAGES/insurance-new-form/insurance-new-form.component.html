@@ -74,14 +74,19 @@
         #dataGrid
         [dataSource]="raFileColumns"
         [showBorders]="true"
-        [columnAutoWidth]="true"
+        [columnAutoWidth]="false"
         [hoverStateEnabled]="true"
         [rowAlternationEnabled]="true"
         rowAlternationInterval="2"
         height="450"
         [(selectedRowKeys)]="selectedKeys"
         [selection]="{ mode: 'multiple' }"
+        [paging]="{ enabled: false }"
       >
+        <dxo-scrolling
+          mode="virtual"
+          rowRenderingMode="virtual"
+        ></dxo-scrolling>
         <dxi-column dataField="ColumnName" caption="Column Name"></dxi-column>
         <dxi-column dataField="ColumnTitle" caption="Caption"></dxi-column>
       </dx-data-grid>
@@ -145,7 +150,13 @@
         [height]="450"
         [showBorders]="true"
         [filterValue]="['Status', '=', 'available']"
+        [paging]="{ enabled: false }"
       >
+        <dxo-scrolling
+          mode="virtual"
+          rowRenderingMode="virtual"
+        ></dxo-scrolling>
+
         <dxo-row-dragging
           data="available"
           group="columnsGroup"
@@ -168,6 +179,7 @@
         [showBorders]="true"
         [filterValue]="['Status', '=', 'selected']"
         [editing]="{ mode: 'cell', allowUpdating: true }"
+        [paging]="{ enabled: false }"
       >
         <dxo-row-dragging
           data="selected"
@@ -176,6 +188,11 @@
           [allowReordering]="true"
           [onReorder]="onReorder"
         ></dxo-row-dragging>
+
+        <dxo-scrolling
+          mode="virtual"
+          rowRenderingMode="virtual"
+        ></dxo-scrolling>
 
         <dxi-column
           dataField="ColumnName"
