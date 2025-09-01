@@ -298,4 +298,11 @@ export class DataService {
     const reqbody = payload;
     return this.http.post(url, reqbody);
   }
+
+  // ======= fetch import RA process data list ======
+  manual_Process_Data(payload: any) {
+    const url = `${BASE_URL}raData/manualProcess`;
+    const reqbody = payload;
+    return this.http.post(url, reqbody);
+  }
 }

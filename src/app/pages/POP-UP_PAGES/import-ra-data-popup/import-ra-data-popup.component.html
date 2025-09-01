@@ -112,33 +112,59 @@
   [dragEnabled]="true"
   [closeOnOutsideClick]="false"
   title="Process Data"
+  (onHidden)="onProcessPopupClosed()"
 >
   <div class="h-100 d-flex flex-column">
     <!-- Top Grid -->
     <p class="h5 fw-bold border-bottom pb-2 mb-3">RA Data</p>
     <dx-data-grid
+      #raGrid
       [dataSource]="RAGridData"
       [columns]="RAProcessPopUpColumns"
       [showBorders]="true"
       class="mb-4"
       [height]="'45%'"
+      [keyExpr]="'ID'"
       [paging]="{ enabled: false }"
+      [selection]="{
+        mode: 'multiple',
+        showCheckBoxesMode: 'always',
+        allowSelectAll: false
+      }"
       [focusedRowEnabled]="true"
-      [selection]="{ mode: 'single' }"
+      [columnAutoWidth]="true"
+      [scrolling]="{ mode: 'virtual' }"
       (onSelectionChanged)="onRADataRowSelected($event)"
     >
+      <dxo-sorting mode="single"></dxo-sorting>
+      <dxo-filter-row [visible]="false"></dxo-filter-row>
+      <dxo-header-filter [visible]="true"></dxo-header-filter>
     </dx-data-grid>
 
     <!-- Bottom Grid -->
     <p class="h5 fw-bold border-bottom pb-2 mb-3">Claim Data</p>
     <dx-data-grid
+      #hisGrid
       [dataSource]="HISGridData"
       [columns]="HISProcessPopUpColumns"
       [showBorders]="true"
       class="flex-grow"
       [height]="'45%'"
+      [keyExpr]="'ID'"
       [paging]="{ enabled: false }"
+      [focusedRowEnabled]="true"
+      [columnAutoWidth]="true"
+      [scrolling]="{ mode: 'virtual' }"
+      [selection]="{
+        mode: 'multiple',
+        showCheckBoxesMode: 'always',
+        allowSelectAll: false
+      }"
+      (onSelectionChanged)="onHISRowSelected($event)"
     >
+      <dxo-sorting mode="single"></dxo-sorting>
+      <dxo-filter-row [visible]="false"></dxo-filter-row>
+      <dxo-header-filter [visible]="true"></dxo-header-filter>
     </dx-data-grid>
 
     <!-- Footer Button -->
@@ -157,7 +183,7 @@
   [(visible)]="isLoading"
   shadingColor="rgba(0,0,0,0.4)"
   [showPane]="true"
-  message="Loading..."
+  message="Processing..."
   [closeOnOutsideClick]="false"
 >
 </dx-load-panel>
