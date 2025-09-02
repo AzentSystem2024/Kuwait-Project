@@ -116,13 +116,13 @@
 >
   <div class="h-100 d-flex flex-column">
     <!-- Top Grid -->
-    <p class="h5 fw-bold border-bottom pb-2 mb-3">RA Data</p>
+    <p class="h5 fw-bold border-bottom pb-2">RA Data</p>
     <dx-data-grid
       #raGrid
       [dataSource]="RAGridData"
       [columns]="RAProcessPopUpColumns"
       [showBorders]="true"
-      class="mb-4"
+      class="mb-1"
       [height]="'45%'"
       [keyExpr]="'ID'"
       [paging]="{ enabled: false }"
@@ -142,14 +142,14 @@
     </dx-data-grid>
 
     <!-- Bottom Grid -->
-    <p class="h5 fw-bold border-bottom pb-2 mb-3">Claim Data</p>
+    <p class="h5 fw-bold border-bottom pb-2">Claim Data</p>
     <dx-data-grid
       #hisGrid
       [dataSource]="HISGridData"
       [columns]="HISProcessPopUpColumns"
       [showBorders]="true"
       class="flex-grow"
-      [height]="'45%'"
+      [height]="'40%'"
       [keyExpr]="'ID'"
       [paging]="{ enabled: false }"
       [focusedRowEnabled]="true"
