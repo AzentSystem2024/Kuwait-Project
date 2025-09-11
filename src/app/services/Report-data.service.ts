@@ -115,29 +115,11 @@ export class ReportService {
 
   //========fetch datasource of Claim-Details========
   fetch_Claim_Details(formData: any) {
-    const userid = sessionStorage.getItem('UserID');
-    const currentPathName = this.router.url.replace('/', '');
-    const url = `${BASE_URL}reports/claimdetails/main`;
+    const url = `${BASE_URL}reports/claimdetails/getReportData`;
     const reqBody = {
-      userid: userid,
-      reportid: currentPathName,
-      SearchOn: formData.SearchOn,
-      encounterType: formData.EncounterType,
-      DateFrom: formData.From_Date,
-      DateTo: formData.To_Date,
-      Facility: formData.Facility,
-      ReceiverId: formData.ReceiverID,
-      PayerId: formData.PayerID,
-      Payer: formData.Payer,
-      Clinician: formData.Clinician,
-      OrderingClinician: formData.OrderingClinician,
-      ClaimStatus: formData.CliamStatus,
-      ResubmissionType: formData.Resubmission,
-      PaymentStatus: formData.paymentStatus,
-      ClaimNumber: formData.ClaimNumber,
-      PatientID: formData.PatientID,
-      MemberID: formData.memberID,
-      DenialCode: formData.DenialCodes,
+      INSURANCE_ID: formData.INSURANCE_ID,
+      DATE_FROM: formData.DATE_FROM,
+      DATE_TO: formData.DATE_TO,
     };
     return this.http.post(url, reqBody);
   }
@@ -217,7 +199,7 @@ export class ReportService {
       ClaimNumber: formData.ClaimNumber,
       PatientID: formData.PatientID,
       MemberID: formData.memberID,
-      // DenialCode: formData.DenialCodes,  
+      // DenialCode: formData.DenialCodes,
     };
     return this.http.post(url, reqBody);
   }
@@ -349,7 +331,7 @@ export class ReportService {
       ClaimNumber: formData.ClaimNumber,
       PatientID: formData.PatientID,
       MemberID: formData.memberID,
-      // DenialCode: formData.DenialCodes,  
+      // DenialCode: formData.DenialCodes,
     };
     return this.http.post(url, reqBody);
   }
@@ -368,11 +350,10 @@ export class ReportService {
       Facility: formData.Facility,
       ReceiverId: formData.ReceiverID,
       PayerId: formData.PayerID,
-      BasedOnInitialNetAmount : formData.BasedOnInitialNetAmount
-      
-      // DenialCode: formData.DenialCodes,  
+      BasedOnInitialNetAmount: formData.BasedOnInitialNetAmount,
+
+      // DenialCode: formData.DenialCodes,
     };
     return this.http.post(url, reqBody);
   }
-
 }

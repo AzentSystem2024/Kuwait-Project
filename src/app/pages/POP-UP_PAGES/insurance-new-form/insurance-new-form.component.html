@@ -152,6 +152,10 @@
         [filterValue]="['Status', '=', 'available']"
         [paging]="{ enabled: false }"
       >
+        <dxo-filter-row
+          [visible]="true"
+          [applyFilter]="'auto'"
+        ></dxo-filter-row>
         <dxo-scrolling
           mode="virtual"
           rowRenderingMode="virtual"
@@ -181,6 +185,10 @@
         [editing]="{ mode: 'cell', allowUpdating: true }"
         [paging]="{ enabled: false }"
       >
+        <dxo-filter-row
+          [visible]="true"
+          [applyFilter]="'auto'"
+        ></dxo-filter-row>
         <dxo-row-dragging
           data="selected"
           group="columnsGroup"

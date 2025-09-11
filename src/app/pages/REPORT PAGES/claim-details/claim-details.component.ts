@@ -77,45 +77,20 @@ export class ClaimDetailsComponent implements OnInit {
   columnsConfig: any; //==============Column data storing variable
 
   //================Variables for Storing DataSource========
-  SearchOn_DataSource: any;
-  Facility_DataSource: any;
-  EncounterType_DataSource: any;
-  RecieverID_DataSource: any;
-  PayerID_DataSource: any;
-  Payer_DataSource: any;
-  Clinician_DataSource: any;
-  OrderingClinician_DataSource: any;
-  ResubmissionType_DataSource: any;
-  DenialCodes_DataSource: any;
-  CptTypes_DataSource: any;
-  CliamStatus_DataSource: any;
-  paymentStatus_DataSource: any;
+
   monthDataSource: { name: string; value: any }[];
   years: number[] = [];
+  Insurance_DataSource: any;
 
   //================Variables for Storing selected Parameters========
-  SearchOn_Value: any = null;
-  Facility_Value: any = [];
-  EncounterType_Value: any = null;
   From_Date_Value: any = new Date();
   To_Date_Value: any = new Date();
-  ReceiverID_Value: any[] = [];
-  PayerID_Value: any[] = [];
-  Payer_Value: any;
-  Clinician_Value: any[] = [];
-  OrderingClinician_Value: any[] = [];
   selectedmonth: any = '';
   selectedYear: number | null = null;
-  ClaimNumber_Value: any = null;
-  PatientID_Value: any = null;
-  Resubmission_Value: any = null;
-  DenialCodes_Value: any;
-  CliamStatus_Value: any;
-  memberID_Value: any = null;
-  paymentStatus_Value: any = null;
+  Insurance_Value;
 
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [10, 20, 'all'];
+  readonly allowedPageSizes: any = [20, 50, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -150,7 +125,7 @@ export class ClaimDetailsComponent implements OnInit {
 
   popupWidth: any = '90%';
   popupHeight: any = '90vh';
-  popupPosition: any = { my: 'center', at: 'center', };
+  popupPosition: any = { my: 'center', at: 'center' };
   isPopupMinimised: boolean = false;
 
   jsonData: any;
@@ -169,7 +144,7 @@ export class ClaimDetailsComponent implements OnInit {
     private router: Router,
     private reportengine: ReportEngineService,
     private datePipe: DatePipe,
-    private masterService: MasterReportService,
+    private dataservice: DataService,
     private popupStateService: PopupStateService,
     private cdr: ChangeDetectorRef
   ) {
@@ -284,7 +259,7 @@ export class ClaimDetailsComponent implements OnInit {
       } else {
         popup.width = '100%';
         popup.height = '90vh';
-        popup.position = { my: 'center', at: 'center',  }; // Example position
+        popup.position = { my: 'center', at: 'center' }; // Example position
         popup.icon = 'minimize-icon';
       }
 
@@ -376,71 +351,20 @@ export class ClaimDetailsComponent implements OnInit {
   //============Get search parameters dropdown values=======
   get_searchParameters_Dropdown_Values() {
     this.loadingVisible = true;
-    this.masterService.Get_Facility_List_Data().subscribe((response: any) => {
-      if (response.flag == '1') {
-        this.Facility_DataSource = this.makeAsyncDataSourceFromJson(
-          response.data
-        );
+    this.dataservice.Get_GropDown('INSURANCE').subscribe((res: any) => {
+      if (res) {
+        this.Insurance_DataSource = res;
+        this.loadingVisible = false;
       }
     });
-    this.service.get_SearchParametrs_Data().subscribe(
-      (response: any) => {
-        if (response.flag == '1') {
-          this.SearchOn_DataSource = response.SearchOn;
-          this.SearchOn_Value = this.SearchOn_DataSource.find(
-            (item) => item.ID === 'EncounterStartDate'
-          )?.ID;
-          this.EncounterType_DataSource = response.EncounterType;
-          this.RecieverID_DataSource = this.makeAsyncDataSourceFromJson(
-            response.ReceiverID
-          );
-          this.RecieverIDjsonData = response.ReceiverID;
-          this.PayerID_DataSource = this.makeAsyncDataSourceFromJson(
-            response.PayerID
-          );
-          this.PayerIDjsonData = response.PayerID;
-          this.Payer_DataSource = response.Payer;
-          this.Clinician_DataSource = this.makeAsyncDataSourceFromJson(
-            response.Clinician
-          );
-          this.ClinicianJsonData = response.Clinician;
-          this.OrderingClinician_DataSource = this.makeAsyncDataSourceFromJson(
-            response.OrderingClinician
-          );
-          this.orderingClinicianJsonData = response.OrderingClinician;
-          this.ResubmissionType_DataSource = response.ResubmissionType;
-          this.CliamStatus_DataSource = response.ClaimStatus;
-          this.paymentStatus_DataSource = response.PaymentStatus;
-          this.advanceFilterGridColumns = response.AdvanceFilter;
-          this.loadingVisible = false;
-        }
-      },
-      (error) => {
-        console.error('Error fetching data:', error);
-      }
-    );
   }
 
   //=========Fetch DataSource For The Datagrid Table==========
   async get_Datagrid_DataSource() {
     const formData = {
-      SearchOn: this.SearchOn_Value,
-      Facility: this.Facility_Value.join(', '),
-      EncounterType: this.EncounterType_Value,
-      From_Date: this.reportengine.formatDate(this.From_Date_Value),
-      To_Date: this.reportengine.formatDate(this.To_Date_Value),
-      ReceiverID: this.ReceiverID_Value.join(', '),
-      PayerID: this.PayerID_Value.join(', '),
-      Payer: this.Payer_Value,
-      Clinician: this.Clinician_Value.join(', '),
-      OrderingClinician: this.OrderingClinician_Value.join(', '),
-      ClaimNumber: this.ClaimNumber_Value,
-      PatientID: this.PatientID_Value,
-      Resubmission: this.Resubmission_Value,
-      DenialCodes: this.DenialCodes_Value,
-      CliamStatus: this.CliamStatus_Value,
-      memberID: this.memberID_Value,
-      paymentStatus: this.paymentStatus_Value,
+      INSURANCE_ID: this.Insurance_Value,
+      DATE_FROM: this.reportengine.formatDate(this.From_Date_Value),
+      DATE_TO: this.reportengine.formatDate(this.To_Date_Value),
     };
     this.isContentVisible = false;
     this.dataGrid.instance.beginCustomLoading('Loading...');
@@ -450,70 +374,21 @@ export class ClaimDetailsComponent implements OnInit {
         .toPromise();
       if (response.flag === '1') {
         this.isEmptyDatagrid = false;
-
-        this.columndata = response.ReportColumns;
-
+        this.columndata = response.header.ReportColumns;
         const userLocale = navigator.language || 'en-US';
-
         this.summaryColumnsData = this.generateSummaryColumns(
-          response.ReportColumns
+          response.header.ReportColumns
         );
 
         this.columnsConfig = this.generateColumnsConfig(
-          response.ReportColumns,
+          response.header.ReportColumns,
           userLocale
         );
         this.ColumnNames = this.columnsConfig
           .filter((column) => column.visible)
           .map((column) => column.caption);
 
-        this.personalReportData = response.PersonalReports;
-        this.memorise_Dropdown_DataList = response.PersonalReports.map(
-          (personalReport) => ({
-            name: personalReport.name,
-          })
-        );
-
-        // Format dates in ReportData
-        const formattedReportData = response.ReportData.map((data) => ({
-          ...data,
-          TransactionDate: this.datePipe.transform(
-            data.TransactionDate,
-            'dd-MMM-yyyy'
-          ),
-          ActivityStartDate: this.datePipe.transform(
-            data.ActivityStartDate,
-            'dd-MMM-yyyy'
-          ),
-          EncounterStartDate: this.datePipe.transform(
-            data.EncounterStartDate,
-            'dd-MMM-yyyy'
-          ),
-          EncounterEndDate: this.datePipe.transform(
-            data.EncounterEndDate,
-            'dd-MMM-yyyy'
-          ),
-          LastResubmissionDate: this.datePipe.transform(
-            data.LastResubmissionDate,
-            'dd-MMM-yyyy'
-          ),
-          InitialDateSettlement: this.datePipe.transform(
-            data.InitialDateSettlement,
-            'dd-MMM-yyyy'
-          ),
-          SubmissionDate: this.datePipe.transform(
-            data.SubmissionDate,
-            'dd-MMM-yyyy'
-          ),
-          LastRemittanceDate: this.datePipe.transform(
-            data.LastRemittanceDate,
-            'dd-MMM-yyyy'
-          ),
-          LastSubmissionDate: this.datePipe.transform(
-            data.LastSubmissionDate,
-            'dd-MMM-yyyy'
-          ),
-        }));
+        const formattedReportData = response.header.ReportData;
 
         // Initialize dataGrid_DataSource with the pre-loaded data
         this.dataGrid_DataSource = new DataSource<any>({
@@ -545,7 +420,7 @@ export class ClaimDetailsComponent implements OnInit {
       );
     }
   }
-
+  // ================ generate summary columns ===============
   generateSummaryColumns(reportColumns) {
     const decimalColumns = reportColumns.filter(
       (col) => col.Type === 'Decimal' && col.Summary
@@ -574,7 +449,7 @@ export class ClaimDetailsComponent implements OnInit {
       ],
     };
   }
-
+  // ================ create summary columns format ===============
   createSummaryItem(col, isGroupItem = false, summaryType = 'sum', formatType) {
     return {
       column: col.Name,
@@ -592,12 +467,12 @@ export class ClaimDetailsComponent implements OnInit {
       showInGroupFooter: isGroupItem, // Show in group footer for group items
     };
   }
-
+  // =========== generate full column data format =============
   generateColumnsConfig(reportColumns, userLocale) {
     return reportColumns.map((column) => {
       let columnFormat;
 
-      if (column.Type === 'DateTime') {
+      if (column.Type === 'datetime') {
         columnFormat = {
           type: 'date',
           formatter: (date) =>
@@ -639,36 +514,6 @@ export class ClaimDetailsComponent implements OnInit {
         format: columnFormat,
       };
     });
-  }
-
-  import_Advance_Filter() {
-    const filterData = this.reportengine.getData();
-    console.log('advance filter imported data', filterData);
-    this.ClaimNumber_Value = filterData.ClaimNumber;
-
-    // this.Facility_Value = this.Facility_DataSource.filter((item) =>
-    //   filterData.ReceiverID.split(',').includes(item.Name)
-    // ).map((item) => item.ID);
-
-    this.ReceiverID_Value = this.RecieverID_DataSource.filter((item) =>
-      filterData.ReceiverID.split(',').includes(item.Name)
-    ).map((item) => item.ID);
-
-    this.PayerID_Value = this.PayerID_DataSource.filter((item) =>
-      filterData.PayerID.split(',').includes(item.Name)
-    ).map((item) => item.ID);
-
-    // this.Payer_Value = this.Payer_DataSource.filter((item) =>
-    //   filterData.ReceiverID.split(',').includes(item.Name)
-    // ).map((item) => item.ID);
-
-    this.Clinician_Value = this.Clinician_DataSource.filter((item) =>
-      filterData.Clinician.split(',').includes(item.Name)
-    ).map((item) => item.ID);
-
-    this.OrderingClinician_Value = this.OrderingClinician_DataSource.filter(
-      (item) => filterData.OrderingClinician.split(',').includes(item.Name)
-    ).map((item) => item.ID);
   }
 
   //============Show Parametrs Div=======================
@@ -744,96 +589,96 @@ export class ClaimDetailsComponent implements OnInit {
     this.GridSource.filter();
   }
 
-  //==============Show Memorise Report===================
-  ShowMemoriseTable = (e: any) => {
-    const SelectedValue = e.itemData.name;
-    if (SelectedValue === null || SelectedValue === '') {
-      this.get_Datagrid_DataSource();
-    } else {
-      this.refresh();
-      this.columnsConfig = this.personalReportData
-        .filter((report: any) => report.name == SelectedValue)
-        .map((report: any) => {
-          return report.Columns.map((column: any) => ({
-            dataField: column.Name,
-            caption: column.Title,
-            visible: column.Visibility,
-            type: column.Type,
-            format:
-              column.Type === 'Decimal'
-                ? {
-                    type: 'fixedPoint',
-                    precision: 2,
-                  }
-                : undefined,
-          }));
-        })
-        .flat(); // Flatten the array in case each report has multiple columns
+  // //==============Show Memorise Report===================
+  // ShowMemoriseTable = (e: any) => {
+  //   const SelectedValue = e.itemData.name;
+  //   if (SelectedValue === null || SelectedValue === '') {
+  //     this.get_Datagrid_DataSource();
+  //   } else {
+  //     this.refresh();
+  //     this.columnsConfig = this.personalReportData
+  //       .filter((report: any) => report.name == SelectedValue)
+  //       .map((report: any) => {
+  //         return report.Columns.map((column: any) => ({
+  //           dataField: column.Name,
+  //           caption: column.Title,
+  //           visible: column.Visibility,
+  //           type: column.Type,
+  //           format:
+  //             column.Type === 'Decimal'
+  //               ? {
+  //                   type: 'fixedPoint',
+  //                   precision: 2,
+  //                 }
+  //               : undefined,
+  //         }));
+  //       })
+  //       .flat(); // Flatten the array in case each report has multiple columns
 
-      this.ColumnNames = this.columnsConfig
-        .filter((column) => column.visible)
-        .map((column) => column.dataField)
-        .sort((a, b) => a.localeCompare(b));
-    }
-  };
+  //     this.ColumnNames = this.columnsConfig
+  //       .filter((column) => column.visible)
+  //       .map((column) => column.dataField)
+  //       .sort((a, b) => a.localeCompare(b));
+  //   }
+  // };
 
-  //==========show memorise save pop up==================
-  show_Memorise_popup = () => {
-    this.MemoriseReportName = '';
-    this.isSaveMemorisedOpened = !this.isSaveMemorisedOpened;
-  };
-  //==========fetch custome memorise report name==========
-  onMemoriseReportNameChanged(e) {
-    this.MemoriseReportName = e.value;
-  }
-  //================Save Memorize Reports=================
-  save_Memorise_Report() {
-    const memoriseName = this.MemoriseReportName;
-    const filterParameters = JSON.parse(sessionStorage.getItem('reportData'));
-    const reportColumns = this.columndata;
-    const allColumns = this.ColumnNames;
-    const columns = this.dataGrid.instance.getVisibleColumns();
-    const VisiblecolumnNames = columns
-      .map((col) => col.caption || col.dataField)
-      .filter((name) => name !== undefined);
-    const hiddenColumns = allColumns.filter(
-      (colName) => !VisiblecolumnNames.includes(colName)
-    );
-    const memoriseReportColumns = reportColumns.map((column) => {
-      return {
-        ...column,
-        Visibility: hiddenColumns.includes(column.Name) ? false : true,
-      };
-    });
-    this.reportengine
-      .save_Memorise_report(
-        memoriseName,
-        memoriseReportColumns,
-        filterParameters
-      )
-      .subscribe((response: any) => {
-        if (response) {
-          notify(
-            {
-              message: `${response.message}`,
-              position: { at: 'top right', my: 'top right' },
-            },
-            'success'
-          );
-          this.show_Memorise_popup();
-          // this.isSaveMemorisedOpened = false;
-          this.get_Datagrid_DataSource();
-        } else {
-          notify(
-            {
-              message: `${response.message}`,
-              position: { at: 'top right', my: 'top right' },
-            },
-            'error'
-          );
-        }
-      });
-  }
+  // //==========show memorise save pop up==================
+  // show_Memorise_popup = () => {
+  //   this.MemoriseReportName = '';
+  //   this.isSaveMemorisedOpened = !this.isSaveMemorisedOpened;
+  // };
+  // //==========fetch custome memorise report name==========
+  // onMemoriseReportNameChanged(e) {
+  //   this.MemoriseReportName = e.value;
+  // }
+  // //================Save Memorize Reports=================
+  // save_Memorise_Report() {
+  //   const memoriseName = this.MemoriseReportName;
+  //   const filterParameters = JSON.parse(sessionStorage.getItem('reportData'));
+  //   const reportColumns = this.columndata;
+  //   const allColumns = this.ColumnNames;
+  //   const columns = this.dataGrid.instance.getVisibleColumns();
+  //   const VisiblecolumnNames = columns
+  //     .map((col) => col.caption || col.dataField)
+  //     .filter((name) => name !== undefined);
+  //   const hiddenColumns = allColumns.filter(
+  //     (colName) => !VisiblecolumnNames.includes(colName)
+  //   );
+  //   const memoriseReportColumns = reportColumns.map((column) => {
+  //     return {
+  //       ...column,
+  //       Visibility: hiddenColumns.includes(column.Name) ? false : true,
+  //     };
+  //   });
+  //   this.reportengine
+  //     .save_Memorise_report(
+  //       memoriseName,
+  //       memoriseReportColumns,
+  //       filterParameters
+  //     )
+  //     .subscribe((response: any) => {
+  //       if (response) {
+  //         notify(
+  //           {
+  //             message: `${response.message}`,
+  //             position: { at: 'top right', my: 'top right' },
+  //           },
+  //           'success'
+  //         );
+  //         this.show_Memorise_popup();
+  //         // this.isSaveMemorisedOpened = false;
+  //         this.get_Datagrid_DataSource();
+  //       } else {
+  //         notify(
+  //           {
+  //             message: `${response.message}`,
+  //             position: { at: 'top right', my: 'top right' },
+  //           },
+  //           'error'
+  //         );
+  //       }
+  //     });
+  // }
   //====================Find the column location from the datagrid================
   findColumnLocation = (e: any) => {
     const columnName = e.itemData;

@@ -9,68 +9,22 @@
       <dxi-item
         itemType="group"
         cssClass="form-group"
-        class="rowGroup"
         [colCount]="8"
         [colCountByScreen]="{ xs: 8, sm: 8, md: 8, lg: 8 }"
       >
-        <dxi-item [colSpan]="8">
-          <dx-drop-down-box
-            labelMode="floating"
-            labelLocation="left"
-            label="Facility value"
-            [(value)]="Facility_Value"
-            valueExpr="ID"
-            displayExpr="FacilityName"
-            [showClearButton]="true"
-            [dataSource]="Facility_DataSource"
-          >
-            <div *dxTemplate="let data of 'content'">
-              <dx-data-grid
-                [dataSource]="Facility_DataSource"
-                [columns]="[
-                  { dataField: 'FacilityLicense', caption: 'License' },
-                  { dataField: 'FacilityName', caption: 'Name' },
-                  { dataField: 'Region', caption: 'Region' },
-                  { dataField: 'Emirate', caption: 'Emirates' },
-                  { dataField: 'Zone', caption: 'Zone' },
-                  { dataField: 'Type', caption: 'Type' },
-                  { dataField: 'Category', caption: 'Category' },
-                  { dataField: 'Postoffice', caption: 'Post office' }
-                ]"
-                [selection]="{ mode: 'multiple' }"
-                [hoverStateEnabled]="true"
-                [paging]="{ enabled: true, pageSize: 10 }"
-                [filterRow]="{ visible: true }"
-                [headerFilter]="{ visible: true }"
-                [scrolling]="{ mode: 'virtual' }"
-                [height]="250"
-                [(selectedRowKeys)]="Facility_Value"
-              >
-              </dx-data-grid>
-            </div>
-          </dx-drop-down-box>
-        </dxi-item>
-      </dxi-item>
-
-      <dxi-item
-        itemType="group"
-        cssClass="form-group"
-        [colCount]="8"
-        [colCountByScreen]="{ xs: 8, sm: 8, md: 8, lg: 8 }"
-      >
-        <dxi-item [colSpan]="2">
+        <dxi-item [colSpan]="3">
           <div>
             <dx-select-box
               labelMode="floating"
               labelLocation="left"
-              label="searchOn value"
-              [dataSource]="SearchOn_DataSource"
-              displayExpr="Name"
+              label="Insurance"
+              [dataSource]="Insurance_DataSource"
+              displayExpr="DESCRIPTION"
               valueExpr="ID"
-              [(value)]="SearchOn_Value"
+              [(value)]="Insurance_Value"
               [searchEnabled]="true"
               (valueChanged)="onDropdownValueChanged()"
-              [dropDownOptions]="{ width: 'auto' }"
+              [dropDownOptions]="{ width: '100%' }"
               [showClearButton]="true"
             >
             </dx-select-box>
@@ -137,313 +91,6 @@
           </dx-date-box>
         </dxi-item>
 
-        <dxi-item [colSpan]="2">
-          <div>
-            <dx-select-box
-              labelMode="floating"
-              labelLocation="left"
-              label="encounter type"
-              [dataSource]="EncounterType_DataSource"
-              displayExpr="Name"
-              valueExpr="ID"
-              [(value)]="EncounterType_Value"
-              [searchEnabled]="true"
-              (valueChanged)="onDropdownValueChanged()"
-              [showClearButton]="true"
-            >
-            </dx-select-box>
-          </div>
-        </dxi-item>
-      </dxi-item>
-
-      <dxi-item
-        itemType="group"
-        cssClass="form-group"
-        [colCount]="8"
-        [colCountByScreen]="{ xs: 8, sm: 8, md: 8, lg: 8 }"
-      >
-        <dxi-item [colSpan]="2">
-          <dx-select-box
-            labelMode="floating"
-            labelLocation="left"
-            label="payer"
-            [dataSource]="Payer_DataSource"
-            displayExpr="Name"
-            valueExpr="ID"
-            [(value)]="Payer_Value"
-            [searchEnabled]="true"
-            (valueChanged)="onDropdownValueChanged()"
-          >
-          </dx-select-box>
-        </dxi-item>
-
-        <dxi-item [colSpan]="2">
-          <dx-drop-down-box
-            labelMode="floating"
-            labelLocation="left"
-            label="payer ID"
-            [(value)]="PayerID_Value"
-            valueExpr="ID"
-            displayExpr="Name"
-            [showClearButton]="true"
-            [dataSource]="PayerID_DataSource"
-          >
-            <div *dxTemplate="let data of 'content'">
-              <dx-data-grid
-                [dataSource]="PayerID_DataSource"
-                [columns]="[{ dataField: 'Name', caption: 'ID - Name' }]"
-                [selection]="{ mode: 'multiple' }"
-                [hoverStateEnabled]="true"
-                [paging]="{ enabled: true, pageSize: 10 }"
-                [filterRow]="{ visible: true }"
-                [headerFilter]="{ visible: true }"
-                [scrolling]="{ mode: 'virtual' }"
-                [height]="'50vh'"
-                [(selectedRowKeys)]="PayerID_Value"
-                (onSelectionChanged)="
-                  onSelectionChanged(
-                    $event,
-                    this.PayerIDjsonData,
-                    'PayerID_DataSource'
-                  )
-                "
-              >
-              </dx-data-grid>
-            </div>
-          </dx-drop-down-box>
-        </dxi-item>
-
-        <dxi-item [colSpan]="2">
-          <dx-drop-down-box
-            labelMode="floating"
-            labelLocation="left"
-            label="Clinician"
-            [(value)]="Clinician_Value"
-            valueExpr="ID"
-            displayExpr="Name"
-            [showClearButton]="true"
-            [dataSource]="Clinician_DataSource"
-          >
-            <div *dxTemplate="let data of 'content'">
-              <dx-data-grid
-                [dataSource]="Clinician_DataSource"
-                [columns]="[{ dataField: 'Name', caption: 'ID - Name' }]"
-                [selection]="{ mode: 'multiple' }"
-                [hoverStateEnabled]="true"
-                [paging]="{ enabled: true, pageSize: 10 }"
-                [filterRow]="{ visible: true }"
-                [headerFilter]="{ visible: true }"
-                [scrolling]="{ mode: 'virtual' }"
-                [height]="'50vh'"
-                [(selectedRowKeys)]="Clinician_Value"
-                (onSelectionChanged)="
-                  onSelectionChanged(
-                    $event,
-                    this.ClinicianJsonData,
-                    'Clinician_DataSource'
-                  )
-                "
-              >
-              </dx-data-grid>
-            </div>
-          </dx-drop-down-box>
-        </dxi-item>
-
-        <dxi-item [colSpan]="2">
-          <dx-drop-down-box
-            labelMode="floating"
-            labelLocation="left"
-            label="Ordering Clinician"
-            [(value)]="OrderingClinician_Value"
-            valueExpr="ID"
-            displayExpr="Name"
-            [showClearButton]="true"
-            [dataSource]="OrderingClinician_DataSource"
-          >
-            <div *dxTemplate="let data of 'content'">
-              <dx-data-grid
-                [dataSource]="OrderingClinician_DataSource"
-                [columns]="[{ dataField: 'Name', caption: 'ID - Name' }]"
-                [selection]="{ mode: 'multiple' }"
-                [hoverStateEnabled]="true"
-                [paging]="{ enabled: true, pageSize: 10 }"
-                [filterRow]="{ visible: true }"
-                [headerFilter]="{ visible: true }"
-                [scrolling]="{ mode: 'virtual' }"
-                [height]="'50vh'"
-                [(selectedRowKeys)]="OrderingClinician_Value"
-                (onSelectionChanged)="
-                  onSelectionChanged(
-                    $event,
-                    this.orderingClinicianJsonData,
-                    'OrderingClinician_DataSource'
-                  )
-                "
-              >
-              </dx-data-grid>
-            </div>
-          </dx-drop-down-box>
-        </dxi-item>
-      </dxi-item>
-
-      <dxi-item
-        itemType="group"
-        cssClass="form-group"
-        [colCount]="8"
-        [colCountByScreen]="{ xs: 8, sm: 8, md: 8, lg: 8 }"
-      >
-        <dxi-item [colSpan]="2">
-          <dx-drop-down-box
-            labelMode="floating"
-            labelLocation="left"
-            label="Reciever ID"
-            [(value)]="ReceiverID_Value"
-            valueExpr="ID"
-            displayExpr="Name"
-            [showClearButton]="true"
-            [dataSource]="RecieverID_DataSource"
-          >
-            <div *dxTemplate="let data of 'content'">
-              <dx-data-grid
-                [dataSource]="RecieverID_DataSource"
-                [columns]="[{ dataField: 'Name', caption: 'ID - Name' }]"
-                [selection]="{ mode: 'multiple' }"
-                [hoverStateEnabled]="true"
-                [paging]="{ enabled: true, pageSize: 10 }"
-                [filterRow]="{ visible: true }"
-                [headerFilter]="{ visible: true }"
-                [scrolling]="{ mode: 'virtual' }"
-                [height]="'50vh'"
-                [(selectedRowKeys)]="ReceiverID_Value"
-                (onSelectionChanged)="
-                  onSelectionChanged(
-                    $event,
-                    this.RecieverIDjsonData,
-                    'RecieverID_DataSource'
-                  )
-                "
-              >
-              </dx-data-grid>
-            </div>
-          </dx-drop-down-box>
-        </dxi-item>
-
-        <dxi-item [colSpan]="2">
-          <div>
-            <dx-text-box
-              labelMode="floating"
-              labelLocation="left"
-              label="Enter Claim Number"
-              [(value)]="ClaimNumber_Value"
-            >
-            </dx-text-box>
-          </div>
-        </dxi-item>
-
-        <dxi-item [colSpan]="2">
-          <div>
-            <dx-text-box
-              labelMode="floating"
-              labelLocation="left"
-              label="Enter Patient ID"
-              [(value)]="PatientID_Value"
-            >
-            </dx-text-box>
-          </div>
-        </dxi-item>
-
-        <dxi-item [colSpan]="2">
-          <div>
-            <dx-text-box
-              labelMode="floating"
-              labelLocation="left"
-              label="Enter Member ID"
-              [(value)]="memberID_Value"
-            >
-            </dx-text-box>
-          </div>
-        </dxi-item>
-      </dxi-item>
-
-      <dxi-item
-        itemType="group"
-        cssClass="form-group"
-        [colCount]="10"
-        [colCountByScreen]="{ xs: 10, sm: 10, md: 10, lg: 10 }"
-      >
-        <dxi-item [colSpan]="2">
-          <dx-select-box
-            labelMode="floating"
-            labelLocation="left"
-            label="Resubmission Type"
-            [dataSource]="ResubmissionType_DataSource"
-            displayExpr="Name"
-            valueExpr="ID"
-            [(value)]="Resubmission_Value"
-            [searchEnabled]="true"
-            (valueChanged)="onDropdownValueChanged()"
-          >
-          </dx-select-box>
-        </dxi-item>
-
-        <dxi-item [colSpan]="2">
-          <div>
-            <dx-text-box
-              labelMode="floating"
-              labelLocation="left"
-              label="Enter Denial Code"
-              [(value)]="DenialCodes_Value"
-            >
-            </dx-text-box>
-          </div>
-        </dxi-item>
-
-        <dxi-item [colSpan]="2">
-          <dx-select-box
-            labelMode="floating"
-            labelLocation="left"
-            label="Claim Status"
-            [dataSource]="CliamStatus_DataSource"
-            displayExpr="Name"
-            valueExpr="ID"
-            [(value)]="CliamStatus_Value"
-            [searchEnabled]="true"
-            (valueChanged)="onDropdownValueChanged()"
-          >
-          </dx-select-box>
-        </dxi-item>
-
-        <dxi-item [colSpan]="2">
-          <div>
-            <dx-select-box
-              labelMode="floating"
-              labelLocation="left"
-              label="Payment Status"
-              [dataSource]="paymentStatus_DataSource"
-              displayExpr="Name"
-              valueExpr="ID"
-              [(value)]="paymentStatus_Value"
-              [searchEnabled]="true"
-              (valueChanged)="onDropdownValueChanged()"
-              [showClearButton]="true"
-            >
-            </dx-select-box>
-          </div>
-        </dxi-item>
-
-        <dxi-item [colSpan]="1" class="mt-1 ms-5">
-          <dx-button
-            class="add-card"
-            icon="download"
-            text=""
-            hint="import search parameters from your excel"
-            type="default"
-            stylingMode="contained"
-            (onClick)="get_advance_Filter()"
-          >
-          </dx-button>
-        </dxi-item>
-
         <dxi-item [colSpan]="1" class="mt-1">
           <dx-button
             class="add-card"
@@ -478,7 +125,7 @@
       id="dataGrid"
       #dataGrid
       class="grid reportGrid reportGridFooter theme-dependent"
-      [height]="'84vh'"
+      [height]="isContentVisible ? '80vh' : '85vh'"
       [noDataText]="!isContentVisible ? 'No Data Available' : ' '"
       [dataSource]="dataGrid_DataSource"
       [showBorders]="true"
@@ -496,7 +143,7 @@
       (onExporting)="onExporting($event)"
       [summary]="summaryColumnsData"
     >
-      <dxi-column
+      <!-- <dxi-column
         *ngIf="!isEmptyDatagrid"
         type="buttons"
         [width]="40"
@@ -513,7 +160,7 @@
           hint="View Details"
           [onClick]="handleRowDrillDownClick"
         ></dxi-button>
-      </dxi-column>
+      </dxi-column> -->
 
       <ng-container *ngFor="let column of columnsConfig">
         <dxi-column
@@ -542,7 +189,7 @@
       </ng-container>
 
       <dxo-search-panel [visible]="true"></dxo-search-panel>
-      <dxo-paging [pageSize]="10"></dxo-paging>
+      <dxo-paging [pageSize]="20"></dxo-paging>
       <dxo-pager
         [visible]="true"
         [allowedPageSizes]="allowedPageSizes"
@@ -633,7 +280,7 @@
 
         <dxi-item name="exportButton" [disabled]="isEmptyDatagrid"></dxi-item>
 
-        <dxi-item
+        <!-- <dxi-item
           widget="dxButton"
           [options]="{
             text: '',
@@ -663,7 +310,7 @@
               width: 'auto',
             }
           }"
-        ></dxi-item>
+        ></dxi-item> -->
 
         <dxi-item
           class="columnfinderclass"
@@ -698,7 +345,7 @@
     </dx-data-grid>
   </ng-container>
 
-  <dx-popup
+  <!-- <dx-popup
     class="m-0 p-0"
     [(visible)]="isSaveMemorisedOpened"
     [title]="'Memorise Report'"
@@ -736,23 +383,7 @@
       (onClick)="save_Memorise_Report()"
       class="save-button"
     ></dx-button>
-  </dx-popup>
-
-  <form-popup
-    class="formPopupClass hide-buttons dx-popup-content m-0 p-0"
-    [(visible)]="isAdvancefilterOpened"
-    titleText="Advance filter"
-    height="80vh"
-    [width]="350"
-    [width]="filterpopupWidth"
-    [visibleButtons]="true"
-    saveButtonText="Apply"
-    (save)="import_Advance_Filter()"
-  >
-    <app-advance-filter-popup
-      [columnData]="advanceFilterGridColumns"
-    ></app-advance-filter-popup>
-  </form-popup>
+  </dx-popup> -->
 
   <div *ngFor="let popup of drilldownPopups">
     <dx-popup
