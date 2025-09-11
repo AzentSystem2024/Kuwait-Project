@@ -107,7 +107,7 @@
 <dx-popup
   [(visible)]="isProcessPopupVisible"
   [width]="'95vw'"
-  [height]="'100vh'"
+  [height]="'95vh'"
   [showCloseButton]="true"
   [dragEnabled]="true"
   [closeOnOutsideClick]="false"
@@ -116,14 +116,13 @@
 >
   <div class="h-100 d-flex flex-column">
     <!-- Top Grid -->
-    <p class="h5 fw-bold border-bottom pb-2">RA Data</p>
     <dx-data-grid
       #raGrid
       [dataSource]="RAGridData"
       [columns]="RAProcessPopUpColumns"
       [showBorders]="true"
       class="mb-1"
-      [height]="'45%'"
+      [height]="'50%'"
       [keyExpr]="'ID'"
       [paging]="{ enabled: false }"
       [selection]="{
@@ -134,22 +133,41 @@
       [focusedRowEnabled]="true"
       [columnAutoWidth]="true"
       [scrolling]="{ mode: 'virtual' }"
+      [allowColumnReordering]="true"
+      [columnFixing]="{
+        enabled: true,
+        texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+      }"
       (onSelectionChanged)="onRADataRowSelected($event)"
     >
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div class="grid-header h5 fw-bold border-bottom">RA Data</div>
+        </dxi-item>
+
+        <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
+      </dxo-toolbar>
+
       <dxo-sorting mode="single"></dxo-sorting>
       <dxo-filter-row [visible]="false"></dxo-filter-row>
       <dxo-header-filter [visible]="true"></dxo-header-filter>
+      <dxo-column-chooser
+        [height]="500"
+        hideOnOutsideClick="true"
+        [enabled]="true"
+        mode="select"
+      >
+      </dxo-column-chooser>
     </dx-data-grid>
 
     <!-- Bottom Grid -->
-    <p class="h5 fw-bold border-bottom pb-2">Claim Data</p>
     <dx-data-grid
       #hisGrid
       [dataSource]="HISGridData"
       [columns]="HISProcessPopUpColumns"
       [showBorders]="true"
       class="flex-grow"
-      [height]="'40%'"
+      [height]="'50%'"
       [keyExpr]="'ID'"
       [paging]="{ enabled: false }"
       [focusedRowEnabled]="true"
@@ -160,17 +178,36 @@
         showCheckBoxesMode: 'always',
         allowSelectAll: false
       }"
+      [allowColumnReordering]="true"
+      [columnFixing]="{
+        enabled: true,
+        texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+      }"
       (onSelectionChanged)="onHISRowSelected($event)"
     >
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div class="grid-header h5 fw-bold border-bottom">Claim Data</div>
+        </dxi-item>
+
+        <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
+      </dxo-toolbar>
       <dxo-sorting mode="single"></dxo-sorting>
       <dxo-filter-row [visible]="false"></dxo-filter-row>
       <dxo-header-filter [visible]="true"></dxo-header-filter>
+      <dxo-column-chooser
+        [height]="500"
+        hideOnOutsideClick="true"
+        [enabled]="true"
+        mode="select"
+      >
+      </dxo-column-chooser>
     </dx-data-grid>
 
     <!-- Footer Button -->
     <div class="d-flex justify-content-end mt-3">
       <dx-button
-        text="submit"
+        text="Process"
         type="default"
         stylingMode="contained"
         (onClick)="onSubmitProcess()"

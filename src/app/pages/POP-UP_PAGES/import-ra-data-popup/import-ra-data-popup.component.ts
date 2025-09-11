@@ -288,9 +288,9 @@ export class ImportRADataPopupComponent implements OnInit {
     if (!selectedRow) return;
 
     // Prevent duplicate HIS API call for the same UNIQUE_KEY
-    if (this.lastRASelection?.UNIQUE_KEY === selectedRow.UNIQUE_KEY) {
-      return;
-    }
+    // if (this.lastRASelection?.UNIQUE_KEY === selectedRow.UNIQUE_KEY) {
+    //   return;
+    // }
     this.lastRASelection = selectedRow;
 
     const payload = {
@@ -315,7 +315,7 @@ export class ImportRADataPopupComponent implements OnInit {
               const match = this.HISGridData.find(
                 (row: any) =>
                   row.UNIQUE_KEY === selectedRow.UNIQUE_KEY &&
-                  row.GROSS_AMOUNT === selectedRow.GROSS_AMOUNT
+                  row.GROSS_AMOUNT === selectedRow.GROSS_CLAIMED
               );
 
               // Use row.ID (because keyExpr = "ID")
@@ -379,14 +379,14 @@ export class ImportRADataPopupComponent implements OnInit {
       !autoProcessNext &&
       raRow &&
       hisRow &&
-      raRow.GROSS_AMOUNT !== hisRow.GROSS_AMOUNT
+      raRow.GROSS_CLAIMED !== hisRow.GROSS_AMOUNT
     ) {
       const dialog = custom({
         title: 'Confirmation',
         messageHtml: `
         <div style="width:400px; height:150px; font-size:14px; text-align:center; padding:15px; box-sizing:border-box;">
           <b>Gross Amounts are different</b><br><br>
-          <div style="margin-bottom:8px;">RA: ${raRow.GROSS_AMOUNT}</div>
+          <div style="margin-bottom:8px;">RA: ${raRow.GROSS_CLAIMED}</div>
           <div style="margin-bottom:8px;">HIS: ${hisRow.GROSS_AMOUNT}</div>
           <div>Do you still want to process?</div>
         </div>
@@ -417,12 +417,6 @@ export class ImportRADataPopupComponent implements OnInit {
         this.isLoading = false;
 
         if (response.flag === '1') {
-          notify({
-            message: 'Process completed successfully',
-            type: 'success',
-            displayTime: 3000,
-          });
-
           // Remove processed rows from grids
           this.RAGridData = this.RAGridData.filter(
             (r: any) => r.ID !== raRow.ID
@@ -449,6 +443,8 @@ export class ImportRADataPopupComponent implements OnInit {
 
               // Auto trigger submit for the last pair (no confirmation dialog)
               this.onSubmitProcess(true);
+            } else {
+              this.HISGridData = [];
             }
           }
         } else {
