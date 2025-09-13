@@ -103,11 +103,11 @@
 
 <!-- ======================== process popup ============== -->
 
-<!-- Popup -->
+<!-- Popup for process data-->
 <dx-popup
   [(visible)]="isProcessPopupVisible"
   [width]="'95vw'"
-  [height]="'95vh'"
+  [height]="'100vh'"
   [showCloseButton]="true"
   [dragEnabled]="true"
   [closeOnOutsideClick]="false"
@@ -130,7 +130,7 @@
         showCheckBoxesMode: 'always',
         allowSelectAll: false
       }"
-      [focusedRowEnabled]="true"
+      [focusedRowEnabled]="false"
       [columnAutoWidth]="true"
       [scrolling]="{ mode: 'virtual' }"
       [allowColumnReordering]="true"
@@ -143,6 +143,20 @@
       <dxo-toolbar>
         <dxi-item location="before">
           <div class="grid-header h5 fw-bold border-bottom">RA Data</div>
+        </dxi-item>
+
+        <dxi-item
+          location="after"
+          widget="dxButton"
+          [options]="{
+            text: 'Distribute RA',
+            icon: '',
+            type: 'default',
+            stylingMode: 'contained',
+            disabled: !isRASelected,
+            onClick: distributeRA
+          }"
+        >
         </dxi-item>
 
         <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
@@ -167,7 +181,7 @@
       [columns]="HISProcessPopUpColumns"
       [showBorders]="true"
       class="flex-grow"
-      [height]="'50%'"
+      [height]="'45%'"
       [keyExpr]="'ID'"
       [paging]="{ enabled: false }"
       [focusedRowEnabled]="true"
@@ -211,6 +225,149 @@
         type="default"
         stylingMode="contained"
         (onClick)="onSubmitProcess()"
+      ></dx-button>
+    </div>
+  </div>
+</dx-popup>
+
+<!-- Distribute RA popup  -->
+<dx-popup
+  [(visible)]="isDistributePopupVisible"
+  [width]="'95vw'"
+  [height]="'100vh'"
+  title="Distribute RA and Match"
+  [showCloseButton]="true"
+>
+  <div class="h-100 d-flex flex-column">
+    <!-- Top RA Row -->
+    <dx-data-grid
+      [dataSource]="[selectedRARow]"
+      [columns]="RAProcessPopUpColumns"
+      [showBorders]="true"
+      [height]="'20%'"
+      [columnAutoWidth]="true"
+      [selection]="{ mode: 'single' }"
+      [focusedRowEnabled]="true"
+      [focusedRowIndex]="0"
+      class="mb-3"
+    >
+    </dx-data-grid>
+
+    <!-- Middle Claim Data -->
+    <dx-data-grid
+  #distributeGrid
+  [dataSource]="DistributeHISGridData"
+  [columns]="DistributeHISColumns"
+  [showBorders]="true"
+  [height]="'auto'"
+  [columnAutoWidth]="true"
+  [keyExpr]="'ID'"
+  [editing]="{ mode: 'cell', allowUpdating: true }"
+  [selection]="{ mode: 'multiple', showCheckBoxesMode: 'always' }"
+  (onSelectionChanged)="onDistributeSelectionChanged($event)"
+  (onCellValueChanged)="onCellValueChanged($event)"
+  (onEditingStart)="ondistributionHISgridEditingStart($event)"
+>
+  <dxi-column type="selection" [fixed]="true" fixedPosition="left"></dxi-column>
+
+  <dxo-summary>
+    <dxi-total-item
+      *ngFor="let col of DistributeHISColumns"
+      [column]="col.dataField"
+      summaryType="sum"
+      [valueFormat]="'#,##0.00'"
+    ></dxi-total-item>
+  </dxo-summary>
+</dx-data-grid>
+
+
+    <!-- Footer Totals -->
+    <div
+      class="d-flex align-items-center border-top pt-2 mb-2 flex-nowrap gap-4"
+    >
+      <!-- Group 1: Total Selected -->
+      <div class="me-5">
+        <dx-text-box
+          [value]="totalSelected"
+          label="Total Selected"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+      </div>
+
+      <!-- Group 2: Gross / Net / Over Billing -->
+      <div class="d-flex flex-nowrap gap-3 me-4">
+        <dx-text-box
+          [value]="getSelectedTotal('GROSS_AMOUNT')"
+          label="Gross Claimed"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedTotal('NET_AMOUNT1')"
+          label="Net Claimed"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+      </div>
+
+      <!-- Group 3: Rejected / Discount / Co-Pay / Net Payable -->
+      <div class="d-flex flex-nowrap gap-3">
+        <dx-text-box
+          [value]="getSelectedTotal('OverBillingAmount')"
+          label="Over Billing"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedTotal('AuditingRejectedAmount')"
+          label="Rejected"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedTotal('DiscountAmount')"
+          label="Discount"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedTotal('Co-PayandDeductible')"
+          label="Co-Pay"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedTotal('NetPayable')"
+          label="Net Payable"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+      </div>
+    </div>
+
+    <!-- Buttons Row at Bottom Right -->
+    <div class="d-flex justify-content-end mt-2 gap-3">
+      <dx-button
+        text="Cancel"
+        type="danger"
+        stylingMode="contained"
+        (onClick)="isDistributePopupVisible = false"
+      ></dx-button>
+      <dx-button
+        text="Process"
+        type="default"
+        stylingMode="contained"
+        (onClick)="onSubmitDistributeRA()"
+        class="me-2"
       ></dx-button>
     </div>
   </div>
