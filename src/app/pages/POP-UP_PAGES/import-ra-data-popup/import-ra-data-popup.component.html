@@ -50,6 +50,7 @@
     [columnFixing]="{ enabled: true }"
     [height]="'80vh'"
     [width]="'100%'"
+    [rowAlternationEnabled]="true"
     [dataSource]="dataSource"
     [columns]="columnData"
   >
@@ -101,9 +102,7 @@
   </div>
 </div>
 
-<!-- ======================== process popup ============== -->
-
-<!-- Popup for process data-->
+<!-- ========= Popup for process data ========= -->
 <dx-popup
   [(visible)]="isProcessPopupVisible"
   [width]="'95vw'"
@@ -124,6 +123,7 @@
       class="mb-1"
       [height]="'50%'"
       [keyExpr]="'ID'"
+      [rowAlternationEnabled]="true"
       [paging]="{ enabled: false }"
       [selection]="{
         mode: 'multiple',
@@ -183,6 +183,7 @@
       class="flex-grow"
       [height]="'45%'"
       [keyExpr]="'ID'"
+      [rowAlternationEnabled]="true"
       [paging]="{ enabled: false }"
       [focusedRowEnabled]="true"
       [columnAutoWidth]="true"
@@ -229,18 +230,19 @@
     </div>
   </div>
 </dx-popup>
-
-<!-- Distribute RA popup  -->
+<!-- ========= Distribute RA popup ========= -->
 <dx-popup
   [(visible)]="isDistributePopupVisible"
   [width]="'95vw'"
   [height]="'100vh'"
   title="Distribute RA and Match"
   [showCloseButton]="true"
+  (onHiding)="clearDistributePopup()"
 >
   <div class="h-100 d-flex flex-column">
     <!-- Top RA Row -->
     <dx-data-grid
+      class="mb-3"
       [dataSource]="[selectedRARow]"
       [columns]="RAProcessPopUpColumns"
       [showBorders]="true"
@@ -249,44 +251,72 @@
       [selection]="{ mode: 'single' }"
       [focusedRowEnabled]="true"
       [focusedRowIndex]="0"
-      class="mb-3"
+      keyExpr="UNIQUE_KEY"
     >
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div class="grid-header h5 fw-bold border-bottom">RA Data</div>
+        </dxi-item>
+
+        <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
+      </dxo-toolbar>
+      <dxo-column-chooser
+        [height]="500"
+        hideOnOutsideClick="true"
+        [enabled]="true"
+        mode="select"
+      >
+      </dxo-column-chooser>
     </dx-data-grid>
 
     <!-- Middle Claim Data -->
     <dx-data-grid
-  #distributeGrid
-  [dataSource]="DistributeHISGridData"
-  [columns]="DistributeHISColumns"
-  [showBorders]="true"
-  [height]="'auto'"
-  [columnAutoWidth]="true"
-  [keyExpr]="'ID'"
-  [editing]="{ mode: 'cell', allowUpdating: true }"
-  [selection]="{ mode: 'multiple', showCheckBoxesMode: 'always' }"
-  (onSelectionChanged)="onDistributeSelectionChanged($event)"
-  (onCellValueChanged)="onCellValueChanged($event)"
-  (onEditingStart)="ondistributionHISgridEditingStart($event)"
->
-  <dxi-column type="selection" [fixed]="true" fixedPosition="left"></dxi-column>
-
-  <dxo-summary>
-    <dxi-total-item
-      *ngFor="let col of DistributeHISColumns"
-      [column]="col.dataField"
-      summaryType="sum"
-      [valueFormat]="'#,##0.00'"
-    ></dxi-total-item>
-  </dxo-summary>
-</dx-data-grid>
-
-
-    <!-- Footer Totals -->
-    <div
-      class="d-flex align-items-center border-top pt-2 mb-2 flex-nowrap gap-4"
+      #distributeGrid
+      [dataSource]="DistributeHISGridData"
+      [columns]="DistributeHISColumns"
+      [showBorders]="true"
+      [height]="'65%'"
+      [columnAutoWidth]="true"
+      [keyExpr]="'ID'"
+      [rowAlternationEnabled]="true"
+      [editing]="{ mode: 'cell', allowUpdating: true }"
+      [selection]="{ mode: 'multiple', showCheckBoxesMode: 'always' }"
+      (onSelectionChanged)="onDistributeSelectionChanged($event)"
+      (onEditingStart)="ondistributionHISgridEditingStart($event)"
     >
-      <!-- Group 1: Total Selected -->
-      <div class="me-5">
+      <dxo-paging [pageSize]="0"></dxo-paging>
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div class="grid-header h5 fw-bold border-bottom">Claim Data</div>
+        </dxi-item>
+
+        <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
+      </dxo-toolbar>
+      <dxo-column-chooser
+        [height]="500"
+        hideOnOutsideClick="true"
+        [enabled]="true"
+        mode="select"
+      >
+      </dxo-column-chooser>
+      <dxo-summary>
+        <ng-container *ngFor="let col of DistributeHISColumns">
+          <dxi-total-item
+            *ngIf="col.dataType === 'number'"
+            [column]="col.dataField"
+            summaryType="sum"
+            [valueFormat]="'#,##0.00'"
+            displayFormat="Total: {0}"
+          >
+          </dxi-total-item>
+        </ng-container>
+      </dxo-summary>
+    </dx-data-grid>
+
+    <div
+      class="d-flex align-items-center border-top pt-3 mb-2 flex-nowrap gap-4"
+    >
+      <div class="ms-auto me-5">
         <dx-text-box
           [value]="totalSelected"
           label="Total Selected"
@@ -296,8 +326,7 @@
         ></dx-text-box>
       </div>
 
-      <!-- Group 2: Gross / Net / Over Billing -->
-      <div class="d-flex flex-nowrap gap-3 me-4">
+      <div class="ms-auto d-flex flex-nowrap gap-1 me-4">
         <dx-text-box
           [value]="getSelectedTotal('GROSS_AMOUNT')"
           label="Gross Claimed"
@@ -314,8 +343,7 @@
         ></dx-text-box>
       </div>
 
-      <!-- Group 3: Rejected / Discount / Co-Pay / Net Payable -->
-      <div class="d-flex flex-nowrap gap-3">
+      <div class="ms-auto d-flex flex-nowrap gap-1">
         <dx-text-box
           [value]="getSelectedTotal('OverBillingAmount')"
           label="Over Billing"
@@ -324,28 +352,28 @@
           width="130"
         ></dx-text-box>
         <dx-text-box
-          [value]="getSelectedTotal('AuditingRejectedAmount')"
+          [value]="getSummaryAmount('AuditingRejectedAmount')"
           label="Rejected"
           labelMode="floating"
           [readOnly]="true"
           width="130"
         ></dx-text-box>
         <dx-text-box
-          [value]="getSelectedTotal('DiscountAmount')"
+          [value]="getSelectedTotal('DISCOUNT')"
           label="Discount"
           labelMode="floating"
           [readOnly]="true"
           width="130"
         ></dx-text-box>
         <dx-text-box
-          [value]="getSelectedTotal('Co-PayandDeductible')"
+          [value]="getSummaryAmount('Co-PayandDeductible')"
           label="Co-Pay"
           labelMode="floating"
           [readOnly]="true"
           width="130"
         ></dx-text-box>
         <dx-text-box
-          [value]="getSelectedTotal('NetPayable')"
+          [value]="getSummaryAmount('NetPayable')"
           label="Net Payable"
           labelMode="floating"
           [readOnly]="true"
@@ -355,12 +383,12 @@
     </div>
 
     <!-- Buttons Row at Bottom Right -->
-    <div class="d-flex justify-content-end mt-2 gap-3">
+    <div class="d-flex justify-content-end mt-1 gap-3">
       <dx-button
         text="Cancel"
         type="danger"
         stylingMode="contained"
-        (onClick)="isDistributePopupVisible = false"
+        (onClick)="clearDistributePopup()"
       ></dx-button>
       <dx-button
         text="Process"

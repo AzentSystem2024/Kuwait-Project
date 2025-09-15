@@ -305,4 +305,11 @@ export class DataService {
     const reqbody = payload;
     return this.http.post(url, reqbody);
   }
+
+    // ======= fetch import RA process data list ======
+    submit_RA_Distribution_Data(payload: any) {
+      const url = `${BASE_URL}RAData/distribute`;
+      const reqbody = payload;
+      return this.http.post(url, reqbody);
+    }
 }

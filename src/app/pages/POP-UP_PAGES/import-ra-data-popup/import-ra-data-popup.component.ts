@@ -1,3 +1,4 @@
+import { FormItemDateModule } from './../../../components/utils/form-datebox/form-datebox.component';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -38,6 +39,8 @@ export class ImportRADataPopupComponent implements OnInit {
   @ViewChild('hisGrid', { static: false }) hisGrid!: DxDataGridComponent;
 
   @ViewChild('fileInput', { static: false }) fileInput: ElementRef;
+
+  @ViewChild('distributeGrid', { static: false }) distributeGrid: any;
 
   @Output() closeForm = new EventEmitter();
 
@@ -304,7 +307,6 @@ export class ImportRADataPopupComponent implements OnInit {
     if (!selectedRow) return;
 
     this.lastRASelection = selectedRow;
-    this.isRASelected = true; // ✅ Enable Distribute RA button
 
     const payload = {
       UniqueKey: selectedRow.UNIQUE_KEY,
@@ -314,6 +316,7 @@ export class ImportRADataPopupComponent implements OnInit {
     this.dataservice.fetch_HIS_Process_Data_list(payload).subscribe({
       next: (response: any) => {
         if (response.flag === '1') {
+          this.isRASelected = true;
           this.HISGridData = response.data;
           this.HISProcessPopUpColumns = response.columns.map((col: any) => ({
             dataField: col.ColumnName,
@@ -350,6 +353,16 @@ export class ImportRADataPopupComponent implements OnInit {
     });
   }
 
+  // ========HIS data row selection event =======
+  onHISRowSelected(e: any) {
+    if (!e.selectedRowsData?.length) return;
+
+    if (e.selectedRowKeys.length > 1) {
+      const lastKey = e.selectedRowKeys[e.selectedRowKeys.length - 1];
+      e.component.selectRows([lastKey], false);
+    }
+  }
+
   // ============== only allow to edit selected rows ==========
   isRowSelected(row: any): boolean {
     return this.selectedDistributeRows?.some((r) => r.ID === row.ID) || false;
@@ -360,68 +373,66 @@ export class ImportRADataPopupComponent implements OnInit {
     if (!this.lastRASelection) return;
 
     this.selectedRARow = this.lastRASelection;
-    this.DistributeHISGridData = this.HISGridData.map((row) => ({
+
+    // Load HIS claims matching RA's unique key
+    this.DistributeHISGridData = this.HISGridData.filter(
+      (row) => row.UNIQUE_KEY === this.selectedRARow.UNIQUE_KEY
+    ).map((row) => ({
       ...row,
-      NetPayable: null, // keep NetPayable empty initially
+      NetPayable: null,
     }));
 
-    // Reset selected rows
     this.selectedDistributeRows = [];
 
-    // Add extra 5 editable columns
     this.DistributeHISColumns = [
-      ...this.HISProcessPopUpColumns.map((col) => {
-        if (col.dataField === 'UNIQUE_KEY') {
-          return {
-            ...col,
-            allowEditing: false,
-            fixed: true, // freeze column
-            fixedPosition: 'left', // lock to left side
-          };
-        }
-        return {
-          ...col,
-          allowEditing: false,
-        };
-      }),
+      { type: 'selection', fixed: true, fixedPosition: 'left' },
+      ...this.HISProcessPopUpColumns.map((col) => ({
+        ...col,
+        allowEditing: false,
+      })),
       {
         dataField: 'OverBillingAmount',
-        caption: 'Over Billing Amount',
+        caption: 'Over Billing',
         dataType: 'number',
+        allowEditing: (r: any) => this.isRowSelected(r),
         format: '#,##0.00',
-        allowEditing: (rowData: any) => this.isRowSelected(rowData),
       },
       {
         dataField: 'AuditingRejectedAmount',
-        caption: 'Auditing Rejected Amount',
+        caption: 'Audit Rejected',
         dataType: 'number',
+        allowEditing: (r: any) => this.isRowSelected(r),
         format: '#,##0.00',
-        allowEditing: (rowData: any) => this.isRowSelected(rowData),
       },
-      {
-        dataField: 'DiscountAmount',
-        caption: 'Discount Amount',
-        dataType: 'number',
-        format: '#,##0.00',
-        allowEditing: (rowData: any) => this.isRowSelected(rowData),
-      },
+
       {
         dataField: 'Co-PayandDeductible',
-        caption: 'Co-Pay & Deductible',
+        caption: 'Co-pay & Deduction',
         dataType: 'number',
+        allowEditing: (r: any) => this.isRowSelected(r),
         format: '#,##0.00',
-        allowEditing: (rowData: any) => this.isRowSelected(rowData),
       },
+
       {
         dataField: 'NetPayable',
         caption: 'Net Payable',
         dataType: 'number',
         format: '#,##0.00',
-        allowEditing: false, // never editable
+        allowEditing: false,
+        calculateCellValue: (rowData: any) => {
+          if (!this.selectedDistributeRows?.some((r) => r.ID === rowData.ID)) {
+            return null;
+          }
+
+          const claimed = Number(rowData.NET_AMOUNT1) || 0;
+          const rejected = Number(rowData.AuditingRejectedAmount) || 0;
+          const copay = Number(rowData['Co-PayandDeductible']) || 0;
+
+          return claimed - rejected - copay;
+        },
       },
     ];
 
-    // Show distribute popup
     this.isDistributePopupVisible = true;
   };
 
@@ -430,31 +441,34 @@ export class ImportRADataPopupComponent implements OnInit {
     this.selectedDistributeRows = e.selectedRowsData || [];
     this.totalSelected = this.selectedDistributeRows.length;
 
-    // Clear NetPayable for unselected rows
     this.DistributeHISGridData.forEach((row) => {
-      if (!this.selectedDistributeRows.some((r) => r.ID === row.ID)) {
-        row.NetPayable = null; // empty when not selected
+      if (this.isRowSelected(row)) {
+        row.NetPayable = Number(row.NET_AMOUNT1) || 0;
+      } else {
+        row.NetPayable = null;
       }
     });
 
-    // Assign GROSS_AMOUNT to NetPayable for selected rows
-    this.selectedDistributeRows.forEach((row) => {
-      const gross = Number(row.GROSS_AMOUNT) || 0;
-      row.NetPayable = gross;
-    });
-
-    // Refresh grid
     e.component.refresh(true);
   }
 
   // ====== Calculate totals using only selected rows ======
-  getSelectedTotal(field: any): string {
+  getSelectedTotal(field: string): string {
     if (!this.selectedDistributeRows?.length) return '0.00';
     const total = this.selectedDistributeRows.reduce((sum, row) => {
-      const val = Number(row[field]) || 0;
-      return sum + val;
+      return sum + (Number(row[field]) || 0);
     }, 0);
-    return total.toFixed(2); // format with 2 decimals
+    return total.toFixed(2);
+  }
+  // ========== get summary Amount ==========
+  getSummaryAmount(column: string): string {
+    if (!this.distributeGrid?.instance) return '0.00';
+    const summaryValue =
+      this.distributeGrid.instance.getTotalSummaryValue(column);
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(summaryValue || 0);
   }
 
   // ====== Block editing for unselected rows ======
@@ -463,32 +477,6 @@ export class ImportRADataPopupComponent implements OnInit {
     if (!this.isRowSelected(row)) {
       e.cancel = true;
     }
-  }
-
-  // ===== RA Distribute HIS cell value changes event =====
-  onCellValueChanged(e: any) {
-    const allowedFields = [
-      'AuditingRejectedAmount',
-      'DiscountAmount',
-      'Co-PayandDeductible',
-      'ExceedingLimit',
-    ];
-
-    if (!allowedFields.includes(e.column.dataField)) return;
-
-    const row = e.data;
-
-    // only recalc if row is selected
-    if (this.isRowSelected(row)) {
-      row.NetPayable =
-        (Number(row.GROSS_AMOUNT) || 0) -
-        (Number(row.AuditingRejectedAmount) || 0) -
-        (Number(row['Co-PayandDeductible']) || 0) -
-        (Number(row.ExceedingLimit) || 0) -
-        (Number(row.DiscountAmount) || 0);
-    }
-
-    e.component.refresh(true);
   }
 
   // ==== Recalculate NetPayable after edits ========
@@ -510,19 +498,80 @@ export class ImportRADataPopupComponent implements OnInit {
     });
   }
 
-  // ====== on click of ra distribute process button ====
-  onSubmitDistributeRA() {
-    // Your submit logic
+  clearDistributePopup() {
+    this.selectedRARow = null;
+    this.DistributeHISGridData = [];
+    this.DistributeHISColumns = [];
+    this.totalSelected = 0;
+    this.selectedDistributeRows = [];
+    this.isDistributePopupVisible = false;
   }
 
-  // ========HIS data row selection event =======
-  onHISRowSelected(e: any) {
-    if (!e.selectedRowsData?.length) return;
-
-    if (e.selectedRowKeys.length > 1) {
-      const lastKey = e.selectedRowKeys[e.selectedRowKeys.length - 1];
-      e.component.selectRows([lastKey], false);
+  // ====== on click of RA distribute process button ====
+  onSubmitDistributeRA() {
+    if (!this.selectedRARow) {
+      notify('Please select an RA before distributing.', 'warning', 3000);
+      return;
     }
+    if (!this.selectedDistributeRows?.length) {
+      notify(
+        'Please select at least one row before distributing.',
+        'warning',
+        3000
+      );
+      return;
+    }
+    console.log("selected ra data :>>",this.selectedRARow)
+
+    const payload = {
+      RaID: this.selectedRARow.ID,
+      distributed_data: this.transformPayload(this.selectedDistributeRows),
+    };
+
+    this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
+      next: (res: any) => {
+        if (res.flag === '1') {
+          notify(
+            res.message || 'RA distribution completed successfully',
+            'success',
+            3000
+          );
+
+          // Reset UI state
+          this.selectedDistributeRows = [];
+          this.distributeGrid?.instance.refresh();
+          this.RAGridData = [];
+          this.HISGridData = [];
+          this.clearDistributePopup();
+          this.onProcessClick();
+        } else {
+          notify(
+            res.message || 'Failed to process RA distribution',
+            'error',
+            3000
+          );
+        }
+      },
+      error: (err) => {
+        console.error('RA Distribution Error:', err);
+        notify('Server error while distributing RA', 'error', 4000);
+      },
+    });
+  }
+
+  // ====== Transform rows into distribution payload ======
+  private transformPayload(rows: any[]): any[] {
+    return rows.map((item: any) => ({
+      hisID: item.ID,
+      GROSS_RA: item.GROSS_AMOUNT ?? 0,
+      OB_RA: item.OverBillingAmount ?? 0,
+      REJECTED_RA: item.AuditingRejectedAmount ?? 0,
+      COPAY_RA: item['Co-PayandDeductible'] ?? 0,
+      LIMIT_RA: item.EXCEEDING_LIMIT ?? 0,
+      DISCOUNT_RA: item.DISCOUNT ?? 0,
+      NET_RA: item.NetPayable ?? 0,
+      REJECTION_NOTE: this.selectedRARow?.RejectionNote || '',
+    }));
   }
 
   // =============== Submit Process ===========
