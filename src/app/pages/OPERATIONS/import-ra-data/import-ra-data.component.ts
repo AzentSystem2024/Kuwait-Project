@@ -190,7 +190,10 @@ export class ImportRADataComponent implements OnInit {
 
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+      const wb: XLSX.WorkBook = XLSX.read(bstr, {
+        type: 'binary',
+        cellDates: true,
+      });
 
       // Get first sheet
       const wsname: string = wb.SheetNames[0];
@@ -199,7 +202,7 @@ export class ImportRADataComponent implements OnInit {
       // Get headers (first row only)
       const sheetHeaders: string[] = this.getHeaders(ws);
 
-      // Expected headers (still captions from API)
+      // Expected headers (from API)
       const expectedHeaders: string[] = this.columnData.map(
         (c: any) => c.caption
       );
@@ -231,8 +234,12 @@ export class ImportRADataComponent implements OnInit {
         return;
       }
 
-      // Convert sheet to JSON (with captions as keys)
-      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      // Get values (dates will come as JS Date objects because of cellDates: true)
+      const rawData = XLSX.utils.sheet_to_json(ws, {
+        defval: '',
+        raw: true,
+        cellDates: true,
+      } as any);
 
       // Build mapping { caption -> dataField }
       const captionToField: Record<string, string> = {};
@@ -240,13 +247,28 @@ export class ImportRADataComponent implements OnInit {
         captionToField[col.caption] = col.dataField;
       });
 
+      // Helper: format dates to dd-MM-yyyy
+      const formatDate = (date: Date): string => {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${dd}-${mm}-${yyyy}`;
+      };
+
       // Map imported rows to use dataField keys instead of caption keys
       const mappedData = rawData.map((row: any) => {
         const newRow: any = {};
         Object.keys(row).forEach((caption) => {
           const field = captionToField[caption];
           if (field) {
-            newRow[field] = row[caption];
+            let value = row[caption];
+
+            // If it's a Date, force dd-MM-yyyy
+            if (value instanceof Date) {
+              value = formatDate(value);
+            }
+
+            newRow[field] = value;
           }
         });
         return newRow;

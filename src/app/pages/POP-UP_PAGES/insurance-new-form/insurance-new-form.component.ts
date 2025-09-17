@@ -277,8 +277,8 @@ export class InsuranceNewFormComponent implements OnInit {
 
     const columns = this.raFileColumns.map((col: any) => ({
       ColumnID: col.ID || 0,
-      ColumnName: col.ColumnName || '',
-      ColumnTitle: col.ColumnTitle || '',
+      ColumnName: (col.ColumnName || '').trim(),
+      ColumnTitle: (col.ColumnTitle || '').trim(),
     }));
 
     const payload = {
