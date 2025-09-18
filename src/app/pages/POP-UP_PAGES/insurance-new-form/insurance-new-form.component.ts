@@ -190,6 +190,7 @@ export class InsuranceNewFormComponent implements OnInit {
   manageUniqueKey() {
     if (this.selectedKeys && this.selectedKeys.length > 0) {
       this.UniqueColumnData = this.selectedKeys;
+      console.log(this.selectedKeys,"selected keys")
       const columnNames = this.selectedKeys.map((col: any) => col.ColumnName);
       this.insuranceCompany.uniqueKey = columnNames.join(', ');
     } else {
@@ -220,13 +221,13 @@ export class InsuranceNewFormComponent implements OnInit {
     const insuranceId = this.insuranceCompany.insuranceId || 0;
 
     const uniqueKeys = this.UniqueColumnData.map((col: any) => ({
-      ColumnID: col.ID || 0,
+      ColumnID: col.ColumnID || 0,
       ColumnName: col.ColumnName || '',
       ColumnTitle: col.ColumnTitle || '',
     }));
 
     const columns = this.raFileColumns.map((col: any) => ({
-      ColumnID: col.ID || 0,
+      ColumnID: col.ColumnID || 0,
       ColumnName: col.ColumnName || '',
       ColumnTitle: col.ColumnTitle || '',
     }));
@@ -270,13 +271,13 @@ export class InsuranceNewFormComponent implements OnInit {
     const insuranceId = this.insuranceCompany.insuranceId || 0;
 
     const uniqueKeys = this.UniqueColumnData.map((col: any) => ({
-      ColumnID: col.ID || 0,
+      ColumnID: col.ColumnID || 0,
       ColumnName: col.ColumnName || '',
       ColumnTitle: col.ColumnTitle || '',
     }));
 
     const columns = this.raFileColumns.map((col: any) => ({
-      ColumnID: col.ID || 0,
+      ColumnID: col.ColumnID || 0,
       ColumnName: (col.ColumnName || '').trim(),
       ColumnTitle: (col.ColumnTitle || '').trim(),
     }));
@@ -293,6 +294,9 @@ export class InsuranceNewFormComponent implements OnInit {
       Remarks: this.insuranceCompany.remarks,
       Inactive: this.insuranceCompany.inactive,
     };
+    console.log(this.selectedKeys,"selectedKeys");
+
+    console.log("raFileColumns",this.raFileColumns)
 
     console.log('Update Payload:', payload);
 

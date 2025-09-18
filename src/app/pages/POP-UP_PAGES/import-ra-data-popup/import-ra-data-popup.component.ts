@@ -330,7 +330,7 @@ export class ImportRADataPopupComponent implements OnInit {
               const match = this.HISGridData.find(
                 (row: any) =>
                   row.UNIQUE_KEY === selectedRow.UNIQUE_KEY &&
-                  row.GROSS_AMOUNT === selectedRow.GROSS_CLAIMED
+                  row.GROSS_CLAIMED === selectedRow.GROSS_CLAIMED
               );
 
               const focusKey = match ? match.ID : this.HISGridData[0].ID;
@@ -483,7 +483,7 @@ export class ImportRADataPopupComponent implements OnInit {
   updateFooterTotals() {
     this.DistributeHISGridData = this.DistributeHISGridData.map((row) => {
       if (this.isRowSelected(row)) {
-        const gross = Number(row.GROSS_AMOUNT) || 0;
+        const gross = Number(row.GROSS_CLAIMED) || 0;
         const rejected = Number(row.AuditingRejectedAmount) || 0;
         const copay = Number(row['Co-PayandDeductible']) || 0;
         const limit = Number(row.ExceedingLimit) || 0;
@@ -563,7 +563,7 @@ export class ImportRADataPopupComponent implements OnInit {
   private transformPayload(rows: any[]): any[] {
     return rows.map((item: any) => ({
       hisID: item.ID,
-      GROSS_RA: item.GROSS_AMOUNT ?? 0,
+      GROSS_RA: item.GROSS_CLAIMED ?? 0,
       OB_RA: item.OverBillingAmount ?? 0,
       REJECTED_RA: item.AuditingRejectedAmount ?? 0,
       COPAY_RA: item['Co-PayandDeductible'] ?? 0,
@@ -604,7 +604,7 @@ export class ImportRADataPopupComponent implements OnInit {
       !autoProcessNext &&
       raRow &&
       hisRow &&
-      raRow.GROSS_CLAIMED !== hisRow.GROSS_AMOUNT
+      raRow.GROSS_CLAIMED !== hisRow.GROSS_CLAIMED
     ) {
       const dialog = custom({
         title: 'Confirmation',
@@ -612,7 +612,7 @@ export class ImportRADataPopupComponent implements OnInit {
         <div style="width:400px; height:150px; font-size:14px; text-align:center; padding:15px; box-sizing:border-box;">
           <b>Gross Amounts are different</b><br><br>
           <div style="margin-bottom:8px;">RA: ${raRow.GROSS_CLAIMED}</div>
-          <div style="margin-bottom:8px;">HIS: ${hisRow.GROSS_AMOUNT}</div>
+          <div style="margin-bottom:8px;">HIS: ${hisRow.GROSS_CLAIMED}</div>
           <div>Do you still want to process?</div>
         </div>
       `,
