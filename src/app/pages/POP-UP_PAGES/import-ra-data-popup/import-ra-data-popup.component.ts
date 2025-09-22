@@ -20,11 +20,13 @@ import {
   DxLoadPanelModule,
   DxCheckBoxModule,
   DxPopupModule,
+  DxTagBoxModule,
 } from 'devextreme-angular';
 import notify from 'devextreme/ui/notify';
 import { confirm, custom } from 'devextreme/ui/dialog';
 import { DataService } from 'src/app/services';
 import { finalize } from 'rxjs/operators';
+import { MasterReportService } from '../../MASTER PAGES/master-report.service';
 
 @Component({
   selector: 'app-import-ra-data-popup',
@@ -34,21 +36,17 @@ import { finalize } from 'rxjs/operators';
 export class ImportRADataPopupComponent implements OnInit {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
-
   @ViewChild('raGrid', { static: false }) raGrid!: DxDataGridComponent;
   @ViewChild('hisGrid', { static: false }) hisGrid!: DxDataGridComponent;
-
   @ViewChild('fileInput', { static: false }) fileInput: ElementRef;
-
   @ViewChild('distributeGrid', { static: false }) distributeGrid: any;
 
-  @Output() closeForm = new EventEmitter();
-
   @Input() viewData: any = null;
-
   @Input() dataSource: any = null;
   @Input() columnData: any = null;
   @Input() selectedInsuranceId: any = null;
+
+  @Output() closeForm = new EventEmitter();
 
   readonly allowedPageSizes: any = [50, 100, 1000];
   displayMode: any = 'full';
@@ -89,21 +87,61 @@ export class ImportRADataPopupComponent implements OnInit {
   // ===== Footer total variables =====
   totalSelected: any = 0;
 
-  constructor(private dataservice: DataService) {}
+  autoProcessPopup: boolean = false;
+  InsuranceColumns: any;
+  uniqueKeyData: any;
+  selectedUniqueColumns: any;
+
+  constructor(
+    private dataservice: DataService,
+    private mastersrvce: MasterReportService
+  ) {}
 
   async ngOnInit(): Promise<void> {
     await this.fetch_insurance_dropdown_data();
 
     if (this.viewData && this.insuranceList) {
+      const logID = this.viewData.ID;
       this.selectedInsuranceId = this.viewData.InsuranceID;
       this.columnData = this.viewData.columns.map((col: any) => ({
         dataField: col.ColumnName,
         caption: col.ColumnTitle,
       }));
       this.dataSource = this.viewData.data;
+      this.fetch_all_column_and_uniqueKey_data();
     }
   }
+  // =============== fetch ra columns and unique key of selected data ========
+  fetch_all_column_and_uniqueKey_data() {
+    const insuranceId = this.selectedInsuranceId;
+    if (insuranceId) {
+      this.mastersrvce.selected_Insurance_Row_Data(insuranceId).subscribe({
+        next: (res: any) => {
+          if (res && res.flag === '1') {
+            this.InsuranceColumns = res.data[0].columns.filter(
+              (col: any) => col.HisMatched === true
+            );
+            this.uniqueKeyData = res.data[0].uniqueKeys;
 
+            // set selected values (array of ColumnID from uniqueKeyData)
+            this.selectedUniqueColumns = this.uniqueKeyData.map(
+              (u: any) => u.ColumnID
+            );
+          } else {
+            notify(
+              res.message || 'Failed to fetch insurance details',
+              'error',
+              3000
+            );
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching row data:', err);
+          notify('Something went wrong while fetching row data', 'error', 3000);
+        },
+      });
+    }
+  }
   // ======== get_insurance_dropdown ========
   fetch_insurance_dropdown_data(): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -265,7 +303,8 @@ export class ImportRADataPopupComponent implements OnInit {
           this.RAProcessPopUpColumns = response.columns.map((col: any) => ({
             dataField: col.ColumnName,
             caption: col.ColumnTitle,
-            width: 150,
+            minWidth: 100,
+            maxWidth: 250,
           }));
           this.RAGridData = response.data;
 
@@ -288,7 +327,11 @@ export class ImportRADataPopupComponent implements OnInit {
       },
     });
   }
+  // ======== change unique key and process data =============
+  onChangeAndProcess() {
 
+    
+  }
   // =============== Ra data row selection change event =========
   onRADataRowSelected(e: any) {
     if (!e.selectedRowsData?.length) {
@@ -321,7 +364,8 @@ export class ImportRADataPopupComponent implements OnInit {
           this.HISProcessPopUpColumns = response.columns.map((col: any) => ({
             dataField: col.ColumnName,
             caption: col.ColumnTitle,
-            width: 150,
+            minWidth: 100,
+            maxWidth: 150,
           }));
 
           setTimeout(() => {
@@ -521,7 +565,7 @@ export class ImportRADataPopupComponent implements OnInit {
       );
       return;
     }
-    console.log("selected ra data :>>",this.selectedRARow)
+    console.log('selected ra data :>>', this.selectedRARow);
 
     const payload = {
       RaID: this.selectedRARow.ID,
@@ -716,6 +760,7 @@ export class ImportRADataPopupComponent implements OnInit {
     DxLoadPanelModule,
     DxCheckBoxModule,
     DxPopupModule,
+    DxTagBoxModule,
   ],
   providers: [],
   declarations: [ImportRADataPopupComponent],

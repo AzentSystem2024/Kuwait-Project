@@ -35,7 +35,7 @@
       text="Process"
       type="default"
       stylingMode="contained"
-      (onClick)="onProcessClick()"
+      (onClick)="autoProcessPopup = true"
     ></dx-button>
   </div>
 
@@ -102,6 +102,63 @@
   </div>
 </div>
 
+<!-- ========= Popup for change uniqueKey and process data ========= -->
+<dx-popup
+  [(visible)]="autoProcessPopup"
+  [showCloseButton]="true"
+  [width]="600"
+  [height]="420"
+  title="Process Records"
+>
+  <div *dxTemplate="let data of 'content'" class="p-3 h-100 d-flex flex-column">
+    <!-- Section 1: Unique Key + Process -->
+    <div class="mb-4">
+      <dx-tag-box
+        [dataSource]="InsuranceColumns"
+        displayExpr="ColumnTitle"
+        valueExpr="ColumnID"
+        [(value)]="selectedUniqueColumns"
+        label="Set Unique Key"
+        labelMode="floating"
+        [showSelectionControls]="true"
+        [showClearButton]="true"
+        [searchEnabled]="true"
+        width="100%"
+      >
+      </dx-tag-box>
+
+      <div class="mt-3 d-flex justify-content-end">
+        <dx-button
+          text="Change & Process"
+          type="default"
+          stylingMode="contained"
+          (onClick)="onChangeAndProcess()"
+        ></dx-button>
+      </div>
+    </div>
+
+    <!-- Section 2: Summary -->
+    <div class="border-top pt-3 flex-grow-1">
+      <h6>Process Summary</h6>
+      <div class="d-flex flex-column gap-2 mt-2">
+        <div>Total Processed: <b> totalProcessed </b></div>
+        <div>Need To Manual Process: <b> manualProcess </b></div>
+        <div>Not Found: <b> notFound </b></div>
+      </div>
+    </div>
+
+    <!-- Bottom Manual Process Button -->
+    <div class="mt-3 d-flex justify-content-center">
+      <dx-button
+        text="Manual Process"
+        type="default"
+        stylingMode="contained"
+        (onClick)="onProcessClick()"
+      ></dx-button>
+    </div>
+  </div>
+</dx-popup>
+
 <!-- ========= Popup for process data ========= -->
 <dx-popup
   [(visible)]="isProcessPopupVisible"
@@ -131,7 +188,6 @@
         allowSelectAll: false
       }"
       [focusedRowEnabled]="false"
-      [columnAutoWidth]="true"
       [scrolling]="{ mode: 'virtual' }"
       [allowColumnReordering]="true"
       [columnFixing]="{
@@ -186,7 +242,6 @@
       [rowAlternationEnabled]="true"
       [paging]="{ enabled: false }"
       [focusedRowEnabled]="true"
-      [columnAutoWidth]="true"
       [scrolling]="{ mode: 'virtual' }"
       [selection]="{
         mode: 'multiple',

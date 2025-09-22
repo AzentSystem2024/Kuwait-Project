@@ -1,6 +1,8 @@
 <div>
   <dx-data-grid
     #dataGrid
+    [dataSource]="dataSource"
+    [columns]="columnData"
     [showBorders]="true"
     [allowColumnResizing]="true"
     [allowColumnReordering]="true"
@@ -10,8 +12,6 @@
     [columnFixing]="{ enabled: true }"
     [height]="'80vh'"
     [width]="'100%'"
-    [dataSource]="dataSource"
-    [columns]="columnData"
   >
     <dxo-paging [pageSize]="100"></dxo-paging>
     <dxo-pager

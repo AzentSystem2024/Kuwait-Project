@@ -40,7 +40,6 @@ export class ImportHISDataFormComponent implements OnInit {
   @Input() dataSource: any = null;
   @Input() selectedInsurance: any = null;
 
-
   readonly allowedPageSizes: any = [50, 100, 1000];
   displayMode: any = 'full';
   showPageSizeSelector = true;
@@ -54,8 +53,6 @@ export class ImportHISDataFormComponent implements OnInit {
   isLoading: boolean = false;
 
   insuranceList: any = [];
-
-
 
   constructor(private dataservice: DataService) {}
 
@@ -75,6 +72,8 @@ export class ImportHISDataFormComponent implements OnInit {
         this.columnData = res.data.map((col: any) => ({
           dataField: col.ColumnName,
           caption: col.ColumnTitle,
+          width: 150,
+          wordWrapEnabled: true,
         }));
         this.isColumnsLoaded = true;
       }

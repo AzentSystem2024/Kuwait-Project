@@ -183,6 +183,7 @@ export class InsuranceNewFormComponent implements OnInit {
     this.raFileColumns = this.fullcolumnsData.filter(
       (item) => item.Status === 'selected'
     );
+    console.log('ra file columns :', this.raFileColumns);
     this.ColumnpopupVisible = false;
   }
 
@@ -190,7 +191,7 @@ export class InsuranceNewFormComponent implements OnInit {
   manageUniqueKey() {
     if (this.selectedKeys && this.selectedKeys.length > 0) {
       this.UniqueColumnData = this.selectedKeys;
-      console.log(this.selectedKeys,"selected keys")
+      console.log(this.selectedKeys, 'selected keys');
       const columnNames = this.selectedKeys.map((col: any) => col.ColumnName);
       this.insuranceCompany.uniqueKey = columnNames.join(', ');
     } else {
@@ -294,9 +295,9 @@ export class InsuranceNewFormComponent implements OnInit {
       Remarks: this.insuranceCompany.remarks,
       Inactive: this.insuranceCompany.inactive,
     };
-    console.log(this.selectedKeys,"selectedKeys");
+    console.log(this.selectedKeys, 'selectedKeys');
 
-    console.log("raFileColumns",this.raFileColumns)
+    console.log('raFileColumns', this.raFileColumns);
 
     console.log('Update Payload:', payload);
 
