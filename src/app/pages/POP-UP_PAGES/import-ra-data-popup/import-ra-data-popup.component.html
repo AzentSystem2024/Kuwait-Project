@@ -135,6 +135,7 @@
           text="Change & Process RA"
           type="default"
           stylingMode="contained"
+          [disabled]="selectedUniqueColumns.length === 0"
           (onClick)="onChangeAndProcess()"
         ></dx-button>
       </div>
