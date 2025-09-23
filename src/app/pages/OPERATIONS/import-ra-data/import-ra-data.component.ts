@@ -72,6 +72,7 @@ export class ImportRADataComponent implements OnInit {
   selectedInsuranceDesc: any;
 
   isLoading: boolean = false;
+  LogID: any;
 
   constructor(private service: DataService) {
     this.UserID = sessionStorage.getItem('UserID');
@@ -328,6 +329,7 @@ export class ImportRADataComponent implements OnInit {
   // ============ detailed view click ========
   viewDetails = (e: any) => {
     const id = e.row.key.ID;
+    this.LogID = e.row.key.ID;
     if (!id) {
       notify({
         message: 'No valid record selected.',
@@ -391,6 +393,7 @@ export class ImportRADataComponent implements OnInit {
     this.ImportRADataFormComponent.clearData();
     this.isLoading = false;
     this.selectedInsuranceId = null;
+    this.loadImportRALogDataSource();
   }
 }
 

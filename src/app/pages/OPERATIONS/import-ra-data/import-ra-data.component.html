@@ -100,6 +100,8 @@
         [options]="addButtonOptions"
       ></dxi-item>
     </dxo-toolbar>
+
+
     <input
       #fileInput
       type="file"
@@ -160,7 +162,8 @@
     <app-import-ra-data-popup
       *ngIf="ViewDataPopup"
       (closeForm)="CloseEditForm()"
-      [viewData]="selectedData"
+      [LogID]="LogID"
+      [fetchedData]="selectedData"
     ></app-import-ra-data-popup>
   </dx-popup>
 </div>

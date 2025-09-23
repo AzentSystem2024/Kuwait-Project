@@ -27,6 +27,7 @@ import { confirm, custom } from 'devextreme/ui/dialog';
 import { DataService } from 'src/app/services';
 import { finalize } from 'rxjs/operators';
 import { MasterReportService } from '../../MASTER PAGES/master-report.service';
+import { DataSource } from 'devextreme/common/data';
 
 @Component({
   selector: 'app-import-ra-data-popup',
@@ -41,7 +42,8 @@ export class ImportRADataPopupComponent implements OnInit {
   @ViewChild('fileInput', { static: false }) fileInput: ElementRef;
   @ViewChild('distributeGrid', { static: false }) distributeGrid: any;
 
-  @Input() viewData: any = null;
+  @Input() LogID: any = null;
+  @Input() fetchedData: any = null;
   @Input() dataSource: any = null;
   @Input() columnData: any = null;
   @Input() selectedInsuranceId: any = null;
@@ -92,25 +94,135 @@ export class ImportRADataPopupComponent implements OnInit {
   uniqueKeyData: any;
   selectedUniqueColumns: any;
 
+  totalPendingprocessed: number = 0;
+  totalProcessed: number = 0;
+  manualProcess: number = 0;
+  notFound: number = 0;
+  totalRaItems: number = 0;
+  isFilterRowVisible: boolean = false;
+
   constructor(
     private dataservice: DataService,
     private mastersrvce: MasterReportService
   ) {}
 
   async ngOnInit(): Promise<void> {
-    await this.fetch_insurance_dropdown_data();
+    this.isLoading = true;
+    try {
+      await this.fetch_insurance_dropdown_data();
 
-    if (this.viewData && this.insuranceList) {
-      const logID = this.viewData.ID;
-      this.selectedInsuranceId = this.viewData.InsuranceID;
-      this.columnData = this.viewData.columns.map((col: any) => ({
-        dataField: col.ColumnName,
-        caption: col.ColumnTitle,
-      }));
-      this.dataSource = this.viewData.data;
+      if (!this.fetchedData) {
+        await this.viewDetails();
+      } else {
+        this.applyFetchedData(this.fetchedData);
+      }
+
       this.fetch_all_column_and_uniqueKey_data();
+    } catch (error) {
+      notify({
+        message: 'Initialization failed.',
+        type: 'error',
+        displayTime: 5000,
+        position: 'top right',
+      });
+    } finally {
+      this.isLoading = false;
     }
   }
+
+  // ============ detailed view ==========
+  private async viewDetails(): Promise<void> {
+    const logid = this.LogID;
+    if (!logid) {
+      notify({
+        message: 'No valid record selected.',
+        type: 'warning',
+        displayTime: 3000,
+        position: 'top right',
+      });
+      return;
+    }
+
+    this.isLoading = true; // 🔹 start loading
+    try {
+      const res: any = await this.fetchRecordDetails(logid);
+      if (res) {
+        this.applyFetchedData(res);
+      } else {
+        notify({
+          message: 'No details found for this record.',
+          type: 'info',
+          displayTime: 3000,
+          position: 'top right',
+        });
+      }
+    } catch (error) {
+      notify({
+        message: 'Failed to fetch record details.',
+        type: 'error',
+        displayTime: 5000,
+        position: 'top right',
+      });
+    } finally {
+      this.isLoading = false; // 🔹 stop loading
+    }
+  }
+
+  // ============ helper to fetch details as Promise ==========
+  private fetchRecordDetails(logid: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.dataservice.fetch_RA_Data_log_view(logid).subscribe({
+        next: (res: any) => resolve(res),
+        error: (err) => reject(err),
+      });
+    });
+  }
+
+  // ============ apply common operations ==========
+  private applyFetchedData(res: any): void {
+    this.fetchedData = res;
+    this.selectedInsuranceId = res.InsuranceID;
+
+    this.columnData = res.columns.map((col: any) => ({
+      dataField: col.ColumnName,
+      caption: col.ColumnTitle,
+    }));
+
+    this.initDataSource(res);
+
+    this.totalRaItems = res.data.length;
+
+    this.totalPendingprocessed = res.data.filter(
+      (item: any) => item.Status === 'Not Processed'
+    ).length;
+
+    this.totalProcessed = res.data.filter(
+      (item: any) => item.Status === 'Processed'
+    ).length;
+  }
+
+  // ============ initialize DataSource ==========
+  private initDataSource(data: any): void {
+    this.dataSource = new DataSource<any>({
+      load: () =>
+        new Promise((resolveLoad, rejectLoad) => {
+          if (data?.data) {
+            resolveLoad(data.data);
+          } else {
+            rejectLoad('No data found');
+          }
+        }),
+    });
+  }
+
+  toggleFilterRow = () => {
+    this.isFilterRowVisible = !this.isFilterRowVisible;
+  };
+  // ============= hide popup ===========
+  handlePopupHidden(): void {
+    this.viewDetails();
+  }
+
   // =============== fetch ra columns and unique key of selected data ========
   fetch_all_column_and_uniqueKey_data() {
     const insuranceId = this.selectedInsuranceId;
@@ -266,7 +378,7 @@ export class ImportRADataPopupComponent implements OnInit {
   clearData() {
     this.dataSource = [];
     this.columnData = [];
-    this.viewData = null;
+    this.fetchedData = null;
   }
 
   close() {
@@ -288,7 +400,7 @@ export class ImportRADataPopupComponent implements OnInit {
   // =========== process popup open and data fetching =============
   onProcessClick() {
     const insurance = this.selectedInsuranceId;
-    const logId = this.viewData.ID;
+    const logId = this.fetchedData.ID;
 
     const payload = {
       InsuranceID: insurance,
@@ -329,8 +441,36 @@ export class ImportRADataPopupComponent implements OnInit {
   }
   // ======== change unique key and process data =============
   onChangeAndProcess() {
+    const insurance = this.selectedInsuranceId;
+    const logId = this.fetchedData.ID;
 
-    
+    const payload = {
+      InsuranceID: insurance,
+      LogID: logId,
+      UNIQUE_KEY: this.selectedUniqueColumns.join(','),
+    };
+    console.log('payload data:', payload);
+
+    this.isLoading = true;
+    this.dataservice.manual_ReProcess_RA_Data(payload).subscribe((res: any) => {
+      this.isLoading = false;
+
+      if (res && res.flag === '1') {
+        console.log(res);
+
+        // Assign response values
+        this.totalProcessed = res.TotalProcessed;
+        this.totalPendingprocessed = res.PendingProcess;
+        this.manualProcess = res.ManualProcess;
+        this.notFound = res.NotFound;
+      } else {
+        // Reset values if API fails
+        this.totalProcessed = 0;
+        this.totalPendingprocessed = 0;
+        this.manualProcess = 0;
+        this.notFound = 0;
+      }
+    });
   }
   // =============== Ra data row selection change event =========
   onRADataRowSelected(e: any) {
@@ -549,6 +689,8 @@ export class ImportRADataPopupComponent implements OnInit {
     this.totalSelected = 0;
     this.selectedDistributeRows = [];
     this.isDistributePopupVisible = false;
+    this.autoProcessPopup = false;
+    this.viewDetails();
   }
 
   // ====== on click of RA distribute process button ====
@@ -743,9 +885,9 @@ export class ImportRADataPopupComponent implements OnInit {
     this.RAProcessPopUpColumns = [];
     this.HISGridData = [];
     this.HISProcessPopUpColumns = [];
-    // this.selectedRAData = null;
-    // this.selectedHISData = null;
+    this.autoProcessPopup = false;
     this.isLoading = false;
+    this.viewDetails();
   }
 }
 

@@ -312,4 +312,11 @@ export class DataService {
       const reqbody = payload;
       return this.http.post(url, reqbody);
     }
+
+     // =======  RA Re_process data list ======
+  manual_ReProcess_RA_Data(payload: any) {
+    const url = `${BASE_URL}RaData/reprocess`;
+    const reqbody = payload;
+    return this.http.post(url, reqbody);
+  }
 }
