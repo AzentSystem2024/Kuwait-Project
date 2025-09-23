@@ -104,6 +104,8 @@ export class ImportRADataPopupComponent implements OnInit {
   totalRaItems: number = 0;
   isFilterRowVisible: boolean = false;
 
+  private uniqueKeyChanged = false;
+
   constructor(
     private dataservice: DataService,
     private mastersrvce: MasterReportService
@@ -418,8 +420,59 @@ export class ImportRADataPopupComponent implements OnInit {
       this.dataGrid.instance.clearFilter();
     }
   }
+
+  // ========== Watch for unique key changes ==========
+  onUniqueKeyChange(event: any) {
+    this.selectedUniqueColumns = event.value;
+    this.uniqueKeyChanged = true;
+  }
+
+  // ======== change unique key and process data =============
+  onChangeAndProcess(): Promise<void> {
+    return new Promise((resolve) => {
+      const insurance = this.selectedInsuranceId;
+      const logId = this.fetchedData.ID;
+
+      const payload = {
+        InsuranceID: insurance,
+        LogID: logId,
+        UNIQUE_KEY: this.selectedUniqueColumns.join(','),
+      };
+
+      console.log('payload data:', payload);
+
+      this.isLoading = true;
+      this.dataservice
+        .manual_ReProcess_RA_Data(payload)
+        .subscribe((res: any) => {
+          this.isLoading = false;
+
+          if (res && res.flag === '1') {
+            console.log(res);
+
+            this.totalProcessed = res.TotalProcessed;
+            this.totalPendingprocessed = res.PendingProcess;
+            this.manualProcess = res.ManualProcess;
+            this.notFound = res.NotFound;
+          } else {
+            this.totalProcessed = 0;
+            this.totalPendingprocessed = 0;
+            this.manualProcess = 0;
+            this.notFound = 0;
+          }
+
+          this.uniqueKeyChanged = false;
+          resolve();
+        });
+    });
+  }
+
   // =========== process popup open and data fetching =============
-  onProcessClick() {
+  async onProcessClick() {
+    if (this.uniqueKeyChanged && this.selectedUniqueColumns.length > 0) {
+      await this.onChangeAndProcess();
+    }
+
     const insurance = this.selectedInsuranceId;
     const logId = this.fetchedData.ID;
 
@@ -460,39 +513,7 @@ export class ImportRADataPopupComponent implements OnInit {
       },
     });
   }
-  // ======== change unique key and process data =============
-  onChangeAndProcess() {
-    const insurance = this.selectedInsuranceId;
-    const logId = this.fetchedData.ID;
 
-    const payload = {
-      InsuranceID: insurance,
-      LogID: logId,
-      UNIQUE_KEY: this.selectedUniqueColumns.join(','),
-    };
-    console.log('payload data:', payload);
-
-    this.isLoading = true;
-    this.dataservice.manual_ReProcess_RA_Data(payload).subscribe((res: any) => {
-      this.isLoading = false;
-
-      if (res && res.flag === '1') {
-        console.log(res);
-
-        // Assign response values
-        this.totalProcessed = res.TotalProcessed;
-        this.totalPendingprocessed = res.PendingProcess;
-        this.manualProcess = res.ManualProcess;
-        this.notFound = res.NotFound;
-      } else {
-        // Reset values if API fails
-        this.totalProcessed = 0;
-        this.totalPendingprocessed = 0;
-        this.manualProcess = 0;
-        this.notFound = 0;
-      }
-    });
-  }
   // =============== Ra data row selection change event =========
   onRADataRowSelected(e: any) {
     if (!e.selectedRowsData?.length) {
