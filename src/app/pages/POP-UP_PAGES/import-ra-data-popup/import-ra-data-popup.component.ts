@@ -28,7 +28,9 @@ import { DataService } from 'src/app/services';
 import { finalize } from 'rxjs/operators';
 import { MasterReportService } from '../../MASTER PAGES/master-report.service';
 import { DataSource } from 'devextreme/common/data';
-
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import * as ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 @Component({
   selector: 'app-import-ra-data-popup',
   templateUrl: './import-ra-data-popup.component.html',
@@ -66,6 +68,7 @@ export class ImportRADataPopupComponent implements OnInit {
   statusOptions = [
     { DESCRIPTION: 'Processed', ID: 'Processed' },
     { DESCRIPTION: 'Not Processed', ID: 'Not Processed' },
+    { DESCRIPTION: 'Not Found', ID: 'Not Found' },
   ];
   selectedStatus: string | null = null;
 
@@ -387,8 +390,26 @@ export class ImportRADataPopupComponent implements OnInit {
     this.closeForm.emit();
   }
 
-  // =============================== process popup codes =========
+  handleExporting(e: any): void {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Data');
 
+    exportDataGrid({
+      component: e.component,
+      worksheet: worksheet,
+      autoFilterEnabled: true,
+    }).then(() => {
+      workbook.xlsx.writeBuffer().then((buffer) => {
+        saveAs(
+          new Blob([buffer], { type: 'application/octet-stream' }),
+          'RA Data Export.xlsx'
+        );
+      });
+    });
+    e.cancel = true;
+  }
+
+  // =============================== process popup codes =========
   onStatusChange(e: any) {
     const statusValue = e.value;
     if (this.dataGrid && statusValue) {

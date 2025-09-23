@@ -1,5 +1,5 @@
 <div>
-  <div class="mb-2 d-flex justify-content-end gap-2">
+  <!-- <div class="mb-2 d-flex justify-content-end gap-2">
     <dx-select-box
       class="p-0"
       [dataSource]="insuranceList"
@@ -37,23 +37,24 @@
       stylingMode="contained"
       (onClick)="autoProcessPopup = true"
     ></dx-button>
-  </div>
+  </div> -->
 
   <dx-data-grid
     #dataGrid
+    [dataSource]="dataSource"
+    [columns]="columnData"
     [showBorders]="true"
-    [allowColumnResizing]="true"
-    [allowColumnReordering]="true"
-    [rowAlternationEnabled]="true"
-    rowAlternationInterval="2"
-    [columnAutoWidth]="true"
-    [columnFixing]="{ enabled: true }"
     [height]="'80vh'"
     [width]="'100%'"
     [rowAlternationEnabled]="true"
-    [dataSource]="dataSource"
-    [columns]="columnData"
+    rowAlternationInterval="2"
+    [columnAutoWidth]="true"
+    [allowColumnResizing]="true"
+    [allowColumnReordering]="true"
+    [columnFixing]="{ enabled: true }"
+    (onExporting)="handleExporting($event)"
   >
+    <!-- Paging -->
     <dxo-paging [pageSize]="100"></dxo-paging>
     <dxo-pager
       [visible]="true"
@@ -64,14 +65,84 @@
       [showNavigationButtons]="true"
     ></dxo-pager>
 
+    <!-- Loading panel -->
     <dxo-load-panel
       [enabled]="true"
       [shading]="true"
       [showIndicator]="true"
       [showPane]="false"
     ></dxo-load-panel>
+
+    <!-- Filtering -->
     <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
     <dxo-scrolling mode="virtual" [useNative]="false"></dxo-scrolling>
+    <dxo-export [enabled]="true" [allowExportSelectedData]="false"></dxo-export>
+
+    <dxo-toolbar>
+      <dxi-item location="after">
+        <dx-select-box
+          class="p-0 mt-0"
+          [dataSource]="insuranceList"
+          displayExpr="DESCRIPTION"
+          valueExpr="ID"
+          [(value)]="selectedInsuranceId"
+          label="Insurance"
+          labelMode="floating"
+          width="300"
+          [showClearButton]="true"
+          [searchEnabled]="true"
+          [readOnly]="true"
+        >
+        </dx-select-box>
+      </dxi-item>
+
+      <dxi-item location="after" *ngIf="fetchedData">
+        <dx-select-box
+          class="p-0 mt-0"
+          [dataSource]="statusOptions"
+          [(value)]="selectedStatus"
+          label="Status"
+          labelMode="floating"
+          width="200"
+          displayExpr="DESCRIPTION"
+          valueExpr="ID"
+          [showClearButton]="true"
+          (onValueChanged)="onStatusChange($event)"
+        >
+        </dx-select-box>
+      </dxi-item>
+
+      <dxi-item
+        *ngIf="fetchedData"
+        location="after"
+        name="exportButton"
+      ></dxi-item>
+      
+      <dxi-item
+        *ngIf="fetchedData"
+        location="after"
+        name="columnChooserButton"
+      ></dxi-item>
+
+      <dxi-item location="after" *ngIf="fetchedData">
+        <dx-button
+          text="Process"
+          type="default"
+          stylingMode="contained"
+          (onClick)="autoProcessPopup = true"
+        ></dx-button>
+      </dxi-item>
+    </dxo-toolbar>
+
+    <!-- Column chooser (optional) -->
+    <dxo-column-chooser
+      [enabled]="true"
+      [height]="500"
+      mode="select"
+      [allowSearch]="true"
+    >
+    </dxo-column-chooser>
   </dx-data-grid>
 </div>
 

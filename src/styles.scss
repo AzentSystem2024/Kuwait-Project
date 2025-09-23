@@ -967,10 +967,18 @@ body {
 }
 
 //=======================================
+
+.dx-scrollbar-horizontal.dx-scrollbar-hoverable {
+  height: 15px !important;
+  padding: 0px;
+  transition: height 0.2s linear 0.15s, background-color 0.2s linear 0.15s;
+}
+
+
 .dx-scrollbar-horizontal.dx-scrollbar-hoverable .dx-scrollable-scroll {
   transition: background-color 0.5s linear 1s, height 0.2s linear 0.15s;
   background-color: rgb(111, 181, 255);
-  height: 15px;
+  height: 15px !important;
 }
 
 .dx-scrollbar-horizontal.dx-scrollbar-hoverable
@@ -978,23 +986,27 @@ body {
   .dx-scrollable-scroll-content {
   transition: background-color 0.5s linear 1s;
   background-color: rgb(111, 181, 255);
-  height: 15px;
+  height: 15px !important;
 }
+
 .dx-scrollbar-horizontal.dx-scrollbar-hoverable
   .dx-scrollable-scroll.dx-state-invisible {
   transition: background-color 0.5s linear 1s, height 0.2s linear 0.15s;
-  height: 15px;
+  height: 15px !important;
 }
+
+
+
 .dx-datagrid .dx-datagrid-sticky-columns .dx-scrollable-scrollbar {
   z-index: 4;
-  height: 15px;
+  height: 15px !important;
   padding-top: 5px;
 }
 
 .dx-scrollbar-vertical.dx-scrollbar-hoverable .dx-scrollable-scroll {
   transition: background-color 0.5s linear 1s, height 0.2s linear 0.15s;
   background-color: rgb(111, 181, 255);
-  height: 15px;
+  height: 15px !important;
 }
 
 .dx-scrollbar-vertical.dx-scrollbar-hoverable
@@ -1002,12 +1014,12 @@ body {
   .dx-scrollable-scroll-content {
   transition: background-color 0.5s linear 1s;
   background-color: rgb(111, 181, 255);
-  height: 15px;
+  height: 15px !important;
 }
 .dx-scrollbar-vertical.dx-scrollbar-hoverable
   .dx-scrollable-scroll.dx-state-invisible {
   transition: background-color 0.5s linear 1s, height 0.2s linear 0.15s;
-  height: 15px;
+  height: 15px !important;
 }
 
 ::ng-deep .formPopupClass.dx-popup-content-scrollable {
@@ -1027,7 +1039,6 @@ input[type="password"]::-webkit-password-toggle-button {
   -webkit-appearance: none;
 }
 
-/* For Firefox */
 input[type="password"]::-moz-password-clear-button,
 input[type="password"]::-moz-password-toggle {
   display: none !important;
