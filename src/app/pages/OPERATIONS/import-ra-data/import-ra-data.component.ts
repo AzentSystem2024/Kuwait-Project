@@ -328,9 +328,8 @@ export class ImportRADataComponent implements OnInit {
   }
   // ============ detailed view click ========
   viewDetails = (e: any) => {
-    const id = e.row.key.ID;
     this.LogID = e.row.key.ID;
-    if (!id) {
+    if (!this.LogID && e) {
       notify({
         message: 'No valid record selected.',
         type: 'warning',
@@ -341,7 +340,7 @@ export class ImportRADataComponent implements OnInit {
     }
     this.isLoading = true;
 
-    this.service.fetch_RA_Data_log_view(id).subscribe({
+    this.service.fetch_RA_Data_log_view(this.LogID).subscribe({
       next: (res: any) => {
         if (res) {
           this.selectedData = res;

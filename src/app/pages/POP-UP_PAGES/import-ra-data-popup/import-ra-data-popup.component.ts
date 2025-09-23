@@ -134,12 +134,12 @@ export class ImportRADataPopupComponent implements OnInit {
   private async viewDetails(): Promise<void> {
     const logid = this.LogID;
     if (!logid) {
-      notify({
-        message: 'No valid record selected.',
-        type: 'warning',
-        displayTime: 3000,
-        position: 'top right',
-      });
+      // notify({
+      //   message: 'No valid record selected.',
+      //   type: 'warning',
+      //   displayTime: 3000,
+      //   position: 'top right',
+      // });
       return;
     }
 
