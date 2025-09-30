@@ -61,3 +61,13 @@
 .main-container .MFABorderBox {
   height: 35vh;
 }
+/* Optional: hover effect */
+.RecButton:hover {
+  background-color: darkblue !important;
+}
+.settings-wrapper {
+   background-color: var(--base-bg);
+  border-radius: 8px;
+  padding: 10px;           /* optional: gives space inside */
+  margin-top: 20px;
+}

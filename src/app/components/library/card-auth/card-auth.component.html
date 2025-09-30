@@ -1,7 +1,16 @@
 <div class="loginMainDiv">
+  <!-- Left side (Image / Welcome text) -->
+  <div class="logoDiv">
+    <img src="../../../../assets/Illustration.png" alt="Logo" />
+    <p class="logoText">WELCOME BACK!</p>
+    <p class="logoSubtext">Securely access your insurance dashboard to manage <br></p>
+    <p class="logoSubtext2" >your policies, claims, and more.</p>
+  </div>
+
+  <!-- Right side (Login form) -->
   <div class="auth-card">
     <div class="dx-card content">
-      <div style="position: relative">
+      <div>
         <dx-button
           icon="close"
           stylingMode="text"
@@ -13,7 +22,7 @@
       </div>
 
       <div class="header">
-        <div class="title">{{ title }}</div>
+        <div class="title"><img src="../../../../assets/Frame 1321318771.svg" height="43px" width="300px" alt="Logo" /></div>
         <div class="description">{{ description }}</div>
       </div>
       <ng-content></ng-content>

@@ -96,7 +96,8 @@
 }
 .toggleButton {
   border-radius: 4px;
-  background-color: #0fa6e1d3;
+  background-color: rgba(30, 58, 138, 1);
+  color: rgba(250, 250, 250, 1);
 }
 
 .SearchParams-container {
@@ -121,8 +122,10 @@
   width: 50px; /* Adjust width to match the font-size */
   // height: 20px;     /* Adjust height to match the font-size */
 }
-
-
+.add-card {
+  background-color: rgba(30, 58, 138, 1);
+  color: rgba(250, 250, 250, 1);
+}
 
 .custom-close-btn {
   position: absolute;

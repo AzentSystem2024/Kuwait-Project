@@ -158,6 +158,7 @@ body {
   font-size: 12px;
   border-radius: 6px;
   // border: 1px solid var(--base-text-color);
+  // background-color: blue;
 }
 
 .dx-scrollbar-horizontal.dx-scrollbar-hoverable {
@@ -433,19 +434,24 @@ body {
     padding-top: 0;
   }
   .grid .dx-button.dx-button-default {
-    border-radius: 8px;
+    border-radius: 100px;
     color: #ffffff;
+    background-color: rgba(30, 58, 138, 1)
   }
   .Notification-Settings .dx-button.dx-button-default {
     border-radius: 24px;
-    background-color: #5486ff;
+    background-color: rgba(30, 58, 138, 1) !important;
     color: #fff;
   }
   .Notification-Settings .dx-button.dx-button-success {
     border-radius: 24px;
   }
   .grid .dx-button.dx-button-default .dx-icon {
-    color: var(--text-color);
+    color:rgba(255, 255, 255, 1);
+    // background-color: rgba(30, 58, 138, 1);
+    
+    // height: 25px;
+    // width: 25px;
   }
   .view-wrapper {
     .dx-toolbar.dx-widget.theme-dependent {
@@ -579,6 +585,7 @@ body {
     .dx-button.form-item-button {
       margin-left: 0;
       margin-top: 5px;
+      background-color:  rgba(30, 58, 138, 1) !important;
     }
   }
 
@@ -594,7 +601,7 @@ body {
 
   .dx-datagrid-headers.dx-datagrid-nowrap.dx-bordered-top-view {
     border-radius: 8px 8px 0 0;
-    background-color: #00a0e020;
+    background-color: var(--grid-toolbar-bg);
     font-size: larger;
     font-weight: bolder;
   }
@@ -645,7 +652,6 @@ body {
 .dx-datagrid-header-panel
   .dx-toolbar-text-auto-hide
   .dx-button.dx-button-has-icon {
-  border-radius: 6px;
   background-color: rgb(96 165 250 / 0%);
   border: 2px solid var(--border-color);
 }
@@ -656,10 +662,13 @@ body {
   width: 20px;
   height: 20px;
   font-size: 20px;
+  // border-radius: 50%;
   margin-inline-end: 0;
   margin-inline-start: 0;
   // color: #64748b;
   font-weight: bold;
+  // color: rgba(30, 58, 138, 1);
+  color: var(--toolbar-icon-color);
 }
 .dx-datagrid-export-button .dx-button .dx-icon {
   width: 20px;
@@ -929,7 +938,7 @@ body {
   position: relative;
   overflow: hidden;
   width: 100%;
-  background-color: aliceblue;
+  background-color: rgb(255, 255, 255,1);
   height: 40px;
   border-radius: 8px;
 }
@@ -938,9 +947,17 @@ body {
   padding-top: 5px;
   padding-bottom: 5px;
   color: black;
+  
 }
 .login-form .dx-texteditor.dx-editor-filled {
-  border-radius: 8px;
+  border-radius: 6px;
+  border-color: rgba(203, 213, 225, 1) !important;
+  background-color: rgba(255, 255, 255, 1);
+}
+.login-form .dx-texteditor.dx-editor-filled.dx-state-hover{
+  border-radius: 6px;
+  border-color: rgba(203, 213, 225, 1) !important;
+  background-color: rgba(255, 255, 255, 1);
 }
 .login-form .dx-button-mode-text .dx-icon {
   color: rgb(0 0 0);
@@ -957,12 +974,15 @@ body {
 
 .my-custom-grid .dx-button.dx-button-default {
   border-radius: 24px;
-  background-color: #5486ff;
+  // background-color: #5486ff;
+  
   color: #fff;
+  background-color: rgba(30, 58, 138, 1)
 }
 .my-custom-grid .dx-button.dx-button-default.dx-state-hover {
   border-radius: 24px;
-  background-color: #5486ff;
+  // background-color: #5486ff;
+  background-color: rgba(30, 58, 138, 1);
   color: #fff;
 }
 
@@ -1005,7 +1025,7 @@ body {
 
 .dx-scrollbar-vertical.dx-scrollbar-hoverable .dx-scrollable-scroll {
   transition: background-color 0.5s linear 1s, height 0.2s linear 0.15s;
-  background-color: rgb(111, 181, 255);
+  background-color:#444444;
   height: 15px !important;
 }
 
@@ -1013,7 +1033,7 @@ body {
   .dx-scrollable-scroll.dx-state-invisible
   .dx-scrollable-scroll-content {
   transition: background-color 0.5s linear 1s;
-  background-color: rgb(111, 181, 255);
+  background-color:#444444;
   height: 15px !important;
 }
 .dx-scrollbar-vertical.dx-scrollbar-hoverable
@@ -1042,4 +1062,134 @@ input[type="password"]::-webkit-password-toggle-button {
 input[type="password"]::-moz-password-clear-button,
 input[type="password"]::-moz-password-toggle {
   display: none !important;
+}
+
+
+.dx-icon-edit:before {
+  content: "\f023" !important;
+  color:var(--grid-edit-icon-color) !important;
+}
+.dx-icon-trash:before {
+  content: "\f03e";
+  color: #d62a1e !important;
+}
+.dx-icon-info:before {
+  content: "\f03e";
+// color:rgba(23, 44, 104, 1)
+  color:var(--grid-edit-icon-color) !important;
+}
+.dx-treeview-node[aria-expanded="true"] > .dx-item .dx-item-content {
+  height: auto;
+  color: rgb(255, 255, 255);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.dx-treeview-node[aria-level="2"][aria-expanded="true"]
+  > .dx-item
+  .dx-item-content {
+  font-weight: 500 !important;
+  height: auto !important;
+  
+}
+
+.dx-treeview-node[aria-level="1"][aria-expanded="true"]
+  > .dx-item
+   {
+  font-weight: 600 !important;
+  height: auto !important;
+  padding: 7px;
+  margin-left: 5px;
+  background-color: rgba(23, 44, 104, 1);
+}
+
+.dx-searchbox.dx-editor-outlined .dx-texteditor-input, .dx-searchbox.dx-editor-outlined .dx-placeholder::before {
+    /* padding-inline-start: 32px; */
+    border-color:rgba(185, 194, 219, 1) !important;
+    border-radius: 100px;
+}
+// .dx-texteditor.dx-editor-outlined {
+//     /* background-color: rgb(41, 41, 41); */
+//     /* border-radius: 4px; */
+//     // border-width: 1px;
+//     // border-style: solid;
+//     // border-color: rgb(97, 97, 97);
+//     // border-bottom-color: #adadad;
+//        border-color:rgba(185, 194, 219, 1) !important;
+//     border-radius: 100px;
+   
+// }
+// ::ng-deep.dx-texteditor.dx-editor-outlined {
+//     // background-color: rgb(255, 255, 255);
+//     // border-radius: 4px;
+//     // border-width: 1px;
+//     // border-style: solid;
+//        border-color:rgba(185, 194, 219, 1) !important;
+//     border-radius: 100px;
+//     // border-color: #e5e8f0;
+//     // border-bottom-color: #a4afcb;
+  
+// }
+::ng-deep.dx-button.dx-button-default {
+    border-radius: 4px;
+    background-color: rgba(30, 58, 138, 1) !important;
+    color: #fff;
+}
+
+
+::ng-deep .dx-button.my-save-btn .dx-button-text {
+  font-size: 14px;
+  color: #fff;
+      background-color: rgba(30, 58, 138, 1) !important;
+}
+.dx-pager .dx-pages .dx-selection,
+.dx-pager .dx-page-sizes .dx-selection,
+.dx-pagination .dx-pages .dx-selection,
+.dx-pagination .dx-page-sizes .dx-selection {
+  font-weight: 500;
+  background-color: rgba(30, 58, 138, 1) !important;
+  color: #fff !important;
+  border: none;
+}
+
+.dx-checkbox-checked .dx-checkbox-icon {
+  color: rgb(255, 255, 255) !important;
+  border-color:  rgba(30, 58, 138, 1)  !important;
+  background-color:  rgba(30, 58, 138, 1)  !important;
+  font: 14px / 1 DXIcons;
+  font-size: 16px;
+}
+.dx-radiobutton-icon-checked .dx-radiobutton-icon-dot {
+  background-color: rgba(30, 58, 138, 1)  !important;
+}
+::ng-deep .dx-texteditor.dx-editor-filled .dx-label,
+::ng-deep .dx-texteditor.dx-editor-outlined .dx-label {
+  top: -6px !important;   /* adjust to move label above */
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+
+.dx-switch-on-value .dx-switch-container::before {
+  background-color:  rgba(30, 58, 138, 1)!important;
+  border-color:  rgba(30, 58, 138, 1) !important;
+}
+
+.dx-datagrid-header-panel .dx-toolbar-text-auto-hide .dx-button.dx-button-has-icon {
+    border-radius: 40px !important;
+}
+::ng-deep .toggleButton .dx-icon-chevronup,
+::ng-deep .toggleButton .dx-icon-chevrondown {
+  color: rgba(250, 250, 250, 1) !important;   /* set your desired color */
+  font-size: 16px;           /* optional: adjust size */
+}
+
+.dx-button.dx-button-default {
+    border-radius: 4px;
+    background-color: rgba(23, 44, 104, 1)  !important;
+    color: rgba(250, 250, 250, 1) !important;
+} 
+.dx-toolbar .dx-button .dx-icon {
+    box-sizing: content-box;
+    // color: var(--grid-edit-icon-color) !important;
+    // border: 1px solid !important;
+    // border-radius: 40px !important;
 }

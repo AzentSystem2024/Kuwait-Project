@@ -3,7 +3,8 @@
   [menuToggleEnabled]="true"
   (menuToggle)="menuOpened = !menuOpened"
   [title]="appInfo.title"
-></app-header>
+>
+</app-header>
 
 <dx-drawer
   class="layout-body"
@@ -51,6 +52,7 @@
           height="100%"
           *dxTemplate="let tab of 'title'"
           (click)="TabItemClick(tab)"
+          [class.selected-tab]="tab === tabs[selectedIndex]"
         >
           <span class="tabSubItems ms-2" [title]="tab.title">{{
             tab.title

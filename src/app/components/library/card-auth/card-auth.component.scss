@@ -4,24 +4,70 @@
   display: flex;
   flex-grow: 2;
   justify-content: center;
-}
-.loginMainDiv {
-  display: flex;
-  justify-content: flex-end;
+}.loginMainDiv {
+  background-color: #fafafa;
   height: 100vh;
   width: 100%;
-  background-image: url("../../../../assets/projectx\ Login2.png");
-  /* White color with 50% opacity */
-  background-size: cover;
-  background-position: center;
+  display: flex;
 }
 
-.auth-card {
+.logoDiv {
+  flex: 1; /* 50% width */
   display: flex;
-  flex-grow: 2;
+  align-items: center;
+  justify-content: center;
+   flex-direction: column;
+   
+}
+
+.logoDiv img {
+  max-width: 40%;
+  height: auto;
+  display: block;
+ position: relative;
+  top: -80px; /* moves image upward */
+
+}
+.logoDiv .logoText {
+ position: relative;
+  top: -30px; 
+  left: -35px;
+  font-size: 30px;    /* adjust size */
+  font-weight: 400;  /* optional */
+  color: rgb(22, 22, 22);      /* or any color you want */
+  font-family: 'Aboreto';
+  margin-bottom: 0;
+  
+}
+
+.logoSubtext {
+  color: grey;        /* text color red */
+  
+  margin-left: 70px;
+  font-size: 16px;   /* optional: adjust size */
+  font-weight: 500;  /* optional: medium weight */
+  text-align: left; /* optional: center text */
+margin-bottom: 0px;
+  text-align: center;  /* optional: spacing from above element */
+}
+
+.logoSubtext2 {
+  color: grey;        /* text color red */
+  text-align: center;
+  left: -40px;
+  font-size: 16px;   /* optional: adjust size */
+  font-weight: 500;  /* optional: medium weight */
+  text-align: left; /* optional: center text */
+  margin-top: 0px;   /* optional: spacing from above element */
+  margin-left: -90px;
+}
+.auth-card {
+  flex: 1; /* 50% width */
+  display: flex;
 
   ::ng-deep .dx-button-text {
     text-transform: none;
+    color: rgba(233, 235, 243, 1);
   }
 
   .dx-card {
@@ -30,15 +76,12 @@
     padding: 28px;
     flex-grow: 0;
     max-width: 450px;
-    // width: 500px;
-    height: 80%;
+    height: 50%;
     border-radius: 8px;
 
     &.content {
       height: auto;
-      // height: 70vh;
-      // width: 25%;
-      background-color: rgba(191, 198, 205, 0.486);
+      background-color: rgba(255, 255, 255, 0.486);
       border-radius: 25px;
     }
 
@@ -58,7 +101,7 @@
       margin-top: 35px;
 
       .title {
-        color: var(--base-text-color);
+        color: rgba(30, 58, 138, 1);
         text-align: center;
         line-height: 24px;
         font-weight: 500;
@@ -66,26 +109,25 @@
       }
 
       .description {
-        color: var(--base-text-color-alpha);
+        color:rgb(253, 253, 253);
         line-height: 16px;
         font-size: 25px;
         margin-top: 20px;
-        // text-align: center;
       }
     }
 
     .btnDiv {
       position: relative;
-      // background-color: rgb(218, 218, 218);
       border: 1px dotted rgb(255, 255, 255);
     }
-    // Add these styles to position the close icon
+
+    /* Fixed close icon */
     .close-icon {
       position: absolute;
       right: 1px;
       font-size: 20px;
       z-index: 1;
-      border: 1px silid black;
+      border: 1px solid black; /* fixed here */
     }
   }
 }

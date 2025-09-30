@@ -14,7 +14,7 @@
       ></dx-button>
 
       <dx-button
-        style="border-radius: 24px"
+        style="border-radius: 24px;background-color: rgba(30, 58, 138, 1); color: white"
         stylingMode="contained"
         text="Save"
         type="default"
@@ -22,7 +22,9 @@
       ></dx-button>
     </div>
   </div>
+  <div class="settings-wrapper">
   <div class="container-fluid main-container">
+
     <div class="row justify-content-center mt-2">
       <div class="col-md-6">
         <div class="BorderBox p-3 mb-3">
@@ -34,7 +36,7 @@
               (onValueChanged)="onValidationEnableChange($event.value)"
             >
             </dx-switch>
-            <label class="ms-2 headingText">Password Validation Required</label>
+            <label class="ms-2 headingText"><i class="fa fa-key me-2 fa-sm"style="color:rgba(30, 58, 138,1)"></i>Password Validation Required</label>
           </div>
 
           <div class="mb-3">
@@ -95,15 +97,22 @@
               [switchedOnText]="'Yes'"
               [switchedOffText]="'No'"
             ></dx-switch>
-            <label class="ms-2 headingText">
+            <label class="ms-2 headingText"><i class="fa-solid fa-shield-halved me-2 fa-sm"style="color:rgba(30, 58,138,1)"></i>
               Enable Multi-factor Authentication
             </label>
-            <span
+            <dx-button
+  text="Recommended"
+  stylingMode="text"
+  type="normal"
+  class="RecButton"
+>
+</dx-button>
+            <!-- <span
               class="ms-2 text-primary fw-semibold"
               style="font-size: 0.875rem"
             >
               (Recommended)
-            </span>
+            </span> -->
           </div>
 
           <!-- Checkboxes (Mutually Exclusive) -->
@@ -185,7 +194,7 @@
 
       <div class="col-md-6">
         <div class="BorderBox p-3 mb-3">
-          <div class="headingText">Account Lock</div>
+          <div class="headingText"><i class="fa fa-lock me-2 fa-sm"style="color:rgba(30, 58,138,1)"></i>Account Lock</div>
           <div class="mt-3 items w-100">
             <dx-number-box
               class="w-100"
@@ -219,7 +228,7 @@
         </div>
 
         <div class="BorderBox p-3">
-          <div class="headingText">General</div>
+          <div class="headingText"><i class="fa fa-cog me-2 fa-sm"style="color:rgba(30, 58, 138, 1)"></i>General</div>
           <div class="dx-field m-1 mt-1 w-100">
             <dx-check-box
               class="w-100"
@@ -261,6 +270,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- <div class="OthersBorderBox p-3">

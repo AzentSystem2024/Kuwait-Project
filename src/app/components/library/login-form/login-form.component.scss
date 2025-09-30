@@ -3,7 +3,7 @@
 .login-form {
   width: 400px;
   height: 300px;
-  margin-top: 80px;
+  margin-top: 30px;
   ::ng-deep .form-text {
     color: var(--base-text-color-alpha);
   }
@@ -12,18 +12,29 @@
 .reset-link {
   text-align: end;
   /* font-size: 12px; */
-  font-style: normal;
-  margin: 6px 0 50px 0;
-  font-size: medium;
+  color: rgba(30, 58, 138, 1);
+margin-top: -10px;
+  // margin: 6px 0 50px 0;
+
+   
 
   a {
     cursor: pointer;
-    color: aliceblue;
+    color: rgba(30, 58, 138, 1);
   }
 }
 
 ::ng-deep .login-form .dx-button.dx-button-default {
-  border-radius: 4px;
-  background-color: rgb(71, 158, 245);
-  margin-top: 10px;
+  border-radius: 100px;
+  background-color: rgba(30, 58, 138, 1);
+  // margin-top: 10px;
+  
+}
+.dx-button .fas.fa-user {
+  font-size: 24px;   // change size
+  color:rgba(30, 58, 138, 1);    // change color
+}
+
+::ng-deep .dx-button.dx-state-disabled .dx-icon{
+  color:rgba(30, 58, 138, 1);    // change color
 }

@@ -73,7 +73,7 @@ export class UserLevelMasterComponent {
 
   addButtonOptions = {
     text: 'New',
-    icon: 'bi bi-file-earmark-plus',
+   icon: 'bi bi-plus-circle-fill',
     type: 'default',
     stylingMode: 'contained',
     hint: 'Add new entry',

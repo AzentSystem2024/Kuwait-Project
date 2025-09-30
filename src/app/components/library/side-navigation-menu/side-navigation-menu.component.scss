@@ -14,6 +14,7 @@
     display: flex;
     flex: 1;
     padding-top: var(--toolbar-vertical-padding);
+    
     // padding-bottom: var(--footer-height);
 
     ::ng-deep .dx-treeview {
@@ -21,7 +22,7 @@
       .dx-treeview-item {
         padding-left: 5px;
         flex-direction: row-reverse;
-        border-radius: 8px;
+        border-radius: 100px;
 
         .dx-icon.dx-icon {
           width: var(--side-panel-min-width);
@@ -54,7 +55,11 @@
         &[aria-level="1"] {
           color: var(--side-menu-text-color);
           font-weight: bold;
-          border-bottom: 1px solid var(--border-color);
+            // color: rgba(14, 14, 14, 1) ;
+            // background-color: var(--side-menu-selected-bg);
+              //  color: rgba(14, 14, 14, 1) !important;
+  // background-color: rgba(23, 44, 104, 1);
+          // border-bottom: 1px solid var(--border-color);
         }
 
         &[aria-level="2"] .dx-treeview-item-content {
@@ -66,20 +71,41 @@
     }
   }
 }
-::ng-deep .menu-container .dx-treeview-item.dx-state-hover {
+// ::ng-deep .menu-container .dx-treeview-item.dx-state-hover {
+//   // background-color: red;
+//   color: rgba(14, 14, 14, 1) !important;
+//   border-radius: 6px;
+// }
+
+// ::ng-deep .dx-treeview-item-without-checkbox .dx-state-focused {
+//   > .dx-treeview-item {
+//     color: rgba(14, 14, 14, 1) !important;
+//   }
+// }
+
+// ::ng-deep .dx-treeview-item-without-checkbox.dx-state-selected
+//   > .dx-treeview-item {
+//   color: rgba(29, 78, 216, 1) !important;
+//   background-color: var(--side-menu-selected-bg);
+// }
+::ng-deep .menu-container .dx-treeview-item-content.dx-state-hover {
+   
   // background-color: #a2eaf4 !important;
-  color: #2474f3 !important;
-  border-radius: 6px;
+   color: --side-menu-text-color !important;
+  background-color: rgba(233, 235, 243, 1);
+   
 }
 
-::ng-deep .dx-treeview-item-without-checkbox .dx-state-focused {
-  > .dx-treeview-item {
-    color: #2474f3 !important;
-  }
-}
+
 
 ::ng-deep .dx-treeview-item-without-checkbox.dx-state-selected
   > .dx-treeview-item {
-  color: rgba(29, 78, 216, 1) !important;
+  color: --side-menu-text-color !important;
   background-color: var(--side-menu-selected-bg);
+}
+::ng-deep .dx-treeview-item-without-checkbox .dx-state-focuser{
+  >.dx-treeview-item{
+    color: --side-menu-text-color !important;
+    background-color: var(--side-menu-selected-bg);
+  }
 }
