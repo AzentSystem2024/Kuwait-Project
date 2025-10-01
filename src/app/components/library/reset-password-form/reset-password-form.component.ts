@@ -22,6 +22,7 @@ import {
 } from 'devextreme-angular';
 import { DxFormModule } from 'devextreme-angular/ui/form';
 import { DxLoadIndicatorModule } from 'devextreme-angular/ui/load-indicator';
+import { TextEditorButton, TextEditorButtonLocation } from 'devextreme/common';
 import notify from 'devextreme/ui/notify';
 import { MasterReportService } from 'src/app/pages/MASTER PAGES/master-report.service';
 import { AuthService, IResponse } from 'src/app/services';
@@ -45,7 +46,7 @@ export class ResetPasswordFormComponent implements OnInit, OnDestroy {
   otpSent: boolean = false;
   otpVerified: boolean = false;
   generatedOtp: string = '';
-  headerTitle: string = 'Reset Password'; // Dynamic header title
+  headerTitle: string = 'Forgot Password?'; // Dynamic header title
   otpDigits: string[] = ['', '', '', '', '', ''];
   formHeight: number = 300; // Initial form height
   otpMessage: string = '';
@@ -475,6 +476,17 @@ export class ResetPasswordFormComponent implements OnInit, OnDestroy {
   redirectToLogin() {
     this.router.navigate(['/auth/login']); // Adjust the route to your actual login page path
   }
+  // Correctly typed buttons
+  emailTextBoxButtons: (string | TextEditorButton)[] = [
+    {
+      name: 'emailIcon',
+      location: 'before' as TextEditorButtonLocation, // ✅ strict typing
+      options: {
+        icon: 'email',
+        stylingMode: 'text'
+      }
+    }
+  ];
 }
 @NgModule({
   imports: [

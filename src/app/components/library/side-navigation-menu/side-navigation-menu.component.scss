@@ -92,16 +92,24 @@
    
   // background-color: #a2eaf4 !important;
    color: --side-menu-text-color !important;
-  background-color: rgba(233, 235, 243, 1);
+  background-color: var(--side-menu-selected-bg)!important;
    
 }
 
+
+::ng-deep .dx-treeview-item-without-checkbox.dx-state-hover {
+     > .dx-treeview-item {
+  // background-color: #a2eaf4 !important;
+   color: --side-menu-text-color !important;
+  background-color: var(--side-menu-selected-bg)!important;
+   
+}}
 
 
 ::ng-deep .dx-treeview-item-without-checkbox.dx-state-selected
   > .dx-treeview-item {
   color: --side-menu-text-color !important;
-  background-color: var(--side-menu-selected-bg);
+  background-color: var(--side-menu-selected-bg)!important;
 }
 ::ng-deep .dx-treeview-item-without-checkbox .dx-state-focuser{
   >.dx-treeview-item{

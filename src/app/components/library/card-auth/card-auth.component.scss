@@ -127,7 +127,9 @@ margin-bottom: 0px;
       right: 1px;
       font-size: 20px;
       z-index: 1;
-      border: 1px solid black; /* fixed here */
+      // border: 1px solid black; /* fixed here */
+      margin-right: 150px;
+    border: none;
     }
   }
 }

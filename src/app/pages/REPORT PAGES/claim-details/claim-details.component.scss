@@ -124,8 +124,24 @@
 }
 .add-card {
   background-color: rgba(30, 58, 138, 1);
-  color: rgba(250, 250, 250, 1);
+  
+  margin-top: 5px;
 }
+.add-card .dx-icon {
+  color: white !important; 
+  font-size: 18px !important;
+}
+/* Only affects the icon in your "add-card" button */
+.add-card .dx-icon-todo {
+  font-size: 22px;   /* change size */
+  color: red;        /* change color */
+}
+
+.toggleButton.dx-button .dx-icon {
+    color:rgba(250, 250, 250, 1) !important;
+}
+
+
 
 .custom-close-btn {
   position: absolute;

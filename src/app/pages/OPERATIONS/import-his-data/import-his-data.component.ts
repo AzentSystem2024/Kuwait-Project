@@ -66,10 +66,11 @@ export class ImportHISDataComponent implements OnInit {
     text: '',
     icon: 'bi bi-file-earmark-plus',
     type: 'default',
-    stylingMode: 'contained',
+    stylingMode: 'text',
     hint: 'Import Excel Data',
     onClick: () => this.selectFile(),
-    elementAttr: { class: 'add-button' },
+    elementAttr: {     class: 'add-button'
+ },
   };
 
   isFilterRowVisible: boolean = false;
