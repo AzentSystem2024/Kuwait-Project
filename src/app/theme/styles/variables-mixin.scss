@@ -63,7 +63,8 @@ $theme-mode: null !default;
    --grid-edit-icon-color:rgba(23, 44, 104, 1) ;
    --tabcolor:#ffff;
    --icon-color:#ffff;
-
+   --grid-head-text-color:rgba(14, 14, 14, 1)
+ --login-icon:rgba(30, 58, 138, 1);
   @if $theme-mode == dark {
     --cell-bg-color: rgb(128, 145, 105);
     --card-background: var(--base-bg-darken-5);
@@ -82,8 +83,10 @@ $theme-mode: null !default;
     --toolbar-icon-color : #ffffff;
     --grid-toolbar-bg:  rgb(68, 67, 67);
     --grid-edit-icon-color:#ECECEC;
-  --tabcolor:rgba(40, 40, 40, 1);
-   --icon-color:#ffff
+    --tabcolor:rgba(40, 40, 40, 1);
+    --icon-color:#ffff;
+    --login-icon:rgba(30, 58, 138, 1);
+    --grid-head-text-color:rgba(236, 236, 236, 1)
   }
 
   --border-color: #{$base-border-color};

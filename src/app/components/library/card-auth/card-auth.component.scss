@@ -41,13 +41,12 @@
 }
 
 .logoSubtext {
-  color: grey;        /* text color red */
-  
+  color: grey;        /* text color red */  
   margin-left: 70px;
   font-size: 16px;   /* optional: adjust size */
   font-weight: 500;  /* optional: medium weight */
   text-align: left; /* optional: center text */
-margin-bottom: 0px;
+  margin-bottom: 0px;
   text-align: center;  /* optional: spacing from above element */
 }
 
@@ -129,7 +128,12 @@ margin-bottom: 0px;
       z-index: 1;
       // border: 1px solid black; /* fixed here */
       margin-right: 150px;
+      color: black;
     border: none;
+    background-color: transparent!important;;
     }
   }
+}
+::ng-deep .close-icon.dx-button-mode-text .dx-icon {
+    color: rgb(0, 0, 0) !important;
 }

@@ -39,6 +39,8 @@
 
     .grid-header {
       @include header();
+         font-size: 26px;
+         font-weight: bold;
     }
     .dxo-filter-row {
       height: 4px;

@@ -2,6 +2,8 @@
 @use "sass:math";
 .grid-header {
   @include header();
+  font-size: 26px;
+  font-weight: bold;
 }
 
 .form-popup-buttons-container {

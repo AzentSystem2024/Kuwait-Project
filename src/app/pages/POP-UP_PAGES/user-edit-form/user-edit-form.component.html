@@ -63,6 +63,7 @@
                 type="button"
                 title="undo button"
                 hint="Reset"
+                class="select-file-button"
                 (click)="resetPassword()"
               >
                 <i class="undoButton dx-icon-undo"></i>
@@ -236,7 +237,7 @@
               />
 
               <!-- Conditionally show the button if no images are uploaded -->
-              <button *ngIf="images.length === 0" (click)="fileInput.click()">
+              <button *ngIf="images.length === 0" (click)="fileInput.click()" class="select-file-button">
                 Select a file
               </button>
 
