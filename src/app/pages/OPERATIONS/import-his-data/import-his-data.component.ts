@@ -14,6 +14,7 @@ import {
   DxValidationGroupComponent,
   DxLoadPanelModule,
   DxSelectBoxModule,
+  DxDateBoxModule,
 } from 'devextreme-angular';
 import { FormPopupModule } from 'src/app/components';
 
@@ -369,6 +370,7 @@ export class ImportHISDataComponent implements OnInit {
     ImportHISDataFormModule,
     DxLoadPanelModule,
     DxSelectBoxModule,
+    DxDateBoxModule
   ],
   providers: [],
   exports: [],

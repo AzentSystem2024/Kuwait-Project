@@ -42,6 +42,8 @@
 
     .grid-header {
       @include header();
+        font-size: 26px;
+  font-weight: 500;
     }
   }
 

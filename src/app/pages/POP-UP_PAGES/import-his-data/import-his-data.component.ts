@@ -13,6 +13,7 @@ import {
   DxButtonModule,
   DxDataGridComponent,
   DxDataGridModule,
+  DxDateBoxModule,
   DxLoadPanelModule,
   DxSelectBoxModule,
   DxTextBoxModule,
@@ -44,7 +45,7 @@ export class ImportHISDataFormComponent implements OnInit {
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
-
+SUBMISSION_DATE: Date = new Date();
   columnData: any[] = [];
 
   isColumnsLoaded = false;
@@ -100,6 +101,38 @@ export class ImportHISDataFormComponent implements OnInit {
       }
     }
   }
+
+  //===================date format conversion ===================
+  formatDateToDDMMYY(date: Date): string {
+  if (!date) return '';
+
+  const d = new Date(date);
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = String(d.getFullYear()); 
+
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+// formatDate(dateStr) {
+//   // Split input (e.g. "08/10/2025")
+//   const [day, month, year] = dateStr.split('/');
+
+//   // Create date object
+//   const date = new Date(`${year}-${month}-${day}`);
+
+//   // Month names
+//   const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+//                   "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+//   // Format parts
+//   const dd = String(date.getDate()).padStart(2, '0');
+//   const mmm = months[date.getMonth()];
+//   const yy = String(date.getFullYear()).slice(-2);
+
+//   return `${dd}-${mmm}-${yy}`;
+// }
+
   // ========= main save import data ===========
   onSaveClick() {
     const userId = Number(sessionStorage.getItem('UserID')) || 0;
@@ -118,14 +151,24 @@ export class ImportHISDataFormComponent implements OnInit {
     this.isSaving = true;
     this.isLoading = true;
 
+    // const payload = {
+    //   userId: userId,
+    //   insuranceId: insuranceId,
+    //   import_his_data: this.dataSource || [],
+    // };
     const payload = {
-      userId: userId,
-      insuranceId: insuranceId,
-      import_his_data: this.dataSource || [],
-    };
+  userId: userId,
+ insuranceId: insuranceId,
+  import_his_data: (this.dataSource || []).map(item => ({
+    ...item,
+    SUBMISSION_DATE: this.formatDateToDDMMYY(this.SUBMISSION_DATE), 
+  })),
+};
+
+    console.log('Payload for Import HIS Data:', payload);
 
     this.dataservice.Import_His_Data(payload).subscribe({
-      next: (res: any) => {
+      next: (res: any) => { 
         if (res.flag === '1') {
           this.isLoading = false;
           this.close();
@@ -227,6 +270,7 @@ export class ImportHISDataFormComponent implements OnInit {
     DxValidatorModule,
     DxTextBoxModule,
     DxLoadPanelModule,
+    DxDateBoxModule
   ],
   providers: [],
   declarations: [ImportHISDataFormComponent],

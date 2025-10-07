@@ -21,6 +21,7 @@ import {
   DxCheckBoxModule,
   DxPopupModule,
   DxTagBoxModule,
+  DxDateBoxModule,
 } from 'devextreme-angular';
 import notify from 'devextreme/ui/notify';
 import { confirm, custom } from 'devextreme/ui/dialog';
@@ -88,7 +89,7 @@ export class ImportRADataPopupComponent implements OnInit {
   selectedDistributeRows: any[] = [];
   DistributeHISGridData: any[] = [];
   DistributeHISColumns: any[] = [];
-
+  RA_RECEIVING_DATE: Date = new Date();
   // ===== Footer total variables =====
   totalSelected: any = 0;
 
@@ -271,6 +272,18 @@ export class ImportRADataPopupComponent implements OnInit {
       });
     });
   }
+  
+  //===================date format conversion ===================
+  formatDateToDDMMYY(date: Date): string {
+  if (!date) return '';
+
+  const d = new Date(date);
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = String(d.getFullYear()); 
+
+  return `${dd}/${mm}/${yyyy}`;
+}
 
   // ========= main save import data ===========
   onSaveClick() {
@@ -294,8 +307,13 @@ export class ImportRADataPopupComponent implements OnInit {
       USerID: userId,
       InsuranceID: insuranceId,
       IsAutoProcessed: this.autoProcess,
-      import_ra_data: this.dataSource || [],
+      import_ra_data: (this.dataSource || []).map(item => ({
+    ...item,
+    RA_RECEIVING_DATE: this.formatDateToDDMMYY(this.RA_RECEIVING_DATE),  // ✅ add field to each record
+  })),
     };
+
+    console.log('Payload for Import RA Data:', payload);
 
     this.dataservice
       .Import_RA_Data(payload)
@@ -334,7 +352,7 @@ export class ImportRADataPopupComponent implements OnInit {
           });
         },
       });
-  }
+   }
 
   // Error handler to manage error notifications and state
   handleError(error: any) {
@@ -755,6 +773,7 @@ export class ImportRADataPopupComponent implements OnInit {
       RaID: this.selectedRARow.ID,
       distributed_data: this.transformPayload(this.selectedDistributeRows),
     };
+    console.log('distribution payload :>>', payload);
 
     this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
       next: (res: any) => {
@@ -945,6 +964,7 @@ export class ImportRADataPopupComponent implements OnInit {
     DxCheckBoxModule,
     DxPopupModule,
     DxTagBoxModule,
+    DxDateBoxModule
   ],
   providers: [],
   declarations: [ImportRADataPopupComponent],

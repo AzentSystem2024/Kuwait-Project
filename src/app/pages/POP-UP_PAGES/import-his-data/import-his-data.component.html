@@ -33,6 +33,17 @@
 
     <!-- Toolbar -->
     <dxo-toolbar class="toolBarDiv p-0 m-0">
+                 <dxi-item location="before">
+        <dx-date-box
+          class="p-0 mt-0"
+          [(value)]="SUBMISSION_DATE"
+          label="Submission Date"
+          labelMode="floating"
+          width="300"
+          displayFormat="dd/MM/yyyy"
+        >
+        </dx-date-box>
+      </dxi-item>
       <dxi-item location="after" locateInMenu="auto">
         <dx-select-box
           label="insurance"

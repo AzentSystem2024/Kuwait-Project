@@ -604,10 +604,12 @@ body {
     background-color: var(--grid-toolbar-bg);
     font-size: larger;
     font-weight: bolder;
+    color: var(--grid-head-text-color);
   }
 
   .theme-dependent {
     .dx-gridbase-container {
+      
       > .dx-bordered-bottom-view {
         border-radius: 0 0 8px 8px;
       }
@@ -1238,3 +1240,37 @@ input[type="password"]::-moz-password-toggle {
     width: 6px;
     transition: none !important;
 }
+/* Default state: transparent background + black icon */
+.dx-texteditor-buttons-container .dx-button {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Hover state: no background */
+.dx-texteditor-buttons-container .dx-button:hover,
+.dx-texteditor-buttons-container .dx-button.dx-state-hover {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Active (pressed) state: no background */
+.dx-texteditor-buttons-container .dx-button.dx-state-active {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Icon color stays black always */
+.dx-texteditor-buttons-container .dx-button .dx-icon {
+  color: rgba(23, 44, 104, 1)  !important;
+}
+
+
+.dx-button-mode-outlined.dx-button-default {
+    border-width: 1px;
+    border-style: solid;
+    border-color: transparent!important;
+}
+.dx-tabs-styling-mode-primary.dx-tab-indicator-position-top .dx-tab-selected::after, .dx-tabs-styling-mode-primary.dx-tab-indicator-position-bottom .dx-tab-selected::after {
+    background-color:rgba(23, 44, 104, 1)!important;
+}
+ 

@@ -483,10 +483,11 @@ export class ResetPasswordFormComponent implements OnInit, OnDestroy {
       location: 'before' as TextEditorButtonLocation, // ✅ strict typing
       options: {
         icon: 'email',
-        stylingMode: 'text'
-      }
-    }
-  ];
+          stylingMode: 'text',
+           elementAttr: { class: 'email-icon-btn' }
+      }
+    }
+  ];
 }
 @NgModule({
   imports: [
