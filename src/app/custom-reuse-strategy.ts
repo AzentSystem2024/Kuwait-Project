@@ -15,7 +15,6 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
     const path = route.routeConfig?.path || '';
     const reuse = this.reuseStrategyService.isReuseAllowed(path);
-    console.log(`shouldDetach: ${path} => ${reuse}`);
     return reuse;
   }
 
@@ -23,7 +22,6 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
     const path = route.routeConfig?.path || '';
     if (path && handle) {
       this.reuseStrategyService.storeHandler(path, handle);
-      console.log(`Stored component for: ${path}`);
     }
   }
 
@@ -31,14 +29,12 @@ export class CustomReuseStrategy implements RouteReuseStrategy {
     const path = route.routeConfig?.path || '';
     const has = this.reuseStrategyService.hasHandler(path);
     const reuse = this.reuseStrategyService.isReuseAllowed(path);
-    console.log(`shouldAttach: ${path} => handler=${has}, allowed=${reuse}`);
     return has && reuse;
   }
 
   retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
     const path = route.routeConfig?.path || '';
     const handler = this.reuseStrategyService.getHandler(path);
-    console.log(`retrieve: ${path} => ${!!handler}`);
     return handler;
   }
 

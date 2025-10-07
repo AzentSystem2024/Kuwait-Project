@@ -9,7 +9,6 @@ export class ReuseStrategyService {
   private reuseWhitelist: Set<string> = new Set();
 
   storeHandler(routePath: string, handle: DetachedRouteHandle): void {
-    console.log(`Storing handler for route: ${routePath}`);
     this.handlers[routePath] = handle;
   }
 
@@ -22,12 +21,10 @@ export class ReuseStrategyService {
   }
 
   removeHandler(routePath: string): void {
-    console.log(`Removing handler for route: ${routePath}`);
     delete this.handlers[routePath];
   }
 
   clearHandlers(): void {
-    console.log('Clearing all handlers');
     this.handlers = {};
   }
 
@@ -37,6 +34,5 @@ export class ReuseStrategyService {
 
   updateReuseWhitelist(tabs: any[]): void {
     this.reuseWhitelist = new Set(tabs.map((tab) => tab.path));
-    console.log('Updated reuse whitelist:', Array.from(this.reuseWhitelist));
   }
 }
