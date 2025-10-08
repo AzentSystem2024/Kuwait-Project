@@ -140,12 +140,6 @@ export class ImportRADataPopupComponent implements OnInit {
   private async viewDetails(): Promise<void> {
     const logid = this.LogID;
     if (!logid) {
-      // notify({
-      //   message: 'No valid record selected.',
-      //   type: 'warning',
-      //   displayTime: 3000,
-      //   position: 'top right',
-      // });
       return;
     }
 
@@ -272,21 +266,21 @@ export class ImportRADataPopupComponent implements OnInit {
       });
     });
   }
-  
+
   //===================date format conversion ===================
   formatDateToDDMMYY(date: Date): string {
-  if (!date) return '';
+    if (!date) return '';
 
-  const d = new Date(date);
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const yyyy = String(d.getFullYear()); 
+    const d = new Date(date);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = String(d.getFullYear());
 
-  return `${dd}/${mm}/${yyyy}`;
-}
+    return `${dd}/${mm}/${yyyy}`;
+  }
 
-  // ========= main save import data ===========
-  onSaveClick() {
+  // =========== save excel Ra data ==========
+  async onSaveClick() {
     const userId = Number(sessionStorage.getItem('UserID')) || 0;
     const insuranceId = this.selectedInsuranceId || 0;
 
@@ -303,58 +297,93 @@ export class ImportRADataPopupComponent implements OnInit {
     this.isLoading = true;
     this.isSaving = true;
 
-    const payload = {
-      USerID: userId,
-      InsuranceID: insuranceId,
-      IsAutoProcessed: this.autoProcess,
-      import_ra_data: (this.dataSource || []).map(item => ({
-    ...item,
-    RA_RECEIVING_DATE: this.formatDateToDDMMYY(this.RA_RECEIVING_DATE),  // ✅ add field to each record
-  })),
-    };
+    try {
+      const allData = (this.dataSource || []).map((item) => ({
+        ...item,
+        RA_RECEIVING_DATE: this.formatDateToDDMMYY(this.RA_RECEIVING_DATE),
+      }));
 
-    console.log('Payload for Import RA Data:', payload);
+      const batchSize = 15000;
+      const totalRecords = allData.length;
 
-    this.dataservice
-      .Import_RA_Data(payload)
-      .pipe(
-        finalize(() => {
-          // Always executed whether success or error
-          this.isLoading = false;
-          this.isSaving = false;
-        })
-      )
-      .subscribe({
-        next: (res: any) => {
-          if (res.flag === '1') {
+      if (totalRecords === 0) {
+        notify({
+          message: 'No data available to save.',
+          type: 'warning',
+          displayTime: 3000,
+          position: { at: 'top right', my: 'top right', of: window },
+        });
+        this.isLoading = false;
+        this.isSaving = false;
+        return;
+      }
+
+      // Generate one common BatchID for all payloads
+      const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
+      const commonBatchId = `${insuranceId}_${datetime}`;
+
+      const totalBatches = Math.ceil(totalRecords / batchSize);
+
+      for (let i = 0; i < totalBatches; i++) {
+        const start = i * batchSize;
+        const end = Math.min(start + batchSize, totalRecords);
+        const currentBatch = allData.slice(start, end);
+
+        const payload = {
+          USerID: userId,
+          InsuranceID: insuranceId,
+          IsAutoProcessed: this.autoProcess,
+          BatchNo: commonBatchId,
+          import_ra_data: currentBatch,
+        };
+
+        await this.dataservice
+          .Import_RA_Data(payload)
+          .toPromise()
+          .then((res: any) => {
+            if (res.flag === '1') {
+              notify({
+                message: `Batch ${
+                  i + 1
+                }/${totalBatches} imported successfully!`,
+                type: 'success',
+                displayTime: 2000,
+                position: { at: 'top right', my: 'top right', of: window },
+              });
+            } else {
+              throw new Error(res.message || `Batch ${i + 1} import failed.`);
+            }
+          })
+          .catch((err) => {
+            console.error(`Error importing batch ${i + 1}:`, err);
             notify({
-              message: 'Data imported successfully!',
-              type: 'success',
-              displayTime: 3000,
-              position: { at: 'top right', my: 'top right', of: window },
-            });
-            this.close();
-          } else {
-            notify({
-              message: res.message || 'Import failed.',
+              message: `Error importing batch ${i + 1}: ${err.message}`,
               type: 'error',
-              displayTime: 3000,
+              displayTime: 4000,
               position: { at: 'top right', my: 'top right', of: window },
             });
-          }
-        },
-        error: () => {
-          notify({
-            message: 'An error occurred while saving.',
-            type: 'error',
-            displayTime: 3000,
-            position: { at: 'top right', my: 'top right', of: window },
+            throw err;
           });
-        },
-      });
-   }
+      }
 
-  // Error handler to manage error notifications and state
+      // Final success notification
+      notify({
+        message: 'All batches imported successfully!',
+        type: 'success',
+        displayTime: 4000,
+        position: { at: 'top right', my: 'top right', of: window },
+      });
+
+      this.close();
+    } catch (error) {
+      this.handleError(error);
+    } finally {
+      this.isLoading = false;
+      this.isSaving = false;
+    }
+  }
+
+  // ========== Error notifications =======
   handleError(error: any) {
     if (error.status === 0) {
       notify(
@@ -964,7 +993,7 @@ export class ImportRADataPopupComponent implements OnInit {
     DxCheckBoxModule,
     DxPopupModule,
     DxTagBoxModule,
-    DxDateBoxModule
+    DxDateBoxModule,
   ],
   providers: [],
   declarations: [ImportRADataPopupComponent],

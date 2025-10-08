@@ -235,7 +235,7 @@ export class ImportRADataComponent implements OnInit {
         return;
       }
 
-      // Get values (dates will come as JS Date objects because of cellDates: true)
+      // Convert sheet to JSON (dates as JS Date objects)
       const rawData = XLSX.utils.sheet_to_json(ws, {
         defval: '',
         raw: true,
@@ -248,8 +248,14 @@ export class ImportRADataComponent implements OnInit {
         captionToField[col.caption] = col.dataField;
       });
 
-      // Helper: format dates to dd-MM-yyyy
+      // Identify date columns by name (case-insensitive)
+      const dateColumns = sheetHeaders.filter((h) =>
+        h.toLowerCase().includes('date')
+      );
+
+      // Helper: format dates to dd/MM/yyyy
       const formatDate = (date: Date): string => {
+        if (!(date instanceof Date)) return date;
         const dd = String(date.getDate()).padStart(2, '0');
         const mm = String(date.getMonth() + 1).padStart(2, '0');
         const yyyy = date.getFullYear();
@@ -264,8 +270,8 @@ export class ImportRADataComponent implements OnInit {
           if (field) {
             let value = row[caption];
 
-            // If it's a Date, force dd-MM-yyyy
-            if (value instanceof Date) {
+            // Only format if column header includes "date"
+            if (dateColumns.includes(caption) && value instanceof Date) {
               value = formatDate(value);
             }
 

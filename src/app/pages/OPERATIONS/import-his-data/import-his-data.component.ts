@@ -70,8 +70,7 @@ export class ImportHISDataComponent implements OnInit {
     stylingMode: 'text',
     hint: 'Import Excel Data',
     onClick: () => this.selectFile(),
-    elementAttr: {     class: 'add-button'
- },
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;
@@ -186,15 +185,15 @@ export class ImportHISDataComponent implements OnInit {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
-      // Get headers (first row only)
+      // Get headers
       const sheetHeaders: string[] = this.getHeaders(ws);
 
-      // Expected headers from API columnData
+      // Expected headers
       const expectedHeaders: string[] = this.columnData.map(
         (c: any) => c.caption
       );
 
-      // Compare sets
+      // Validate header mismatch
       const missingInExcel = expectedHeaders.filter(
         (h) => !sheetHeaders.includes(h)
       );
@@ -221,22 +220,53 @@ export class ImportHISDataComponent implements OnInit {
         return;
       }
 
-      // Convert sheet to JSON (with captions as keys)
+      // Convert sheet to JSON
       const rawData = XLSX.utils.sheet_to_json(ws, { defval: '' });
 
-      // Build mapping { caption -> dataField }
+      // Map caption -> dataField
       const captionToField: Record<string, string> = {};
       this.columnData.forEach((col: any) => {
         captionToField[col.caption] = col.dataField;
       });
 
-      // Map imported rows to use dataField keys instead of caption keys
+      // Identify date columns by name (case-insensitive)
+      const dateColumns = sheetHeaders.filter((h) =>
+        h.toLowerCase().includes('date')
+      );
+
+      // Helper: Convert any Excel date to dd/MM/yyyy
+      const formatExcelDate = (value: any): string => {
+        if (!value) return '';
+        let dateObj: Date | null = null;
+
+        if (typeof value === 'number') {
+          // Excel serial number date
+          dateObj = XLSX.SSF.parse_date_code(value)
+            ? new Date(Date.UTC(1899, 11, 30 + value))
+            : null;
+        } else if (typeof value === 'string') {
+          const parsed = new Date(value);
+          dateObj = isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        if (!dateObj) return value;
+
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const year = dateObj.getFullYear();
+        return `${day}/${month}/${year}`;
+      };
+
+      // Map data + apply date formatting only for "date" columns
       const mappedData = rawData.map((row: any) => {
         const newRow: any = {};
         Object.keys(row).forEach((caption) => {
           const field = captionToField[caption];
           if (field) {
-            newRow[field] = row[caption];
+            const val = row[caption];
+            newRow[field] = dateColumns.includes(caption)
+              ? formatExcelDate(val)
+              : val;
           }
         });
         return newRow;
@@ -356,7 +386,7 @@ export class ImportHISDataComponent implements OnInit {
   onClearData() {
     this.ImportHISDataFormComponent.clearData();
     this.isLoading = false;
-    this.selectedInsuranceId=null
+    this.selectedInsuranceId = null;
   }
 }
 
@@ -370,7 +400,7 @@ export class ImportHISDataComponent implements OnInit {
     ImportHISDataFormModule,
     DxLoadPanelModule,
     DxSelectBoxModule,
-    DxDateBoxModule
+    DxDateBoxModule,
   ],
   providers: [],
   exports: [],
