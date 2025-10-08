@@ -179,7 +179,10 @@ export class ImportHISDataComponent implements OnInit {
 
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+      const wb: XLSX.WorkBook = XLSX.read(bstr, {
+        type: 'binary',
+        cellDates: true,
+      });
 
       // Get first sheet
       const wsname: string = wb.SheetNames[0];
@@ -193,7 +196,7 @@ export class ImportHISDataComponent implements OnInit {
         (c: any) => c.caption
       );
 
-      // Validate header mismatch
+      // Validate headers
       const missingInExcel = expectedHeaders.filter(
         (h) => !sheetHeaders.includes(h)
       );
@@ -229,18 +232,23 @@ export class ImportHISDataComponent implements OnInit {
         captionToField[col.caption] = col.dataField;
       });
 
-      // Identify date columns by name (case-insensitive)
+      // Identify columns
       const dateColumns = sheetHeaders.filter((h) =>
         h.toLowerCase().includes('date')
       );
+      const monthColumns = sheetHeaders.filter((h) =>
+        h.toLowerCase().includes('month')
+      );
 
-      // Helper: Convert any Excel date to dd/MM/yyyy
+      // Format Excel date to dd/MM/yyyy
       const formatExcelDate = (value: any): string => {
         if (!value) return '';
         let dateObj: Date | null = null;
 
-        if (typeof value === 'number') {
-          // Excel serial number date
+        if (value instanceof Date) {
+          dateObj = value;
+        } else if (typeof value === 'number') {
+          // Excel serial number
           dateObj = XLSX.SSF.parse_date_code(value)
             ? new Date(Date.UTC(1899, 11, 30 + value))
             : null;
@@ -257,16 +265,28 @@ export class ImportHISDataComponent implements OnInit {
         return `${day}/${month}/${year}`;
       };
 
-      // Map data + apply date formatting only for "date" columns
+      // Map rows + format date/month columns
       const mappedData = rawData.map((row: any) => {
         const newRow: any = {};
         Object.keys(row).forEach((caption) => {
           const field = captionToField[caption];
           if (field) {
-            const val = row[caption];
-            newRow[field] = dateColumns.includes(caption)
-              ? formatExcelDate(val)
-              : val;
+            let value = row[caption];
+
+            // Month columns: preserve MMM-YY
+            if (monthColumns.includes(caption)) {
+              if (value instanceof Date) {
+                const month = value.toLocaleString('en-US', { month: 'short' });
+                const year = String(value.getFullYear()).slice(-2);
+                value = `${month}-${year}`;
+              }
+            }
+            // Date columns: convert to dd/MM/yyyy
+            else if (dateColumns.includes(caption)) {
+              value = formatExcelDate(value);
+            }
+
+            newRow[field] = value;
           }
         });
         return newRow;
@@ -275,7 +295,6 @@ export class ImportHISDataComponent implements OnInit {
       this.ImportedDataSource = mappedData;
       this.isLoading = false;
       this.isNewFormPopupOpened = true;
-
       this.resetFileInput();
     };
 

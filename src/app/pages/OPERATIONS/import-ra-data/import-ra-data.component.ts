@@ -185,7 +185,6 @@ export class ImportRADataComponent implements OnInit {
     }
 
     this.isLoading = true;
-
     const file = target.files[0];
     const reader: FileReader = new FileReader();
 
@@ -193,22 +192,22 @@ export class ImportRADataComponent implements OnInit {
       const bstr: string = e.target.result;
       const wb: XLSX.WorkBook = XLSX.read(bstr, {
         type: 'binary',
-        cellDates: true,
+        cellDates: true, // Excel date cells become JS Date objects
+        raw: false,
       });
 
-      // Get first sheet
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
-      // Get headers (first row only)
+      // Extract headers from first row
       const sheetHeaders: string[] = this.getHeaders(ws);
 
-      // Expected headers (from API)
+      // Expected headers from your API columnData
       const expectedHeaders: string[] = this.columnData.map(
         (c: any) => c.caption
       );
 
-      // Compare sets
+      // Check for missing/extra columns
       const missingInExcel = expectedHeaders.filter(
         (h) => !sheetHeaders.includes(h)
       );
@@ -235,7 +234,7 @@ export class ImportRADataComponent implements OnInit {
         return;
       }
 
-      // Convert sheet to JSON (dates as JS Date objects)
+      // Convert sheet to JSON
       const rawData = XLSX.utils.sheet_to_json(ws, {
         defval: '',
         raw: true,
@@ -248,13 +247,16 @@ export class ImportRADataComponent implements OnInit {
         captionToField[col.caption] = col.dataField;
       });
 
-      // Identify date columns by name (case-insensitive)
+      // Identify date and month columns
       const dateColumns = sheetHeaders.filter((h) =>
         h.toLowerCase().includes('date')
       );
+      const monthColumns = sheetHeaders.filter((h) =>
+        h.toLowerCase().includes('month')
+      );
 
-      // Helper: format dates to dd/MM/yyyy
-      const formatDate = (date: Date): string => {
+      // Helper: format true Date fields as dd/MM/yyyy
+      const formatDate = (date: any): string => {
         if (!(date instanceof Date)) return date;
         const dd = String(date.getDate()).padStart(2, '0');
         const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -262,7 +264,7 @@ export class ImportRADataComponent implements OnInit {
         return `${dd}/${mm}/${yyyy}`;
       };
 
-      // Map imported rows to use dataField keys instead of caption keys
+      // Map rows to your dataField keys
       const mappedData = rawData.map((row: any) => {
         const newRow: any = {};
         Object.keys(row).forEach((caption) => {
@@ -270,8 +272,16 @@ export class ImportRADataComponent implements OnInit {
           if (field) {
             let value = row[caption];
 
-            // Only format if column header includes "date"
-            if (dateColumns.includes(caption) && value instanceof Date) {
+            // Month columns: preserve as MMM-YY
+            if (monthColumns.includes(caption)) {
+              if (value instanceof Date) {
+                const month = value.toLocaleString('en-US', { month: 'short' });
+                const year = String(value.getFullYear()).slice(-2);
+                value = `${month}-${year}`;
+              }
+            }
+            // Date columns: convert to dd/MM/yyyy
+            else if (dateColumns.includes(caption) && value instanceof Date) {
               value = formatDate(value);
             }
 
@@ -281,6 +291,7 @@ export class ImportRADataComponent implements OnInit {
         return newRow;
       });
 
+      // Assign to your data source
       this.ImportedDataSource = mappedData;
       this.isLoading = false;
       this.isNewFormPopupOpened = true;
