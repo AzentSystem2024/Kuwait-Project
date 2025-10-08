@@ -45,7 +45,7 @@ export class ImportHISDataFormComponent implements OnInit {
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
-SUBMISSION_DATE: Date = new Date();
+  SUBMISSION_DATE: Date = new Date();
   columnData: any[] = [];
 
   isColumnsLoaded = false;
@@ -104,37 +104,18 @@ SUBMISSION_DATE: Date = new Date();
 
   //===================date format conversion ===================
   formatDateToDDMMYY(date: Date): string {
-  if (!date) return '';
+    if (!date) return '';
 
-  const d = new Date(date);
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const yyyy = String(d.getFullYear()); 
+    const d = new Date(date);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = String(d.getFullYear());
 
-  return `${dd}/${mm}/${yyyy}`;
-}
-
-// formatDate(dateStr) {
-//   // Split input (e.g. "08/10/2025")
-//   const [day, month, year] = dateStr.split('/');
-
-//   // Create date object
-//   const date = new Date(`${year}-${month}-${day}`);
-
-//   // Month names
-//   const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-//                   "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-
-//   // Format parts
-//   const dd = String(date.getDate()).padStart(2, '0');
-//   const mmm = months[date.getMonth()];
-//   const yy = String(date.getFullYear()).slice(-2);
-
-//   return `${dd}-${mmm}-${yy}`;
-// }
+    return `${dd}/${mm}/${yyyy}`;
+  }
 
   // ========= main save import data ===========
-  onSaveClick() {
+  async onSaveClick() {
     const userId = Number(sessionStorage.getItem('UserID')) || 0;
     const insuranceId = this.selectedInsurance || 0;
 
@@ -151,57 +132,94 @@ SUBMISSION_DATE: Date = new Date();
     this.isSaving = true;
     this.isLoading = true;
 
-    // const payload = {
-    //   userId: userId,
-    //   insuranceId: insuranceId,
-    //   import_his_data: this.dataSource || [],
-    // };
-    const payload = {
-  userId: userId,
- insuranceId: insuranceId,
-  import_his_data: (this.dataSource || []).map(item => ({
-    ...item,
-    SUBMISSION_DATE: this.formatDateToDDMMYY(this.SUBMISSION_DATE), 
-  })),
-};
+    try {
+      const allData = (this.dataSource || []).map((item) => ({
+        ...item,
+        SUBMISSION_DATE: this.formatDateToDDMMYY(item.SUBMISSION_DATE),
+      }));
 
-    console.log('Payload for Import HIS Data:', payload);
+      const totalRecords = allData.length;
+      const batchSize = 15000;
 
-    this.dataservice.Import_His_Data(payload).subscribe({
-      next: (res: any) => { 
-        if (res.flag === '1') {
-          this.isLoading = false;
-          this.close();
-          notify({
-            message: 'Data imported successfully!',
-            type: 'success',
-            displayTime: 3000,
-            position: { at: 'top right', my: 'top right', of: window },
-          });
-        } else {
-          this.isLoading = false;
-          notify({
-            message: res.message || 'Import failed.',
-            type: 'error',
-            displayTime: 3000,
-            position: { at: 'top right', my: 'top right', of: window },
-          });
-        }
-      },
-      error: () => {
-        this.isLoading = false;
+      if (totalRecords === 0) {
         notify({
-          message: 'An error occurred while saving.',
-          type: 'error',
+          message: 'No data available to save.',
+          type: 'warning',
           displayTime: 3000,
           position: { at: 'top right', my: 'top right', of: window },
         });
-      },
-      complete: () => {
-        this.isLoading = false;
         this.isSaving = false;
-      },
-    });
+        this.isLoading = false;
+        return;
+      }
+
+      // Create one shared batch ID for all chunks
+      const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
+      const batchId = `${insuranceId}_${datetime}`;
+
+      const totalBatches = Math.ceil(totalRecords / batchSize);
+
+      for (let i = 0; i < totalBatches; i++) {
+        const start = i * batchSize;
+        const end = Math.min(start + batchSize, totalRecords);
+        const currentBatch = allData.slice(start, end);
+
+        const payload = {
+          userId: userId,
+          insuranceId: insuranceId,
+          BatchNo: batchId,
+          import_his_data: currentBatch,
+        };
+
+        await this.dataservice
+          .Import_His_Data(payload)
+          .toPromise()
+          .then((res: any) => {
+            if (res.flag === '1') {
+              notify({
+                message: `Batch ${
+                  i + 1
+                }/${totalBatches} uploaded successfully!`,
+                type: 'success',
+                displayTime: 2000,
+                position: { at: 'top right', my: 'top right', of: window },
+              });
+            } else {
+              throw new Error(res.message || `Batch ${i + 1} failed.`);
+            }
+          })
+          .catch((err) => {
+            console.error(`Error in batch ${i + 1}:`, err);
+            notify({
+              message: `Error importing batch ${i + 1}: ${err.message}`,
+              type: 'error',
+              displayTime: 4000,
+              position: { at: 'top right', my: 'top right', of: window },
+            });
+            throw err; // stop further batches on error
+          });
+      }
+
+      notify({
+        message: 'All batches imported successfully!',
+        type: 'success',
+        displayTime: 4000,
+        position: { at: 'top right', my: 'top right', of: window },
+      });
+
+      this.close();
+    } catch (error) {
+      console.error('Error during batch upload:', error);
+      notify({
+        message: 'An error occurred while importing data.',
+        type: 'error',
+        displayTime: 4000,
+        position: { at: 'top right', my: 'top right', of: window },
+      });
+    } finally {
+      this.isSaving = false;
+      this.isLoading = false;
+    }
   }
 
   // Error handler to manage error notifications and state
@@ -270,7 +288,7 @@ SUBMISSION_DATE: Date = new Date();
     DxValidatorModule,
     DxTextBoxModule,
     DxLoadPanelModule,
-    DxDateBoxModule
+    DxDateBoxModule,
   ],
   providers: [],
   declarations: [ImportHISDataFormComponent],
