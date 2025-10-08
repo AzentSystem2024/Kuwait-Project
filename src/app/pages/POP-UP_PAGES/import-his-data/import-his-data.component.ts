@@ -135,7 +135,7 @@ export class ImportHISDataFormComponent implements OnInit {
     try {
       const allData = (this.dataSource || []).map((item) => ({
         ...item,
-        SUBMISSION_DATE: this.formatDateToDDMMYY(item.SUBMISSION_DATE),
+        SUBMISSION_DATE: this.formatDateToDDMMYY(this.SUBMISSION_DATE),
       }));
 
       const totalRecords = allData.length;
