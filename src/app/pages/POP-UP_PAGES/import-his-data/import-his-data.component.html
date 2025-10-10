@@ -12,6 +12,8 @@
     [columnFixing]="{ enabled: true }"
     [height]="'80vh'"
     [width]="'100%'"
+    (onCellPrepared)="onCellPrepared($event)"
+    (onRowValidating)="onRowValidating($event)"
   >
     <dxo-paging [pageSize]="100"></dxo-paging>
     <dxo-pager
@@ -30,6 +32,8 @@
       [showPane]="false"
     ></dxo-load-panel>
     <dxo-scrolling mode="virtual" [useNative]="false"></dxo-scrolling>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
 
     <!-- Toolbar -->
     <dxo-toolbar class="toolBarDiv p-0 m-0">

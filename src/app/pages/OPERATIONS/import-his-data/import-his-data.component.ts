@@ -116,6 +116,7 @@ export class ImportHISDataComponent implements OnInit {
         this.columnData = res.data.map((col: any) => ({
           dataField: col.ColumnName,
           caption: col.ColumnTitle,
+          type: col.Type,
         }));
         this.isColumnsLoaded = true;
       }
@@ -230,23 +231,15 @@ export class ImportHISDataComponent implements OnInit {
       }
 
       // Convert sheet to JSON
-      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
+      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
 
-      // Map caption -> dataField
-      const captionToField: Record<string, string> = {};
+      // Map Caption ➝ Field & Type from columnData
+      const captionToMeta: Record<string, { field: string; type: string }> = {};
       this.columnData.forEach((col) => {
-        captionToField[col.caption] = col.dataField;
+        captionToMeta[col.caption] = { field: col.dataField, type: col.type };
       });
 
-      // Identify columns
-      const dateColumns = sheetHeaders.filter((h) =>
-        h.toLowerCase().includes('date')
-      );
-      const monthColumns = sheetHeaders.filter((h) =>
-        h.toLowerCase().includes('month')
-      );
-
-      // Format Excel date to dd/MM/yyyy without timezone shift
+      // Excel Date Formatter (No timezone shift)
       const formatExcelDate = (value: any): string => {
         if (!value) return '';
         let dateObj: Date | null = null;
@@ -254,43 +247,43 @@ export class ImportHISDataComponent implements OnInit {
         if (value instanceof Date) {
           dateObj = value;
         } else if (typeof value === 'number') {
-          // Correctly convert Excel serial number to JS Date
-          dateObj = new Date(Math.round((value - 25569) * 86400 * 1000)); // Excel -> JS timestamp
+          dateObj = new Date(Math.round((value - 25569) * 86400 * 1000));
         } else if (typeof value === 'string') {
           const parsed = new Date(value);
           dateObj = isNaN(parsed.getTime()) ? null : parsed;
         }
 
-        if (!dateObj) return value;
-
+        if (!dateObj) return value; // Keep original if invalid
         const day = String(dateObj.getDate()).padStart(2, '0');
         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
         const year = dateObj.getFullYear();
         return `${day}/${month}/${year}`;
       };
 
-      // Map rows + format date/month columns
+      // Final Mapping with Type Conversion (but keep invalid as-is)
       const mappedData = rawData.map((row: any) => {
         const newRow: any = {};
         Object.keys(row).forEach((caption) => {
-          const field = captionToField[caption];
-          if (field) {
+          const meta = captionToMeta[caption];
+          if (meta) {
             let value = row[caption];
 
-            // Month columns: preserve MMM-YY
-            if (monthColumns.includes(caption)) {
-              if (value instanceof Date) {
-                const month = value.toLocaleString('en-US', { month: 'short' });
-                const year = String(value.getFullYear()).slice(-2);
-                value = `${month}-${year}`;
+            if (value !== null && value !== '') {
+              switch (meta.type) {
+                case 'DATETIME':
+                  // Only convert if valid date
+                  const formatted = formatExcelDate(value);
+                  value = this.isValidDDMMYYYY(formatted) ? formatted : value;
+                  break;
+
+                case 'DECIMAL':
+                  // Only convert if valid number
+                  value = !isNaN(Number(value)) ? parseFloat(value) : value;
+                  break;
               }
             }
-            // Date columns: convert to dd/MM/yyyy
-            else if (dateColumns.includes(caption)) {
-              value = formatExcelDate(value);
-            }
 
-            newRow[field] = value;
+            newRow[meta.field] = value;
           }
         });
         return newRow;
@@ -303,6 +296,13 @@ export class ImportHISDataComponent implements OnInit {
     };
 
     reader.readAsBinaryString(file);
+  }
+
+  // Strict dd/MM/yyyy validator
+  isValidDDMMYYYY(value: any): boolean {
+    if (!value || typeof value !== 'string') return false;
+    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    return regex.test(value);
   }
 
   // ====== Utility function to extract headers from sheet ===

@@ -119,6 +119,7 @@ export class ImportRADataComponent implements OnInit {
         this.columnData = res.data.map((col: any) => ({
           dataField: col.ColumnName,
           caption: col.ColumnTitle,
+          type: col.Type,
         }));
       }
     });
@@ -192,22 +193,21 @@ export class ImportRADataComponent implements OnInit {
       const bstr: string = e.target.result;
       const wb: XLSX.WorkBook = XLSX.read(bstr, {
         type: 'binary',
-        cellDates: true, // Excel date cells become JS Date objects
-        raw: false,
+        cellDates: true,
       });
 
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
-      // Extract headers from first row
+      // Extract headers from Excel
       const sheetHeaders: string[] = this.getHeaders(ws);
 
-      // Expected headers from your API columnData
+      // Expected headers from API
       const expectedHeaders: string[] = this.columnData.map(
         (c: any) => c.caption
       );
 
-      // Check for missing/extra columns
+      // Validate columns
       const missingInExcel = expectedHeaders.filter(
         (h) => !sheetHeaders.includes(h)
       );
@@ -235,57 +235,57 @@ export class ImportRADataComponent implements OnInit {
       }
 
       // Convert sheet to JSON
-      const rawData = XLSX.utils.sheet_to_json(ws, {
-        defval: '',
-        raw: true,
-        cellDates: true,
-      } as any);
+      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
 
-      // Build mapping { caption -> dataField }
-      const captionToField: Record<string, string> = {};
+      // Map Caption ➝ Field & Type
+      const captionToMeta: Record<string, { field: string; type: string }> = {};
       this.columnData.forEach((col: any) => {
-        captionToField[col.caption] = col.dataField;
+        captionToMeta[col.caption] = { field: col.dataField, type: col.type };
       });
 
-      // Identify date and month columns
-      const dateColumns = sheetHeaders.filter((h) =>
-        h.toLowerCase().includes('date')
-      );
-      const monthColumns = sheetHeaders.filter((h) =>
-        h.toLowerCase().includes('month')
-      );
+      // Excel Date Formatter (dd/MM/yyyy)
+      const formatExcelDate = (value: any): string => {
+        if (!value) return '';
+        let dateObj: Date | null = null;
 
-      // Helper: format true Date fields as dd/MM/yyyy
-      const formatDate = (date: any): string => {
-        if (!(date instanceof Date)) return date;
-        const dd = String(date.getDate()).padStart(2, '0');
-        const mm = String(date.getMonth() + 1).padStart(2, '0');
-        const yyyy = date.getFullYear();
+        if (value instanceof Date) {
+          dateObj = value;
+        } else if (typeof value === 'number') {
+          dateObj = new Date(Math.round((value - 25569) * 86400 * 1000));
+        } else if (typeof value === 'string') {
+          const parsed = new Date(value);
+          dateObj = isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        if (!dateObj) return value; // Keep original if invalid
+        const dd = String(dateObj.getDate()).padStart(2, '0');
+        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const yyyy = dateObj.getFullYear();
         return `${dd}/${mm}/${yyyy}`;
       };
 
-      // Map rows to your dataField keys
+      // Final Mapping Based on Type (keep invalid as-is)
       const mappedData = rawData.map((row: any) => {
         const newRow: any = {};
         Object.keys(row).forEach((caption) => {
-          const field = captionToField[caption];
-          if (field) {
+          const meta = captionToMeta[caption];
+          if (meta) {
             let value = row[caption];
 
-            // Month columns: preserve as MMM-YY
-            if (monthColumns.includes(caption)) {
-              if (value instanceof Date) {
-                const month = value.toLocaleString('en-US', { month: 'short' });
-                const year = String(value.getFullYear()).slice(-2);
-                value = `${month}-${year}`;
+            if (value !== null && value !== '') {
+              switch (meta.type) {
+                case 'DATETIME':
+                  const formatted = formatExcelDate(value);
+                  value = this.isValidDDMMYYYY(formatted) ? formatted : value;
+                  break;
+
+                case 'DECIMAL':
+                  value = !isNaN(Number(value)) ? parseFloat(value) : value;
+                  break;
               }
             }
-            // Date columns: convert to dd/MM/yyyy
-            else if (dateColumns.includes(caption) && value instanceof Date) {
-              value = formatDate(value);
-            }
 
-            newRow[field] = value;
+            newRow[meta.field] = value;
           }
         });
         return newRow;
@@ -300,6 +300,13 @@ export class ImportRADataComponent implements OnInit {
     };
 
     reader.readAsBinaryString(file);
+  }
+
+  // Strict dd/MM/yyyy validator
+  isValidDDMMYYYY(value: any): boolean {
+    if (!value || typeof value !== 'string') return false;
+    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    return regex.test(value);
   }
 
   // ======== Utility function to extract headers from sheet ========

@@ -55,6 +55,9 @@ export class ImportHISDataFormComponent implements OnInit {
 
   insuranceList: any = [];
 
+  // Track invalid columns
+  invalidColumns: Set<string> = new Set();
+
   constructor(private dataservice: DataService) {}
 
   ngOnInit(): void {
@@ -73,6 +76,7 @@ export class ImportHISDataFormComponent implements OnInit {
         this.columnData = res.data.map((col: any) => ({
           dataField: col.ColumnName,
           caption: col.ColumnTitle,
+          type: col.Type,
           width: 150,
           wordWrapEnabled: true,
         }));
@@ -89,17 +93,115 @@ export class ImportHISDataFormComponent implements OnInit {
       }
     });
   }
-  // ========= oncell prepared ======
+
+  // ========== onCellPrepared validator ==========
   onCellPrepared(e: any) {
-    if (e.rowType === 'data') {
-      const column = this.columnData.find(
-        (c) => c.dataField === e.column.dataField
-      );
-      if (column?.IsMandatory && !e.value) {
-        e.cellElement.style.backgroundColor = '#FFC1C3';
-        notify(`Error: ${column.caption} is mandatory`, 'error', 1500);
-      }
+    if (e.rowType !== 'data') return;
+
+    const colInfo = this.columnData.find(
+      (c: any) => c.dataField === e.column.dataField
+    );
+    if (!colInfo) return;
+
+    const value = e.value;
+
+    // Skip empty/null values
+    if (value === null || value === '') return;
+
+    let isInvalid = false;
+    let reason = '';
+
+    // DATETIME validation (strict dd/MM/yyyy)
+    if (colInfo.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
+      isInvalid = true;
+      reason = 'Invalid Date format';
     }
+
+    // DECIMAL validation
+    if (colInfo.type === 'DECIMAL' && isNaN(Number(value))) {
+      isInvalid = true;
+      reason = 'Invalid Decimal number';
+    }
+
+    if (isInvalid) {
+      // Highlight the cell with tooltip showing reason and current value
+      this.highlightInvalidCell(e, `${reason}: "${value}"`);
+
+      // Track column as invalid and highlight header
+      this.invalidColumns.add(colInfo.dataField);
+      this.highlightColumnHeader(colInfo.dataField);
+    }
+  }
+
+  // ========== Strict dd/MM/yyyy format validator ==========
+  isValidDDMMYYYY(value: any): boolean {
+    if (!value || typeof value !== 'string') return false;
+    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    return regex.test(value);
+  }
+
+  // =========== Highlight invalid cell ==========
+  highlightInvalidCell(e: any, message: string) {
+    e.cellElement.style.backgroundColor = '#ffcccc';
+    e.cellElement.title = message;
+  }
+
+  // =========== Highlight column header ==========
+  highlightColumnHeader(dataField: string) {
+    setTimeout(() => {
+      const headerCells = document.querySelectorAll(
+        `.dx-header-row .dx-datagrid-text-content`
+      );
+      headerCells.forEach((headerCell: any) => {
+        if (
+          headerCell.innerText === dataField ||
+          this.getCaptionByField(dataField) === headerCell.innerText
+        ) {
+          headerCell.style.color = '#ff9999';
+          headerCell.title = 'Contains invalid data';
+        }
+      });
+    }, 0);
+  }
+
+  // =========== Utility: get caption from columnData ==========
+  getCaptionByField(field: string) {
+    const col = this.columnData.find((c: any) => c.dataField === field);
+    return col ? col.caption : '';
+  }
+
+  // =========== Row-level validation (prevent save) ==========
+  onRowValidating(e: any) {
+    const row = e.newData || e.oldData;
+
+    this.columnData.forEach((col: any) => {
+      const value = row[col.dataField];
+
+      // Skip empty/null values
+      if (value === null || value === '') return;
+
+      let isInvalid = false;
+      let reason = '';
+
+      // DATETIME validation
+      if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
+        isInvalid = true;
+        reason = `Invalid Date: "${value}"`;
+      }
+
+      // DECIMAL validation
+      if (col.type === 'DECIMAL' && isNaN(Number(value))) {
+        isInvalid = true;
+        reason = `Invalid Decimal: "${value}"`;
+      }
+
+      if (isInvalid) {
+        e.isValid = false;
+        e.errorText = `${col.caption} has invalid value: ${value}`;
+        this.invalidColumns.add(col.dataField);
+        this.highlightColumnHeader(col.dataField);
+      }
+    });
   }
 
   //===================date format conversion ===================

@@ -13,6 +13,8 @@
     [allowColumnReordering]="true"
     [columnFixing]="{ enabled: true }"
     (onExporting)="handleExporting($event)"
+    (onCellPrepared)="onCellPrepared($event)"
+    (onRowValidating)="onRowValidating($event)"
   >
     <!-- Paging -->
     <dxo-paging [pageSize]="100"></dxo-paging>
@@ -40,7 +42,7 @@
     <dxo-export [enabled]="true" [allowExportSelectedData]="false"></dxo-export>
 
     <dxo-toolbar>
-                  <dxi-item location="before">
+      <dxi-item location="before">
         <dx-date-box
           class="p-0 mt-0"
           [(value)]="RA_RECEIVING_DATE"
@@ -169,7 +171,7 @@
         [showClearButton]="true"
         [searchEnabled]="true"
         width="100%"
-        (onValueChanged)="onUniqueKeyChange($event)" 
+        (onValueChanged)="onUniqueKeyChange($event)"
       >
       </dx-tag-box>
 
