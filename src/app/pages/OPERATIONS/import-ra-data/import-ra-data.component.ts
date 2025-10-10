@@ -172,7 +172,7 @@ export class ImportRADataComponent implements OnInit {
     }
   }
 
-  // ========= handle file selection and read the Excel file =======
+  // ============ on file selected from excel data =========
   onFileSelected(event: any) {
     const target: DataTransfer = <DataTransfer>event.target;
     if (target.files.length !== 1) {
@@ -191,6 +191,7 @@ export class ImportRADataComponent implements OnInit {
 
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
+
       const wb: XLSX.WorkBook = XLSX.read(bstr, {
         type: 'binary',
         cellDates: true,
@@ -199,107 +200,99 @@ export class ImportRADataComponent implements OnInit {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
-      // Extract headers from Excel
-      const sheetHeaders: string[] = this.getHeaders(ws);
-
-      // Expected headers from API
-      const expectedHeaders: string[] = this.columnData.map(
-        (c: any) => c.caption
-      );
-
-      // Validate columns
-      const missingInExcel = expectedHeaders.filter(
-        (h) => !sheetHeaders.includes(h)
-      );
-      const extraInExcel = sheetHeaders.filter(
-        (h) => !expectedHeaders.includes(h)
-      );
-
-      if (missingInExcel.length > 0 || extraInExcel.length > 0) {
-        this.isLoading = false;
-        notify({
-          message:
-            `Column mismatch!\n\n` +
-            (missingInExcel.length
-              ? `Missing in Excel: ${missingInExcel.join(', ')}\n`
-              : '') +
-            (extraInExcel.length
-              ? `Extra in Excel: ${extraInExcel.join(', ')}\n`
-              : ''),
-          type: 'error',
-          displayTime: 5000,
-          position: { my: 'right top', at: 'right top', of: window },
-        });
-        this.resetFileInput();
-        return;
-      }
-
-      // Convert sheet to JSON
       const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
 
-      // Map Caption ➝ Field & Type
-      const captionToMeta: Record<string, { field: string; type: string }> = {};
-      this.columnData.forEach((col: any) => {
-        captionToMeta[col.caption] = { field: col.dataField, type: col.type };
+      // Map captions
+      const captionToField: Record<string, string> = {};
+      this.columnData.forEach((col) => {
+        captionToField[col.caption] = col.dataField;
       });
 
-      // Excel Date Formatter (dd/MM/yyyy)
-      const formatExcelDate = (value: any): string => {
-        if (!value) return '';
-        let dateObj: Date | null = null;
-
-        if (value instanceof Date) {
-          dateObj = value;
-        } else if (typeof value === 'number') {
-          dateObj = new Date(Math.round((value - 25569) * 86400 * 1000));
-        } else if (typeof value === 'string') {
-          const parsed = new Date(value);
-          dateObj = isNaN(parsed.getTime()) ? null : parsed;
-        }
-
-        if (!dateObj) return value; // Keep original if invalid
-        const dd = String(dateObj.getDate()).padStart(2, '0');
-        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const yyyy = dateObj.getFullYear();
-        return `${dd}/${mm}/${yyyy}`;
-      };
-
-      // Final Mapping Based on Type (keep invalid as-is)
-      const mappedData = rawData.map((row: any) => {
+      let mappedData = rawData.map((row: any) => {
         const newRow: any = {};
         Object.keys(row).forEach((caption) => {
-          const meta = captionToMeta[caption];
-          if (meta) {
-            let value = row[caption];
-
-            if (value !== null && value !== '') {
-              switch (meta.type) {
-                case 'DATETIME':
-                  const formatted = formatExcelDate(value);
-                  value = this.isValidDDMMYYYY(formatted) ? formatted : value;
-                  break;
-
-                case 'DECIMAL':
-                  value = !isNaN(Number(value)) ? parseFloat(value) : value;
-                  break;
-              }
-            }
-
-            newRow[meta.field] = value;
-          }
+          const field = captionToField[caption];
+          if (field) newRow[field] = row[caption];
         });
         return newRow;
       });
 
-      // Assign to your data source
+      // Get all Date fields
+      const dateFields = this.columnData
+        .filter((c) => c.type === 'DATETIME')
+        .map((c) => c.dataField);
+
+      // Format and Fix date
+      mappedData = this.formatDateFields(mappedData, dateFields);
+
       this.ImportedDataSource = mappedData;
       this.isLoading = false;
       this.isNewFormPopupOpened = true;
-
       this.resetFileInput();
     };
 
     reader.readAsBinaryString(file);
+  }
+
+  // ========= Detect System Date Format =========
+  getSystemDateFormat(): string {
+    const testDate = new Date(2024, 0, 5); // 5 Jan 2024
+    const formatted = new Intl.DateTimeFormat(undefined).format(testDate);
+
+    const sep = formatted.includes('/')
+      ? '/'
+      : formatted.includes('-')
+      ? '-'
+      : formatted.includes('.')
+      ? '.'
+      : ' ';
+
+    const parts = formatted.split(sep);
+
+    const format = parts.map((p) => {
+      if (p.length === 4) return 'yyyy';
+      if (+p === 5) return 'dd';
+      if (+p === 1) return 'MM';
+      return '??';
+    });
+
+    return format.join(sep);
+  }
+
+  // ========= Format and Fix Date Issue =========
+  formatDateFields(data: any[], dateFields: string[]): any[] {
+    return data.map((row) => {
+      const newRow = { ...row };
+
+      dateFields.forEach((field) => {
+        const rawVal = newRow[field];
+        if (!rawVal) return;
+
+        let dateObj: Date | null = null;
+
+        if (rawVal instanceof Date) {
+          dateObj = rawVal;
+        } else if (!isNaN(Number(rawVal))) {
+          const excelEpoch = new Date(1899, 11, 30);
+          dateObj = new Date(excelEpoch.getTime() + Number(rawVal) * 86400000);
+        } else {
+          const tmp = new Date(rawVal);
+          if (!isNaN(tmp.getTime())) dateObj = tmp;
+        }
+
+        // ✅ Fix One-Day Minus Issue
+        if (dateObj) {
+          dateObj.setDate(dateObj.getDate() + 1);
+
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const year = dateObj.getFullYear();
+          newRow[field] = `${day}/${month}/${year}`;
+        }
+      });
+
+      return newRow;
+    });
   }
 
   // Strict dd/MM/yyyy validator
