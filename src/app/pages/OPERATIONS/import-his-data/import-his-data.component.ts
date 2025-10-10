@@ -81,6 +81,7 @@ export class ImportHISDataComponent implements OnInit {
   isLoading: boolean = false;
   insuranceList: any;
   selectedInsuranceId: any;
+  downloadButtonOptions: any;
 
   constructor(private service: DataService) {
     this.UserID = sessionStorage.getItem('UserID');
@@ -90,6 +91,13 @@ export class ImportHISDataComponent implements OnInit {
     this.loadImportHisLogDataSource();
     this.fetch_His_Column_List();
     this.fetch_insurance_dropdown_data();
+    this.downloadButtonOptions = {
+      hint: 'Download Template',
+      icon: 'download',
+      type: 'default',
+      stylingMode: 'contained',
+      onClick: () => this.downloadTemplate(),
+    };
   }
 
   //======== get_insurance_dropdown ========
@@ -188,13 +196,11 @@ export class ImportHISDataComponent implements OnInit {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
-      // Get headers
+      // Get headers without converting
       const sheetHeaders: string[] = this.getHeaders(ws);
 
       // Expected headers
-      const expectedHeaders: string[] = this.columnData.map(
-        (c: any) => c.caption
-      );
+      const expectedHeaders: string[] = this.columnData.map((c) => c.caption);
 
       // Validate headers
       const missingInExcel = expectedHeaders.filter(
@@ -224,11 +230,11 @@ export class ImportHISDataComponent implements OnInit {
       }
 
       // Convert sheet to JSON
-      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
 
       // Map caption -> dataField
       const captionToField: Record<string, string> = {};
-      this.columnData.forEach((col: any) => {
+      this.columnData.forEach((col) => {
         captionToField[col.caption] = col.dataField;
       });
 
@@ -240,7 +246,7 @@ export class ImportHISDataComponent implements OnInit {
         h.toLowerCase().includes('month')
       );
 
-      // Format Excel date to dd/MM/yyyy
+      // Format Excel date to dd/MM/yyyy without timezone shift
       const formatExcelDate = (value: any): string => {
         if (!value) return '';
         let dateObj: Date | null = null;
@@ -248,10 +254,8 @@ export class ImportHISDataComponent implements OnInit {
         if (value instanceof Date) {
           dateObj = value;
         } else if (typeof value === 'number') {
-          // Excel serial number
-          dateObj = XLSX.SSF.parse_date_code(value)
-            ? new Date(Date.UTC(1899, 11, 30 + value))
-            : null;
+          // Correctly convert Excel serial number to JS Date
+          dateObj = new Date(Math.round((value - 25569) * 86400 * 1000)); // Excel -> JS timestamp
         } else if (typeof value === 'string') {
           const parsed = new Date(value);
           dateObj = isNaN(parsed.getTime()) ? null : parsed;

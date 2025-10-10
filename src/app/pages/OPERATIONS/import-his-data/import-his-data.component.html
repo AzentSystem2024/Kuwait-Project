@@ -85,23 +85,12 @@
         }"
       ></dxi-item>
 
-      <dxi-item location="after" locateInMenu="auto"        showText="inMenu"
+      <dxi-item
+        *ngIf="isColumnsLoaded"
+        location="after"
         widget="dxButton"
-        [options]="{
-          text: 'download',
-          icon: 'download',
-          stylingMode: 'text',
-          hint: 'download',
-          onClick: downloadTemplate
-        }">
-        <!-- <dx-button
-          hint="Download Template"
-          icon="download"
-          type="default"
-          stylingMode="contained"
-          (onClick)="downloadTemplate()"
-          [visible]="isColumnsLoaded"
-        ></dx-button> -->
+        [options]="downloadButtonOptions"
+      >
       </dxi-item>
 
       <dxi-item
@@ -110,7 +99,7 @@
         [options]="addButtonOptions"
       ></dxi-item>
     </dxo-toolbar>
-    <input 
+    <input
       #fileInput
       type="file"
       accept=".xlsx, .xls"
