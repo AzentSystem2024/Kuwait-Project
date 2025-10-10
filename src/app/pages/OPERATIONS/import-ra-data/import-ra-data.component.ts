@@ -282,7 +282,7 @@ export class ImportRADataComponent implements OnInit {
 
         // ✅ Fix One-Day Minus Issue
         if (dateObj) {
-          dateObj.setDate(dateObj.getDate() + 1);
+          dateObj.setDate(dateObj.getDate());
 
           const day = String(dateObj.getDate()).padStart(2, '0');
           const month = String(dateObj.getMonth() + 1).padStart(2, '0');
