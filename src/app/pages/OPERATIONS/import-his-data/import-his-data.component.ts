@@ -168,7 +168,8 @@ export class ImportHISDataComponent implements OnInit {
       });
     }
   }
-  // ============ on file selected from excel data =========
+
+  // ============ File Selected from Excel =========
   onFileSelected(event: any) {
     const target: DataTransfer = <DataTransfer>event.target;
     if (target.files.length !== 1) {
@@ -196,9 +197,10 @@ export class ImportHISDataComponent implements OnInit {
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
+      // Raw Excel Data
       const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
 
-      // Map captions
+      // Map Captions to Data Fields
       const captionToField: Record<string, string> = {};
       this.columnData.forEach((col) => {
         captionToField[col.caption] = col.dataField;
@@ -213,12 +215,12 @@ export class ImportHISDataComponent implements OnInit {
         return newRow;
       });
 
-      // Get all Date fields
+      // Date Fields from Column Settings
       const dateFields = this.columnData
         .filter((c) => c.type === 'DATETIME')
         .map((c) => c.dataField);
 
-      // Format and Fix date
+      // Format and Fix Date Issues
       mappedData = this.formatDateFields(mappedData, dateFields);
 
       this.ImportedDataSource = mappedData;
@@ -230,59 +232,39 @@ export class ImportHISDataComponent implements OnInit {
     reader.readAsBinaryString(file);
   }
 
-  // ========= Detect System Date Format =========
-  getSystemDateFormat(): string {
-    const testDate = new Date(2024, 0, 5); // 5 Jan 2024
-    const formatted = new Intl.DateTimeFormat(undefined).format(testDate);
-
-    const sep = formatted.includes('/')
-      ? '/'
-      : formatted.includes('-')
-      ? '-'
-      : formatted.includes('.')
-      ? '.'
-      : ' ';
-
-    const parts = formatted.split(sep);
-
-    const format = parts.map((p) => {
-      if (p.length === 4) return 'yyyy';
-      if (+p === 5) return 'dd';
-      if (+p === 1) return 'MM';
-      return '??';
-    });
-
-    return format.join(sep);
-  }
-
-  // ========= Format and Fix Date Issue =========
+  // ========= Format & Fix Date (One-Day Minus Bug Fixed) =========
   formatDateFields(data: any[], dateFields: string[]): any[] {
     return data.map((row) => {
       const newRow = { ...row };
 
       dateFields.forEach((field) => {
-        const rawVal = newRow[field];
-        if (!rawVal) return;
+        let value = newRow[field];
+        if (!value) return;
 
         let dateObj: Date | null = null;
 
-        if (rawVal instanceof Date) {
-          dateObj = rawVal;
-        } else if (!isNaN(Number(rawVal))) {
-          const excelEpoch = new Date(1899, 11, 30);
-          dateObj = new Date(excelEpoch.getTime() + Number(rawVal) * 86400000);
-        } else {
-          const tmp = new Date(rawVal);
-          if (!isNaN(tmp.getTime())) dateObj = tmp;
+        // Case 1: Excel Serial Number (e.g., 45857)
+        if (typeof value === 'number') {
+          // Excel epoch conversion (handles 1900 bug)
+          dateObj = new Date(Math.round((value - 25567 - 1) * 86400 * 1000));
+        }
+        // Case 2: Already a Date object
+        else if (value instanceof Date) {
+          dateObj = new Date(
+            Date.UTC(value.getFullYear(), value.getMonth(), value.getDate())
+          );
+        }
+        // Case 3: String date input
+        else {
+          const temp = new Date(value);
+          if (!isNaN(temp.getTime())) dateObj = temp;
         }
 
-        // ✅ Fix One-Day Minus Issue
         if (dateObj) {
-          dateObj.setDate(dateObj.getDate());
-
-          const day = String(dateObj.getDate()).padStart(2, '0');
-          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-          const year = dateObj.getFullYear();
+          // Format dd/MM/yyyy
+          const day = String(dateObj.getUTCDate()).padStart(2, '0');
+          const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+          const year = dateObj.getUTCFullYear();
           newRow[field] = `${day}/${month}/${year}`;
         }
       });
@@ -291,7 +273,7 @@ export class ImportHISDataComponent implements OnInit {
     });
   }
 
-  // Strict dd/MM/yyyy validator
+  // ========= Strict dd/MM/yyyy Validator =========
   isValidDDMMYYYY(value: any): boolean {
     if (!value || typeof value !== 'string') return false;
     const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
