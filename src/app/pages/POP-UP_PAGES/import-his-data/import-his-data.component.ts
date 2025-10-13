@@ -242,7 +242,7 @@ export class ImportHISDataFormComponent implements OnInit {
       }));
 
       const totalRecords = allData.length;
-      const batchSize = 4000;
+      const batchSize = 15000;
 
       if (totalRecords === 0) {
         notify({

@@ -414,7 +414,7 @@ export class ImportRADataPopupComponent implements OnInit {
         RA_RECEIVING_DATE: this.formatDateToDDMMYY(this.RA_RECEIVING_DATE),
       }));
 
-      const batchSize = 4000;
+      const batchSize = 15000;
       const totalRecords = allData.length;
 
       if (totalRecords === 0) {
