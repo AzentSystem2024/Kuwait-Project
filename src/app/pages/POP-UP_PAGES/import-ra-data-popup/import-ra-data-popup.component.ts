@@ -215,9 +215,8 @@ export class ImportRADataPopupComponent implements OnInit {
     });
   }
 
-
-   // ========== onCellPrepared validator ==========
-   onCellPrepared(e: any) {
+  // ========== onCellPrepared validator ==========
+  onCellPrepared(e: any) {
     if (e.rowType !== 'data') return;
 
     const colInfo = this.columnData.find(
@@ -255,10 +254,11 @@ export class ImportRADataPopupComponent implements OnInit {
     }
   }
 
-  // ========== Strict dd/MM/yyyy format validator ==========
+  // ========== Strict dd/MM/yyyy or dd-MM-yyyy format validator ==========
   isValidDDMMYYYY(value: any): boolean {
     if (!value || typeof value !== 'string') return false;
-    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    // Allows dd/mm/yyyy or dd-mm-yyyy
+    const regex = /^(0[1-9]|[12][0-9]|3[01])[\/-](0[1-9]|1[0-2])[\/-]\d{4}$/;
     return regex.test(value);
   }
 
@@ -325,9 +325,6 @@ export class ImportRADataPopupComponent implements OnInit {
       }
     });
   }
-
-
-
 
   toggleFilterRow = () => {
     this.isFilterRowVisible = !this.isFilterRowVisible;
@@ -417,7 +414,7 @@ export class ImportRADataPopupComponent implements OnInit {
         RA_RECEIVING_DATE: this.formatDateToDDMMYY(this.RA_RECEIVING_DATE),
       }));
 
-      const batchSize = 15000;
+      const batchSize = 4000;
       const totalRecords = allData.length;
 
       if (totalRecords === 0) {

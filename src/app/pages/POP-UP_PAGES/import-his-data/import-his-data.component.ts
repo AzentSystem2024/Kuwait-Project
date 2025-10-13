@@ -136,7 +136,8 @@ export class ImportHISDataFormComponent implements OnInit {
   // ========== Strict dd/MM/yyyy format validator ==========
   isValidDDMMYYYY(value: any): boolean {
     if (!value || typeof value !== 'string') return false;
-    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    // Allows dd/mm/yyyy or dd-mm-yyyy
+    const regex = /^(0[1-9]|[12][0-9]|3[01])[\/-](0[1-9]|1[0-2])[\/-]\d{4}$/;
     return regex.test(value);
   }
 
@@ -241,7 +242,7 @@ export class ImportHISDataFormComponent implements OnInit {
       }));
 
       const totalRecords = allData.length;
-      const batchSize = 15000;
+      const batchSize = 4000;
 
       if (totalRecords === 0) {
         notify({
