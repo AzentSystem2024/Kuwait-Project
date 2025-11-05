@@ -30,14 +30,14 @@ import { DataService } from 'src/app/services';
   styleUrls: ['./cpt-type.component.scss'],
   providers: [ReportService, DataService],
 })
-export class CPTTypeComponent  {
+export class CPTTypeComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
   @ViewChild(CptTypeNewFormComponent, { static: false })
   CptTypeComponent: CptTypeNewFormComponent;
 
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -62,7 +62,7 @@ export class CPTTypeComponent  {
     stylingMode: 'contained',
     hint: 'Add new entry',
     onClick: () => this.show_new_Form(),
-    elementAttr: { class: 'add-button' }
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;
@@ -75,8 +75,6 @@ export class CPTTypeComponent  {
     private router: Router,
     private dataService: DataService
   ) {}
-
-
 
   //=========================show new popup=========================
   show_new_Form() {

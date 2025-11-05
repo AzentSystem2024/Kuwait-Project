@@ -31,14 +31,14 @@ import { DataService } from 'src/app/services';
   styleUrls: ['./speciality.component.scss'],
   providers: [ReportService, DataService],
 })
-export class SpecialityComponent  {
+export class SpecialityComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
   @ViewChild(SpecialityNewFormComponent, { static: false })
   SpecialityNewForm: SpecialityNewFormComponent;
 
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -63,7 +63,7 @@ export class SpecialityComponent  {
     stylingMode: 'contained',
     hint: 'Add new entry',
     onClick: () => this.show_new_Form(),
-    elementAttr: { class: 'add-button' }
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;
@@ -73,7 +73,6 @@ export class SpecialityComponent  {
     private router: Router,
     private dataService: DataService
   ) {}
-
 
   toggleFilterRow = () => {
     this.isFilterRowVisible = !this.isFilterRowVisible;

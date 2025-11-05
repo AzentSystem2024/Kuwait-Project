@@ -42,7 +42,7 @@ export class ClinicianComponent implements OnInit {
   isAddClinicianPopupOpened: any = false;
   // dataSource: any;
   // Variables for Pagination
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;

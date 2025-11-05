@@ -1255,3 +1255,38 @@ input[type="password"]::-moz-password-toggle {
   .dx-tab-selected::after {
   background-color: rgba(23, 44, 104, 1) !important;
 }
+
+.dx-checkbox-indeterminate .dx-checkbox-icon {
+    border-color:  1e49b0!important;
+}
+
+.dx-checkbox-indeterminate.dx-state-hover .dx-checkbox-icon::before {
+    background-color: #1e49b0;
+}
+// .dx-loadindicator-segment-inner {
+//     position: relative;
+//     height: 100%;
+//     border-color:  none !important;
+//     border-width: 0.12em;
+//     border-style: solid;
+//     border-bottom-color: transparent;
+//     animation: none;
+//     border-radius: 50%;
+// }
+
+.dx-loadindicator-segment-inner {
+    position: relative;
+    height: 100%;
+    /* border-color: #5486ff; */
+    border-width: 0.12em;
+    border-style: solid;
+    border-bottom-color: transparent;
+    animation: none;
+    border-radius: 50%;
+}
+
+// .dx-treeview-item.dx-state-hover {
+//     background-color: transparent !important;
+//     border-radius: 4px;
+//     color: #21293b;
+// }

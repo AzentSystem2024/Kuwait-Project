@@ -30,14 +30,14 @@ import { DataService } from 'src/app/services';
   styleUrls: ['./denial-category.component.scss'],
   providers: [ReportService, DataService],
 })
-export class DenialCategoryComponent  {
+export class DenialCategoryComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
   @ViewChild(DenialCategoryNewFormComponent, { static: false })
   DenialCategoryNewForm: DenialCategoryNewFormComponent;
 
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -62,7 +62,7 @@ export class DenialCategoryComponent  {
     stylingMode: 'contained',
     hint: 'Add new entry',
     onClick: () => this.show_new_Form(),
-    elementAttr: { class: 'add-button' }
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;

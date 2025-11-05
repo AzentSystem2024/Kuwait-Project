@@ -50,7 +50,7 @@ export class ImportHISDataComponent implements OnInit {
   @ViewChild('fileInput', { static: false }) fileInput: ElementRef;
 
   isNewFormPopupOpened: boolean = false;
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -198,7 +198,9 @@ export class ImportHISDataComponent implements OnInit {
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
       // Raw Excel Data
-      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
+      console.log(XLSX);
+      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
+      console.log(rawData, '=============Raw Data============');
 
       // Map Captions to Data Fields
       const captionToField: Record<string, string> = {};
@@ -206,6 +208,10 @@ export class ImportHISDataComponent implements OnInit {
         captionToField[col.caption] = col.dataField;
       });
 
+      console.log(
+        captionToField,
+        '============captionToField=================='
+      );
       let mappedData = rawData.map((row: any) => {
         const newRow: any = {};
         Object.keys(row).forEach((caption) => {
@@ -222,6 +228,7 @@ export class ImportHISDataComponent implements OnInit {
 
       // Format and Fix Date Issues
       mappedData = this.formatDateFields(mappedData, dateFields);
+      console.log(mappedData);
 
       this.ImportedDataSource = mappedData;
       this.isLoading = false;
@@ -233,6 +240,46 @@ export class ImportHISDataComponent implements OnInit {
   }
 
   // ========= Format & Fix Date (One-Day Minus Bug Fixed) =========
+  // formatDateFields(data: any[], dateFields: string[]): any[] {
+  //   return data.map((row) => {
+  //     const newRow = { ...row };
+
+  //     dateFields.forEach((field) => {
+  //       let value = newRow[field];
+  //       if (!value) return;
+
+  //       let dateObj: Date | null = null;
+
+  //       // Case 1: Excel Serial Number (e.g., 45857)
+  //       if (typeof value === 'number') {
+  //         // Excel epoch conversion (handles 1900 bug)
+  //         dateObj = new Date(Math.round((value - 25567 - 1) * 86400 * 1000));
+  //       }
+  //       // Case 2: Already a Date object
+  //       else if (value instanceof Date) {
+  //         dateObj = new Date(
+  //           Date.UTC(value.getFullYear(), value.getMonth(), value.getDate())
+  //         );
+  //       }
+  //       // Case 3: String date input
+  //       else {
+  //         const temp = new Date(value);
+  //         if (!isNaN(temp.getTime())) dateObj = temp;
+  //       }
+
+  //       if (dateObj) {
+  //         // Format dd/MM/yyyy
+  //         const day = String(dateObj.getUTCDate()).padStart(2, '0');
+  //         const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+  //         const year = dateObj.getUTCFullYear();
+  //         newRow[field] = `${day}/${month}/${year}`;
+  //       }
+  //     });
+
+  //     return newRow;
+  //   });
+  // }
+  // ✅ Format & Fix Date (No Timezone Shift, No Day Decrease)
   formatDateFields(data: any[], dateFields: string[]): any[] {
     return data.map((row) => {
       const newRow = { ...row };
@@ -245,26 +292,34 @@ export class ImportHISDataComponent implements OnInit {
 
         // Case 1: Excel Serial Number (e.g., 45857)
         if (typeof value === 'number') {
-          // Excel epoch conversion (handles 1900 bug)
-          dateObj = new Date(Math.round((value - 25567 - 1) * 86400 * 1000));
+          // Convert Excel serial to JS date (local, no UTC)
+          dateObj = new Date((value - 25569) * 86400 * 1000);
         }
         // Case 2: Already a Date object
         else if (value instanceof Date) {
           dateObj = new Date(
-            Date.UTC(value.getFullYear(), value.getMonth(), value.getDate())
+            value.getFullYear(),
+            value.getMonth(),
+            value.getDate()
           );
         }
         // Case 3: String date input
-        else {
-          const temp = new Date(value);
-          if (!isNaN(temp.getTime())) dateObj = temp;
+        else if (typeof value === 'string') {
+          const parsed = new Date(value);
+          if (!isNaN(parsed.getTime())) {
+            dateObj = new Date(
+              parsed.getFullYear(),
+              parsed.getMonth(),
+              parsed.getDate()
+            );
+          }
         }
 
         if (dateObj) {
-          // Format dd/MM/yyyy
-          const day = String(dateObj.getUTCDate()).padStart(2, '0');
-          const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-          const year = dateObj.getUTCFullYear();
+          // Format: dd/MM/yyyy (local date, no UTC)
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const year = dateObj.getFullYear();
           newRow[field] = `${day}/${month}/${year}`;
         }
       });

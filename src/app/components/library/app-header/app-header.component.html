@@ -12,18 +12,12 @@
       }"
     >
     </dxi-item>
-    <!-- <dxi-item
-      location="before"
-      cssClass="header-title"
-      *ngIf="title"
-      [text]="title"
-    >
-    
-    </dxi-item> -->
-    <dxi-item  location="before"
-      cssClass="header-title">
+    <dxi-item  location="before" 
+      cssClass="header-title " style="display: flex;">
       <img src="../../../../assets/Frame 1321318770.svg" alt="Logo" class="logo-image" />
+          <span class="version-text ms-1 mt-2">v1.1</span>
     </dxi-item>
+
 
     <dxi-item location="after" locateInMenu="never">
       <ng-container *dxTemplate>
@@ -48,7 +42,6 @@
         menuMode="context"
         id="userPanel"
       ></user-panel>
-      <!-- Tooltip to display loginName -->
       <dx-tooltip
         target="#userPanel"
         [visible]="true"

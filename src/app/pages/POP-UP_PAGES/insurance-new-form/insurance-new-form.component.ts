@@ -105,15 +105,153 @@ export class InsuranceNewFormComponent implements OnInit {
       this.selectedGrid?.instance.refresh();
       this.dataGrid?.instance.refresh();
     });
+
+    console.log(this.selectedKeys,'==============')
   }
 
   // ======== ENABLE POPUP FOR SELECTING COLUMN DATA ========
-  manageColumns() {
-    this.get_All_Column_data();
-    this.ColumnpopupVisible = true;
+  // manageColumns() {
+  //   this.get_All_Column_data();
+  //   this.ColumnpopupVisible = true;
+  // }
+
+//   async manageColumns() {
+//   // Fetch full column list first
+//   await this.get_All_Column_data();
+
+//   if (this.fullcolumnsData && this.fullcolumnsData.length > 0) {
+//   const defaultColumns = ['PAYMENT_DATE', 'REFERENCE_NO'];
+
+
+//   this.fullcolumnsData = this.fullcolumnsData.map(col => {
+//     const isLocked = defaultColumns.includes(col.ColumnName);
+//     return {
+//       ...col,
+//       Status: isLocked ? 'selected' : 'available',
+//       isLocked
+//     };
+//   });
+// }
+
+// // Make sure locked rows always appear first
+// this.fullcolumnsData.sort((a, b) => {
+//   if (a.isLocked && !b.isLocked) return -1;
+//   if (!a.isLocked && b.isLocked) return 1;
+//   return 0;
+// });
+
+//   // Finally open the popup
+//   this.ColumnpopupVisible = true;
+
+//   // Optional: refresh grids
+//   setTimeout(() => {
+//     this.availableGrid?.instance.refresh();
+//     this.selectedGrid?.instance.refresh();
+//   });
+// }
+
+// async manageColumns() {
+//   // Step 1: Fetch all columns
+//   await this.get_All_Column_data();
+
+//   if (this.fullcolumnsData && this.fullcolumnsData.length > 0) {
+//     const defaultColumns = ['PAYMENT_DATE', 'REFERENCE_NO'];
+
+//     // Step 2: Tag locked columns
+//     this.fullcolumnsData = this.fullcolumnsData.map(col => {
+//       const isLocked = defaultColumns.includes(col.ColumnName);
+//       return {
+//         ...col,
+//         Status: isLocked ? 'selected' : 'available',
+//         isLocked
+//       };
+//     });
+//   }
+
+//   // Step 3: Keep locked rows always on top
+//   this.fullcolumnsData.sort((a, b) => {
+//     if (a.isLocked && !b.isLocked) return -1;
+//     if (!a.isLocked && b.isLocked) return 1;
+//     return 0;
+//   });
+
+//   // Step 4: Open popup
+//   this.ColumnpopupVisible = true;
+
+//   // Step 5: Refresh grids
+//   setTimeout(() => {
+//     this.availableGrid?.instance.refresh();
+//     this.selectedGrid?.instance.refresh();
+//   });
+// }
+async manageColumns() {
+  // Step 1: Fetch all columns
+  await this.get_All_Column_data();
+
+  const defaultColumns = ['PAYMENT_DATE', 'REFERENCE_NO'];
+
+  // Step 2: When editing, keep already selected columns
+  const existingSelected = new Set(
+    (this.raFileColumns || []).map((col: any) => col.ColumnName)
+  );
+
+  // Step 3: Prepare full columns list
+  this.fullcolumnsData = this.fullcolumnsData.map((col: any) => {
+    const isLocked = defaultColumns.includes(col.ColumnName);
+    const isSelected = existingSelected.has(col.ColumnName);
+
+    return {
+      ...col,
+      // If editing, keep selected status; else auto select locked ones
+      Status: isSelected || isLocked ? 'selected' : 'available',
+      isLocked
+    };
+  });
+
+  // Step 4: Keep locked rows always at top
+  this.fullcolumnsData.sort((a, b) => {
+    if (a.isLocked && !b.isLocked) return -1;
+    if (!a.isLocked && b.isLocked) return 1;
+    return 0;
+  });
+
+  // Step 5: If it's a *new* form (not editing), ensure locked columns are in raFileColumns
+  if (!this.insuranceData) {
+    const lockedColumns = this.fullcolumnsData.filter(c => c.isLocked);
+    const otherSelected = this.raFileColumns || [];
+
+    // Merge locked ones at top (avoid duplicates)
+    const uniqueByName = new Map();
+    [...lockedColumns, ...otherSelected].forEach(c =>
+      uniqueByName.set(c.ColumnName, c)
+    );
+    this.raFileColumns = Array.from(uniqueByName.values());
   }
 
-  // ======= fetch all columns list =========
+  // Step 6: Open popup and refresh grids
+  this.ColumnpopupVisible = true;
+  setTimeout(() => {
+    this.availableGrid?.instance.refresh();
+    this.selectedGrid?.instance.refresh();
+  });
+}
+
+
+// // Step 6: Prevent drag or reorder for locked rows
+// onReorder = (e: any) => {
+//   const fromData = e.fromData;
+//   const toData = e.toData;
+
+//   // If source or target row is locked, cancel the drag
+//   if (e.itemData?.isLocked || (toData && toData.some((r: any) => r.isLocked))) {
+//     e.cancel = true;
+//     return;
+//   }
+// };
+
+
+
+
   async get_All_Column_data() {
     const response: any = await firstValueFrom(
       this.dataservice.get_All_Column_List()
@@ -142,6 +280,9 @@ export class InsuranceNewFormComponent implements OnInit {
     });
   }
 
+
+
+
   // ======= classification dropdown data ========
   async fetch_clasificationDropdown_Data() {
     const res: any = await firstValueFrom(
@@ -154,6 +295,11 @@ export class InsuranceNewFormComponent implements OnInit {
 
   // ===== Drag between grids =======
   onAdd = (e: any) => {
+      if (e.itemData?.isLocked) {
+    e.cancel = true;
+    return;
+  }
+    console.log(e)
     const status = e.toData;
     const updatedItem = { ...e.itemData, Status: status };
     this.fullcolumnsData = this.fullcolumnsData.filter(
@@ -163,20 +309,56 @@ export class InsuranceNewFormComponent implements OnInit {
   };
 
   // ======== Reorder inside Selected Columns grid =======
-  onReorder = (e: any) => {
-    const selectedItems = this.fullcolumnsData.filter(
-      (item) => item.Status === 'selected'
-    );
-    const fromIndex = e.fromIndex;
-    const toIndex = e.toIndex;
+  // onReorder = (e: any) => {
+  //   const selectedItems = this.fullcolumnsData.filter(
+  //     (item) => item.Status === 'selected'
+  //   );
+  //   const fromIndex = e.fromIndex;
+  //   const toIndex = e.toIndex;
+  //   const movedItem = selectedItems.splice(fromIndex, 1)[0];
+  //   selectedItems.splice(toIndex, 0, movedItem);
+  //   this.fullcolumnsData = [
+  //     ...selectedItems,
+  //     ...this.fullcolumnsData.filter((item) => item.Status !== 'selected'),
+  //   ];
+  // };
 
-    const movedItem = selectedItems.splice(fromIndex, 1)[0];
-    selectedItems.splice(toIndex, 0, movedItem);
-    this.fullcolumnsData = [
-      ...selectedItems,
-      ...this.fullcolumnsData.filter((item) => item.Status !== 'selected'),
-    ];
-  };
+  // ======== Reorder inside Selected Columns grid =======
+onReorder = (e: any) => {
+  const selectedItems = this.fullcolumnsData.filter(
+    (item) => item.Status === 'selected'
+  );
+
+  const fromIndex = e.fromIndex;
+  const toIndex = e.toIndex;
+
+  const movedItem = selectedItems[fromIndex];
+
+  // Prevent dragging locked rows (PAYMENT_DATE, REFERENCE_NO)
+  const lockedColumns = ['PAYMENT_DATE', 'REFERENCE_NO'];
+
+  // If user tries to move a locked item, cancel reorder
+  if (lockedColumns.includes(movedItem.ColumnName)) {
+    e.cancel = true;
+    return;
+  }
+
+  // If user tries to drop *before* locked rows, also block it
+  if (toIndex < lockedColumns.length) {
+    e.cancel = true;
+    return;
+  }
+
+  // Continue normal reorder
+  selectedItems.splice(fromIndex, 1);
+  selectedItems.splice(toIndex, 0, movedItem);
+
+  // Merge back into full list
+  this.fullcolumnsData = [
+    ...selectedItems,
+    ...this.fullcolumnsData.filter((item) => item.Status !== 'selected'),
+  ];
+};
 
   // ==== Apply: Save selected columns to raFileColumns and close popup ====
   applySelected() {

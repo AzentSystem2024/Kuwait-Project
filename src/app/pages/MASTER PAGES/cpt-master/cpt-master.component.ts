@@ -31,14 +31,14 @@ import { DataService } from 'src/app/services';
   styleUrls: ['./cpt-master.component.scss'],
   providers: [ReportService, DataService],
 })
-export class CPTMasterComponent  {
+export class CPTMasterComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
   @ViewChild(CptMasterNewFormComponent, { static: false })
   CptNewFormComponent: CptMasterNewFormComponent;
 
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -63,7 +63,7 @@ export class CPTMasterComponent  {
     stylingMode: 'contained',
     hint: 'Add new entry',
     onClick: () => this.show_new_Form(), // use your actual method here
-    elementAttr: { class: 'add-button' }
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;
@@ -89,16 +89,10 @@ export class CPTMasterComponent  {
 
   //====================Add data ================================
   onClickSaveNewCptType = () => {
-    const {CPTCode, CPTShortName, CPTName, Description } =
+    const { CPTCode, CPTShortName, CPTName, Description } =
       this.CptNewFormComponent.getNewCptMasterData();
     this.masterService
-      .Insert_CptMaster_Data(
-
-        CPTCode,
-        CPTShortName,
-        CPTName,
-        Description
-      )
+      .Insert_CptMaster_Data(CPTCode, CPTShortName, CPTName, Description)
       .subscribe((response: any) => {
         if (response) {
           this.dataGrid.instance.refresh();

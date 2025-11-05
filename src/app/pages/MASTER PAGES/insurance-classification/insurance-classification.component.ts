@@ -31,7 +31,7 @@ import { DataService } from 'src/app/services';
   styleUrls: ['./insurance-classification.component.scss'],
   providers: [ReportService, DataService],
 })
-export class InsuranceClassificationComponent  {
+export class InsuranceClassificationComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
   @ViewChild(InsuranceClassificationNewFormComponent, { static: false })
@@ -40,7 +40,7 @@ export class InsuranceClassificationComponent  {
   isAddFormPopupOpened: any = false;
 
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -64,7 +64,7 @@ export class InsuranceClassificationComponent  {
     stylingMode: 'contained',
     hint: 'Add new entry',
     onClick: () => this.show_new_InsuranceClassification_Form(),
-    elementAttr: { class: 'add-button' }
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;
@@ -79,7 +79,6 @@ export class InsuranceClassificationComponent  {
     this.isFilterRowVisible = !this.isFilterRowVisible;
   };
 
-  
   //=============Showing the new Facility Form===================
   show_new_InsuranceClassification_Form() {
     this.isAddFormPopupOpened = true;

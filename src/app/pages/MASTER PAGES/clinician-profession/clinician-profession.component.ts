@@ -31,7 +31,7 @@ import { DataService } from 'src/app/services';
   styleUrls: ['./clinician-profession.component.scss'],
   providers: [ReportService, DataService],
 })
-export class ClinicianProfessionComponent  {
+export class ClinicianProfessionComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
   @ViewChild(ClinicianProfessionNewFormComponent, { static: false })
@@ -39,7 +39,7 @@ export class ClinicianProfessionComponent  {
 
   isAddFormPopupOpened: any = false;
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -63,7 +63,7 @@ export class ClinicianProfessionComponent  {
     stylingMode: 'contained',
     hint: 'Add new entry',
     onClick: () => this.show_new_InsuranceClassification_Form(), // use your actual method here
-    elementAttr: { class: 'add-button' }
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;
@@ -76,10 +76,6 @@ export class ClinicianProfessionComponent  {
     private router: Router,
     private dataService: DataService
   ) {}
-
-
-
-
 
   //=============Showing the new Facility Form===================
   show_new_InsuranceClassification_Form() {
@@ -198,7 +194,6 @@ export class ClinicianProfessionComponent  {
   toggleFilterRow = () => {
     this.isFilterRowVisible = !this.isFilterRowVisible;
   };
-
 }
 @NgModule({
   imports: [

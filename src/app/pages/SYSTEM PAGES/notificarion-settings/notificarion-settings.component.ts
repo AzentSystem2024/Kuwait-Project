@@ -52,7 +52,7 @@ export class NotificationSettingsComponent implements OnInit {
   @ViewChild('editor') editor: DxHtmlEditorComponent;
 
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -60,7 +60,6 @@ export class NotificationSettingsComponent implements OnInit {
   dataSource: any;
 
   valueContent: string;
-
 
   editorValueType: string = 'html';
 

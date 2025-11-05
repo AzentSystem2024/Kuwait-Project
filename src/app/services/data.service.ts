@@ -319,4 +319,12 @@ export class DataService {
     const reqbody = payload;
     return this.http.post(url, reqbody);
   }
+
+  //===================duplication checking api when load excel data==================
+    get_Duplicated_His_Data_List(payload:any) {
+    const Url = `${BASE_URL}HisData/checkduplicate`;
+    const reqbody = payload;
+    return this.http.post(Url, reqbody);
+  }
+
 }

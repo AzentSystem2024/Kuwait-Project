@@ -39,7 +39,7 @@ export class FacilityTypeComponent {
   facilityTypeComponent: FacilityTypeNewFormComponent;
 
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -64,7 +64,7 @@ export class FacilityTypeComponent {
     stylingMode: 'contained',
     hint: 'Add new entry',
     onClick: () => this.show_new_Form(),
-    elementAttr: { class: 'add-button' }
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;

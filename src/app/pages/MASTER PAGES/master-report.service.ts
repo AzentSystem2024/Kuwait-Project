@@ -142,7 +142,7 @@ export class MasterReportService {
   Insert_Insurance_Data(payload: any) {
     const url = `${BASE_URL}insurance/insert`;
     const reqBody = payload;
-    return this.http.post(url, reqBody);
+    return this.http.post(url, reqBody);  
   }
 
   //=====Update Insurance data======

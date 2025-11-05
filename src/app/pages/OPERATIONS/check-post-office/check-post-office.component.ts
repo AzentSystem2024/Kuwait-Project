@@ -37,7 +37,7 @@ export class CheckPostOfficeComponent implements OnInit {
   @ViewChild('facilityDropDown', { static: false })
   facilityDropDown!: DxDropDownBoxComponent;
 
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
 

@@ -39,7 +39,7 @@ import { DataService } from 'src/app/services';
   styleUrls: ['./user.component.scss'],
   providers: [MasterReportService, ReportService, DataService],
 })
-export class UserComponent  {
+export class UserComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
 
@@ -51,7 +51,7 @@ export class UserComponent  {
   isAddFormPopupOpened: boolean = false;
   isEditPopupOpened: boolean = false;
   selectedRowData: any;
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -75,7 +75,7 @@ export class UserComponent  {
     stylingMode: 'contained',
     hint: 'Add new entry',
     onClick: () => this.show_new_Form(),
-    elementAttr: { class: 'add-button' }
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;
@@ -114,7 +114,7 @@ export class UserComponent  {
 
   onClickSaveNewData() {
     const data = this.userNewForm.getNewUserData();
-    console.log(data,"PAYLOAD IN SAVE")
+    console.log(data, 'PAYLOAD IN SAVE');
     this.service.insert_User_Data(data).subscribe((res: any) => {
       try {
         if (res.message === 'Success') {
@@ -144,7 +144,15 @@ export class UserComponent  {
   onClearData() {
     this.userNewForm.removeImage();
     this.userNewForm.clearData();
+  }
 
+  formatDateValue(date: Date): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 
   onRowRemoving(event: any) {

@@ -32,7 +32,7 @@ export class LicenseInfoComponent implements OnInit {
   dataGrid: DxDataGridComponent;
 
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -83,11 +83,11 @@ export class LicenseInfoComponent implements OnInit {
 
   update_Columns() {
     this.Columns = [
-      {
-        caption: 'ID',
-        dataField: 'ID',
-        allowEditing: false,
-      },
+      // {
+      //   caption: 'ID',
+      //   dataField: 'ID',
+      //   allowEditing: false,
+      // },
       {
         caption: 'License',
         dataField: 'FacilityLicense',
@@ -112,13 +112,15 @@ export class LicenseInfoComponent implements OnInit {
         caption: 'Expiry Date',
         dataField: 'Expiry_Date',
         dataType: 'date',
-        format: 'yyyy-MM-dd',
+        format: 'dd-MM-yyyy',
         allowEditing: false,
       },
       {
         caption: 'Status',
         dataField: 'status',
         allowEditing: false,
+        width: 100,
+
         cellTemplate: (container: any, options: any) => {
           const icon = document.createElement('i');
           icon.className =

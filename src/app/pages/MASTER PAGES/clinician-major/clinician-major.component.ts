@@ -39,7 +39,7 @@ export class ClinicianMajorComponent {
 
   isAddFormPopupOpened: any = false;
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -63,7 +63,7 @@ export class ClinicianMajorComponent {
     type: 'default',
     stylingMode: 'contained',
     hint: 'Add new entry',
-    onClick: () => this.show_new_InsuranceClassification_Form(), 
+    onClick: () => this.show_new_InsuranceClassification_Form(),
     elementAttr: { class: 'add-button' },
   };
   currentPathName: any;

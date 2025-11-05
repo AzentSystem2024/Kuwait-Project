@@ -173,50 +173,50 @@ export class ImportRADataComponent implements OnInit {
   }
 
   // ============ File Selected from Excel =========
-  onFileSelected(event: any) {
-    const target: DataTransfer = <DataTransfer>event.target;
-    if (target.files.length !== 1) {
-      notify({
-        message: 'Please select a single Excel file.',
-        type: 'error',
-        displayTime: 5000,
-        position: { my: 'right top', at: 'right top', of: window },
-      });
-      return;
-    }
+onFileSelected(event: any) {
+  const target: DataTransfer = <DataTransfer>event.target;
+  if (target.files.length !== 1) {
+    notify({
+      message: 'Please select a single Excel file.',
+      type: 'error',
+      displayTime: 5000,
+      position: { my: 'right top', at: 'right top', of: window },
+    });
+    return;
+  }
 
-    this.isLoading = true;
-    const file = target.files[0];
-    const reader: FileReader = new FileReader();
+  this.isLoading = true;
+  const file = target.files[0];
+  const reader: FileReader = new FileReader();
 
-    reader.onload = (e: any) => {
-      const bstr: string = e.target.result;
+  reader.onload = (e: any) => {
+    const bstr: string = e.target.result;
 
-      const wb: XLSX.WorkBook = XLSX.read(bstr, {
-        type: 'binary',
-        cellDates: true,
-      });
+    const wb: XLSX.WorkBook = XLSX.read(bstr, {
+      type: 'binary',
+      cellDates: true,
+    });
 
-      const wsname: string = wb.SheetNames[0];
-      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+    const wsname: string = wb.SheetNames[0];
+    const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
       // Raw Excel Data
-      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: true });
+    const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
 
       // Map Captions to Data Fields
-      const captionToField: Record<string, string> = {};
-      this.columnData.forEach((col) => {
-        captionToField[col.caption] = col.dataField;
-      });
+    const captionToField: Record<string, string> = {};
+    this.columnData.forEach((col) => {
+      captionToField[col.caption] = col.dataField;
+    });
 
-      let mappedData = rawData.map((row: any) => {
-        const newRow: any = {};
-        Object.keys(row).forEach((caption) => {
-          const field = captionToField[caption];
-          if (field) newRow[field] = row[caption];
-        });
-        return newRow;
+    let mappedData = rawData.map((row: any) => {
+      const newRow: any = {};
+      Object.keys(row).forEach((caption) => {
+        const field = captionToField[caption];
+        if (field) newRow[field] = row[caption];
       });
+      return newRow;
+    });
 
       // Date Fields from Column Settings
       const dateFields = this.columnData
@@ -226,55 +226,103 @@ export class ImportRADataComponent implements OnInit {
       // Format and Fix Date Issues
       mappedData = this.formatDateFields(mappedData, dateFields);
 
-      this.ImportedDataSource = mappedData;
-      this.isLoading = false;
-      this.isNewFormPopupOpened = true;
-      this.resetFileInput();
-    };
+    this.ImportedDataSource = mappedData;
+    this.isLoading = false;
+    this.isNewFormPopupOpened = true;
+    this.resetFileInput();
+  };
 
-    reader.readAsBinaryString(file);
-  }
+  reader.readAsBinaryString(file);
+}
 
   // ========= Format & Fix Date (One-Day Minus Bug Fixed) =========
+  // formatDateFields(data: any[], dateFields: string[]): any[] {
+  //   return data.map((row) => {
+  //     const newRow = { ...row };
+
+  //     dateFields.forEach((field) => {
+  //       let value = newRow[field];
+  //       if (!value) return;
+
+  //       let dateObj: Date | null = null;
+
+  //       // Case 1: Excel Serial Number (e.g., 45857)
+  //       if (typeof value === 'number') {
+  //         // Excel epoch conversion (handles 1900 bug)
+  //         dateObj = new Date(Math.round((value - 25567 - 1) * 86400 * 1000));
+  //       }
+  //       // Case 2: Already a Date object
+  //       else if (value instanceof Date) {
+  //         dateObj = new Date(
+  //           Date.UTC(value.getFullYear(), value.getMonth(), value.getDate())
+  //         );
+  //       }
+  //       // Case 3: String date input
+  //       else {
+  //         const temp = new Date(value);
+  //         if (!isNaN(temp.getTime())) dateObj = temp;
+  //       }
+
+  //       if (dateObj) {
+  //         // Format dd/MM/yyyy
+  //         const day = String(dateObj.getUTCDate()).padStart(2, '0');
+  //         const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+  //         const year = dateObj.getUTCFullYear();
+  //         newRow[field] = `${day}/${month}/${year}`;
+  //       }
+  //     });
+
+  //     return newRow;
+  //   });
+  // }
   formatDateFields(data: any[], dateFields: string[]): any[] {
-    return data.map((row) => {
-      const newRow = { ...row };
+  return data.map((row) => {
+    const newRow = { ...row };
 
-      dateFields.forEach((field) => {
-        let value = newRow[field];
-        if (!value) return;
+    dateFields.forEach((field) => {
+      let value = newRow[field];
+      if (!value) return;
 
-        let dateObj: Date | null = null;
+      let dateObj: Date | null = null;
 
-        // Case 1: Excel Serial Number (e.g., 45857)
-        if (typeof value === 'number') {
-          // Excel epoch conversion (handles 1900 bug)
-          dateObj = new Date(Math.round((value - 25567 - 1) * 86400 * 1000));
-        }
-        // Case 2: Already a Date object
-        else if (value instanceof Date) {
+      // Case 1: Excel Serial Number (e.g., 45857)
+      if (typeof value === 'number') {
+        // Convert Excel serial to JS date (local, no UTC)
+        dateObj = new Date((value - 25569) * 86400 * 1000);
+      }
+      // Case 2: Already a Date object
+      else if (value instanceof Date) {
+        dateObj = new Date(
+          value.getFullYear(),
+          value.getMonth(),
+          value.getDate()
+        );
+      }
+      // Case 3: String date input
+      else if (typeof value === 'string') {
+        const parsed = new Date(value);
+        if (!isNaN(parsed.getTime())) {
           dateObj = new Date(
-            Date.UTC(value.getFullYear(), value.getMonth(), value.getDate())
+            parsed.getFullYear(),
+            parsed.getMonth(),
+            parsed.getDate()
           );
         }
-        // Case 3: String date input
-        else {
-          const temp = new Date(value);
-          if (!isNaN(temp.getTime())) dateObj = temp;
-        }
+      }
 
-        if (dateObj) {
-          // Format dd/MM/yyyy
-          const day = String(dateObj.getUTCDate()).padStart(2, '0');
-          const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-          const year = dateObj.getUTCFullYear();
-          newRow[field] = `${day}/${month}/${year}`;
-        }
-      });
-
-      return newRow;
+      if (dateObj) {
+        // Format: dd/MM/yyyy (local date, no UTC)
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const year = dateObj.getFullYear();
+        newRow[field] = `${day}/${month}/${year}`;
+      }
     });
-  }
+
+    return newRow;
+  });
+}
+
 
   // ========= Strict dd/MM/yyyy Validator =========
   isValidDDMMYYYY(value: any): boolean {

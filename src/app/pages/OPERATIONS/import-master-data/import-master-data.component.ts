@@ -43,7 +43,7 @@ export class ImportMasterDataComponent implements OnInit {
   @ViewChild('validationGroup', { static: true })
   validationGroup: DxValidationGroupComponent;
   isNewFormPopupOpened: boolean = false;
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;

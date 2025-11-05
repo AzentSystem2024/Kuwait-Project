@@ -39,7 +39,7 @@ import { MasterReportService } from '../master-report.service';
   styleUrls: ['./denial-list.component.scss'],
   providers: [DataService, ReportService],
 })
-export class DenialListComponent  {
+export class DenialListComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
 
@@ -55,7 +55,7 @@ export class DenialListComponent  {
   ID: any;
   isFilterOpened = true;
   //========Variables for Pagination ====================
-  readonly allowedPageSizes: any = [5, 10, 'all'];
+  readonly allowedPageSizes: any = [15, 25, 'all'];
   displayMode: any = 'full';
   showPageSizeSelector = true;
   showInfo = true;
@@ -78,7 +78,7 @@ export class DenialListComponent  {
     stylingMode: 'contained',
     hint: 'Add new entry',
     onClick: () => this.addDenial(),
-    elementAttr: { class: 'add-button' }
+    elementAttr: { class: 'add-button' },
   };
 
   isFilterRowVisible: boolean = false;

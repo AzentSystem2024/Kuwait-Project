@@ -114,6 +114,7 @@ export class ImportRADataPopupComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
+    console.log(this.dataSource,'-data--------------')
     try {
       await this.fetch_insurance_dropdown_data();
 
@@ -189,7 +190,7 @@ export class ImportRADataPopupComponent implements OnInit {
     }));
 
     this.initDataSource(res);
-
+console.log(res)
     this.totalRaItems = res.data.length;
 
     this.totalPendingprocessed = res.data.filter(
