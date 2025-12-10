@@ -277,7 +277,7 @@
       </div>
 
       <!-- Tabs for Options and Facility -->
-      <dx-tabs
+      <!-- <dx-tabs
         [width]="'auto'"
         [selectedIndex]="0"
         [rtlEnabled]="false"
@@ -286,12 +286,12 @@
         [dataSource]="tabItems"
         (onItemClick)="onTabClick($event)"
       >
-      </dx-tabs>
+      </dx-tabs> -->
 
       <!-- Content Area for Tabs -->
       <div class="tab-content">
         <!-- Facility Tab Content -->
-        <div *ngIf="selectedIndex === 0">
+        <!-- <div *ngIf="selectedIndex === 0">
           <dx-data-grid
             [dataSource]="facilityList"
             [showBorders]="true"
@@ -352,14 +352,14 @@
               </dxo-header-filter>
             </dxi-column>
           </dx-data-grid>
-          <!-- Display selected row count -->
+
           <div style="margin-top: 10px">
             Selected Rows: {{ selectedRowCount }}
           </div>
-        </div>
+        </div> -->
 
         <!-- Options Tab Content -->
-        <div *ngIf="selectedIndex === 1">
+        <div *ngIf="selectedIndex === 0">
           <!-- Options: Inactive -->
           <div
             style="
@@ -447,16 +447,16 @@
           </div>
           <!-- <div style="margin: 30px 0 10px; font-size: 16px; font-weight: bold;">Date-Time and Currency Settings</div> -->
 
-          <div style="margin: 30px 0 10px; font-size: 16px; font-weight: bold">
+          <!-- <div style="margin: 30px 0 10px; font-size: 16px; font-weight: bold">
             Date-Time and Currency Settings
-          </div>
+          </div> -->
 
-          <div
+          <!-- <div
             style="border: 1px solid #ccc; padding: 15px; border-radius: 8px"
-          >
-            <div style="display: flex; align-items: flex-start; gap: 20px">
+          > -->
+            <!-- <div style="display: flex; align-items: flex-start; gap: 20px"> -->
               <!-- Date Format Section -->
-              <div>
+              <!-- <div>
                 <dx-select-box
                   [items]="dateFormat"
                   [(value)]="newUserData.Date_Format"
@@ -477,10 +477,10 @@
                 >
                   Eg: {{ exampleDateFormat }}
                 </div>
-              </div>
+              </div> -->
 
               <!-- Time Format Section -->
-              <div>
+              <!-- <div>
                 <dx-select-box
                   [items]="timeFormat"
                   [(value)]="newUserData.Time_Format"
@@ -501,9 +501,9 @@
                 >
                   Eg: {{ exampleTimeFormat }}
                 </div>
-              </div>
-            </div>
-          </div>
+              </div> -->
+            <!-- </div> -->
+          <!-- </div> -->
         </div>
       </div>
     </div>

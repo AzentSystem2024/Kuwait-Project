@@ -9,8 +9,24 @@ const BASE_URL = environment.PROJECTX_API_BASE_URL;
 
 const Token = JSON.parse(localStorage.getItem('Token'));
 
+
 @Injectable()
 export class DataService {
+    private months: { name: string; value: any }[] = [
+    { name: 'All', value: '' },
+    { name: 'January', value: 0 },
+    { name: 'February', value: 1 },
+    { name: 'March', value: 2 },
+    { name: 'April', value: 3 },
+    { name: 'May', value: 4 },
+    { name: 'June', value: 5 },
+    { name: 'July', value: 6 },
+    { name: 'August', value: 7 },
+    { name: 'September', value: 8 },
+    { name: 'October', value: 9 },
+    { name: 'November', value: 10 },
+    { name: 'December', value: 11 },
+  ];
   constructor(private http: HttpClient, private router: Router) {}
 
   //======Facility Drop down data=====================
@@ -327,4 +343,38 @@ export class DataService {
     return this.http.post(Url, reqbody);
   }
 
+  //===============His column for set unique key=================
+
+  His_Columns_For_UniqueKey(payload:any) {
+    const Url = `${BASE_URL}DropDown`;
+   const reqbody ={
+  "NAME": "HIS_COLUMNS",
+}
+    return this.http.post(Url, reqbody);
+  }
+  
+  RA_Columns_For_UniqueKey(payload:any) {
+    const Url = `${BASE_URL}DropDown`;
+   const reqbody =payload 
+    return this.http.post(Url, reqbody);
+  }
+
+
+    //============Share months to component ================
+  getMonths(): { name: string; value: number }[] {
+    return this.months;
+  }
+
+  get_aged_details(item:any){
+  const Url = `${BASE_URL}reports/InsuranceAgeing/getDetail`;
+   const reqbody =item 
+    return this.http.post(Url, reqbody);
+  }
+  
+    get_Aged_Summary(item:any){
+  const Url = `${BASE_URL}reports/InsuranceAgeing/getSummary`;
+   const reqbody =item 
+    return this.http.post(Url, reqbody);
+
+}
 }

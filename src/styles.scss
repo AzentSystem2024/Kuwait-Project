@@ -1284,9 +1284,6 @@ input[type="password"]::-moz-password-toggle {
     animation: none;
     border-radius: 50%;
 }
-
-// .dx-treeview-item.dx-state-hover {
-//     background-color: transparent !important;
-//     border-radius: 4px;
-//     color: #21293b;
-// }
+.dx-checkbox-indeterminate .dx-checkbox-icon {
+    border-color: #32519c;
+}

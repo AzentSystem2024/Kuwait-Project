@@ -316,7 +316,7 @@
     </div>
 
     <!-- Tabs for Options and Facility -->
-    <dx-tabs
+    <!-- <dx-tabs
       [width]="'auto'"
       [selectedIndex]="0"
       [rtlEnabled]="false"
@@ -325,13 +325,13 @@
       [dataSource]="tabItems"
       (onItemClick)="onTabClick($event)"
     >
-    </dx-tabs>
+    </dx-tabs> -->
 
     <!-- Content Area for Tabs -->
     <div class="tab-content">
       <!-- Facility Tab Content -->
-      <div *ngIf="selectedIndex === 0">
-        <dx-data-grid
+      <!-- <div *ngIf="selectedIndex === 0"> -->
+        <!-- <dx-data-grid
           [dataSource]="facilityList"
           [showBorders]="true"
           [selection]="{ mode: 'multiple' }"
@@ -389,15 +389,15 @@
               <dxo-search [enabled]="true"></dxo-search>
             </dxo-header-filter>
           </dxi-column>
-        </dx-data-grid>
-        <!-- Display selected row count -->
-        <div style="margin-top: 10px">
+        </dx-data-grid> -->
+
+        <!-- <div style="margin-top: 10px">
           Selected Rows: {{ selectedRowCount }}
         </div>
-      </div>
+      </div> -->
 
       <!-- Options Tab Content -->
-      <div *ngIf="selectedIndex === 1">
+      <div *ngIf="selectedIndex === 0">
         <!-- Options: Inactive -->
         <div
           style="
@@ -498,13 +498,13 @@
             style="margin-right: 20px"
           ></dx-date-box>
         </div>
-        <div style="margin: 30px 0 10px; font-size: 16px; font-weight: bold">
+        <!-- <div style="margin: 30px 0 10px; font-size: 16px; font-weight: bold">
           Date-Time and Currency Settings
         </div>
 
         <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px">
           <div style="display: flex; align-items: flex-start; gap: 20px">
-            <!-- Date Format Section -->
+            Date Format Section
             <div>
               <dx-select-box
                 [items]="dateFormat"
@@ -525,7 +525,7 @@
               </div>
             </div>
         
-            <!-- Time Format Section -->
+            Time Format Section
             <div>
               <dx-select-box
                 [items]="timeFormat"
@@ -546,7 +546,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
         
               <!-- <dx-number-box
                 [(value)]="newUserData.Decimal_Points"
@@ -561,7 +561,7 @@
                 [max]="10"
               ></dx-number-box> -->
         <!-- </div>
-      </div> -->
+       </div> -->
     </div>
   </div>
 </div>

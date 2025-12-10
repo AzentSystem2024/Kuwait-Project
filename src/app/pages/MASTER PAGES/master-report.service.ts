@@ -796,13 +796,11 @@ export class MasterReportService {
       LockDateTo: data.LockDateTo,
       LockReason: data.LockReason,
       PhotoFile: data.PhotoFile,
-      user_facility: data.user_facility,
       changePasswordOnLogin: data.changePasswordOnLogin,
       LoginExpiryReason: '',
       Date_Format: data.Date_Format,
       Time_Format: data.Time_Format,
-      // Decimal_Points:data.Decimal_Points,
-      // Currency_Symbol:data.Currency_Symbol
+      
     };
 
     return this.http.post(url, reqBody);
@@ -829,7 +827,6 @@ export class MasterReportService {
       LockDateTo: data.LockDateTo,
       LockReason: data.LockReason,
       PhotoFile: data.PhotoFile,
-      user_facility: data.user_facility,
       changePasswordOnLogin: data.changePasswordOnLogin,
       LoginExpiryReason: '',
       Date_Format: data.Date_Format,

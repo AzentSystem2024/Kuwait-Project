@@ -49,22 +49,38 @@
       </div>
 
       <div class="mb-3">
-        <dx-text-area
-          label="Unique Key"
-          labelMode="floating"
-          [(value)]="insuranceCompany.uniqueKey"
-          [height]="100"
-          [readOnly]="true"
-        ></dx-text-area>
+     <dx-tag-box
+  [dataSource]="RA_columns"
+  displayExpr="ColumnTitle"
+  valueExpr="ColumnID"
+  [(value)]="selecteRAuniqueKeys"
+  label="RA Unique Key"
+  labelMode="floating"
+  [showSelectionControls]="true"
+  [showClearButton]="true"
+  [searchEnabled]="true"
+  width="100%"
+  (onValueChanged)="RADropdownOnchangeValue($event)"
+>
+</dx-tag-box>
 
-        <div
-          *ngIf="selectedKeys?.length > 0"
-          class="d-flex justify-content-end mt-1"
-        >
-          <a href="javascript:void(0)" (click)="manageUniqueKey()">
-            Set Unique Key
-          </a>
-        </div>
+
+      </div>
+            <div class="mb-3">
+     <dx-tag-box
+  [dataSource]="hisColumns"
+  displayExpr="DESCRIPTION"
+  valueExpr="ID"
+  [(value)]="selecteHISuniqueKeys"
+  label="HIS Unique Key"
+  labelMode="floating"
+  [showSelectionControls]="true"
+  [showClearButton]="true"
+  [searchEnabled]="true"
+  width="100%"
+  (onValueChanged)="HISDropdownOnchangeValue($event)"
+>
+</dx-tag-box>
       </div>
     </div>
 
@@ -79,8 +95,6 @@
         [rowAlternationEnabled]="true"
         rowAlternationInterval="2"
         height="450"
-        [(selectedRowKeys)]="selectedKeys"
-        [selection]="{ mode: 'multiple', showCheckBoxesMode: 'always' }"
         [paging]="{ enabled: false }"
       >
         <dxo-scrolling
@@ -89,11 +103,7 @@
         ></dxo-scrolling>
 
         <!-- Custom selection column -->
-        <dxi-column
-          type="selection"
-          [width]="50"
-          cellTemplate="selectionCell"
-        ></dxi-column>
+    
 
         <dxi-column dataField="ColumnName" caption="Column Name"></dxi-column>
         <dxi-column dataField="ColumnTitle" caption="Caption"></dxi-column>

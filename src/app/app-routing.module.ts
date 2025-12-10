@@ -64,6 +64,7 @@ import { TwoStepVerificationComponent } from './components/library/two-step-veri
 import { CheckPostOfficeComponent } from './pages/OPERATIONS/check-post-office/check-post-office.component';
 import { ImportHISDataComponent } from './pages/OPERATIONS/import-his-data/import-his-data.component';
 import { ImportRADataComponent } from './pages/OPERATIONS/import-ra-data/import-ra-data.component';
+import { AgedReportComponent } from './pages/REPORT PAGES/aged-report/aged-report.component';
 const routes: Routes = [
   {
     path: '',
@@ -333,6 +334,11 @@ const routes: Routes = [
       {
         path: 'balance-amount-to-be-received',
         component: BalanceAmountToBeReceivedComponent,
+        canActivate: [AuthGuardService],
+      },
+          {
+        path: 'Insurance-ageing',
+        component: AgedReportComponent,
         canActivate: [AuthGuardService],
       },
       {

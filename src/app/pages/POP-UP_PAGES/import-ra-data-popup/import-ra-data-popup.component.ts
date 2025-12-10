@@ -65,6 +65,18 @@ export class ImportRADataPopupComponent implements OnInit {
   insuranceList: any;
 
   autoProcess: boolean = true;
+  fullcolumnsData: any;
+  selectedKeys: any[] = [];
+  UniqueColumnData: any[];
+  selectedColumns: any[] = [];
+  selectedFieldNames: string[] = [];
+  selecteRAuniqueKeys: any;
+  RA_columns: any[] = [];
+  selecteHISuniqueKeys: any;
+  finalHISObjects: any;
+  finalRAObjects: any;
+  insurance_id: any;
+  editColumns: any;
 
   statusOptions = [
     { DESCRIPTION: 'Processed', ID: 'Processed' },
@@ -104,17 +116,24 @@ export class ImportRADataPopupComponent implements OnInit {
   notFound: number = 0;
   totalRaItems: number = 0;
   isFilterRowVisible: boolean = false;
+  hisColumns: any[] = [];
 
   private uniqueKeyChanged = false;
   invalidColumns: Set<string> = new Set();
+  selected_Insurance_id: any;
+  invalidData: boolean=false;
   constructor(
     private dataservice: DataService,
     private mastersrvce: MasterReportService
-  ) {}
+  ) {
+    // this.get_RA_Columns_Data()
+    this.getHisColumnsForUniqueKey();
+  }
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-    console.log(this.dataSource,'-data--------------')
+    console.log(this.dataSource, '-data--------------');
+    // this.get_RA_Columns_Data()
     try {
       await this.fetch_insurance_dropdown_data();
 
@@ -190,7 +209,10 @@ export class ImportRADataPopupComponent implements OnInit {
     }));
 
     this.initDataSource(res);
-console.log(res)
+    console.log(res);
+
+    this.selected_Insurance_id = res.InsuranceID;
+
     this.totalRaItems = res.data.length;
 
     this.totalPendingprocessed = res.data.filter(
@@ -200,6 +222,8 @@ console.log(res)
     this.totalProcessed = res.data.filter(
       (item: any) => item.Status === 'Processed'
     ).length;
+
+    this.get_RA_Columns_Data();
   }
 
   // ============ initialize DataSource ==========
@@ -282,6 +306,7 @@ console.log(res)
         ) {
           headerCell.style.color = '#ff9999';
           headerCell.title = 'Contains invalid data';
+          this.invalidData=true
         }
       });
     }, 0);
@@ -341,16 +366,34 @@ console.log(res)
     if (insuranceId) {
       this.mastersrvce.selected_Insurance_Row_Data(insuranceId).subscribe({
         next: (res: any) => {
+          console.log(res);
           if (res && res.flag === '1') {
             this.InsuranceColumns = res.data[0].columns.filter(
               (col: any) => col.HisMatched === true
             );
+            console.log(this.InsuranceColumns);
+            const uniqueKeyhis = res.data[0].uniqueKeys;
+            console.log(uniqueKeyhis);
             this.uniqueKeyData = res.data[0].uniqueKeys;
-
             // set selected values (array of ColumnID from uniqueKeyData)
             this.selectedUniqueColumns = this.uniqueKeyData.map(
               (u: any) => u.ColumnID
             );
+
+            this.selecteRAuniqueKeys = uniqueKeyhis
+              .filter((item) => item.IsHisColumn === false)
+              .map((item) => item.ColumnID);
+
+            this.selecteHISuniqueKeys = uniqueKeyhis
+              .filter((item) => item.IsHisColumn === true)
+              .map((item) => item.ColumnID);
+
+            console.log(
+              'Default HIS selected keys:',
+              this.selecteHISuniqueKeys
+            );
+
+            // this.selecteHISuniqueKeys=this.
           } else {
             notify(
               res.message || 'Failed to fetch insurance details',
@@ -595,7 +638,8 @@ console.log(res)
       const payload = {
         InsuranceID: insurance,
         LogID: logId,
-        UNIQUE_KEY: this.selectedUniqueColumns.join(','),
+        RA_UNIQUE_KEY: this.selecteRAuniqueKeys.join(','),
+        HIS_UNIQUE_KEY: this.selecteHISuniqueKeys.join(','),
       };
 
       console.log('payload data:', payload);
@@ -675,6 +719,7 @@ console.log(res)
 
   // =============== Ra data row selection change event =========
   onRADataRowSelected(e: any) {
+    console.log(e)
     if (!e.selectedRowsData?.length) {
       this.isRASelected = false;
       this.lastRASelection = null;
@@ -756,8 +801,8 @@ console.log(res)
   // ========= Distribute RA button click =========
   distributeRA = () => {
     if (!this.lastRASelection) return;
-
     this.selectedRARow = this.lastRASelection;
+    console.log('selecte ra column in Distribute RA',this.selectedRARow)
 
     // Load HIS claims matching RA's unique key
     this.DistributeHISGridData = this.HISGridData.filter(
@@ -908,7 +953,17 @@ console.log(res)
       );
       return;
     }
+     if (!this.selectedRARow) {
+      notify('Please select an RA before distributing.', 'warning', 3000);
+      return;
+    }
     console.log('selected ra data :>>', this.selectedRARow);
+    const selectedClaimvalues=this.transformPayload(this.selectedDistributeRows)
+    const totalGrossClaimed = this.getSelectedTotal('GROSS_CLAIMED');
+    const RaGrossAmount=this.selectedRARow.GROSS_CLAIMED
+   
+    if(RaGrossAmount==totalGrossClaimed)
+    {
 
     const payload = {
       RaID: this.selectedRARow.ID,
@@ -945,6 +1000,10 @@ console.log(res)
         notify('Server error while distributing RA', 'error', 4000);
       },
     });
+}
+else{
+   notify('The RA gross amount and HIS gross amount are different ', 'error', 4000);
+}
   }
 
   // ====== Transform rows into distribution payload ======
@@ -1090,6 +1149,73 @@ console.log(res)
     this.autoProcessPopup = false;
     this.isLoading = false;
     this.viewDetails();
+  }
+
+  //==================RA dropdown onchange function===============
+  RADropdownOnchangeValue(e: any) {
+    console.log(e);
+
+    const SelectedRaKey = e.component._dataSource._items.filter((item: any) =>
+      e.value.includes(item.ColumnID)
+    );
+  }
+
+  //================get RA columns data==================
+  get_RA_Columns_Data() {
+    const payload = {
+      NAME: 'RA_COLUMNS',
+      INSURANCE_ID: this.selected_Insurance_id,
+    };
+
+    this.dataservice.RA_Columns_For_UniqueKey(payload).subscribe((res: any) => {
+      console.log(res, 'RA columns for unique key');
+      // Convert to TagBox expected structure
+      this.RA_columns = (res || []).map((item: any) => ({
+        ColumnID: item.ID,
+        ColumnTitle: item.DESCRIPTION,
+      }));
+
+      // 2) Get IDs where HisMatched == true from editColumns
+      const hisMatchedIds = this.editColumns
+        .filter((c) => c.HisMatched === true)
+        .map((c) => c.ColumnID);
+
+      // 3) Preselect those IDs in TagBox
+      this.selecteRAuniqueKeys = hisMatchedIds;
+
+      console.log('Preselected RA keys:', this.selecteRAuniqueKeys);
+    });
+    // this.RA_columns = res|| [];
+  }
+
+  HISDropdownOnchangeValue(e: any) {
+    console.log(e);
+
+    const selectedHISObjects = e.component._dataSource._items.filter(
+      (item: any) => e.value.includes(item.ID)
+    );
+
+    this.finalHISObjects = selectedHISObjects.map((item: any) => ({
+      ID: 0,
+      InsuranceID: 0,
+      ColumnID: item.ID,
+      ColumnName: '',
+      ColumnTitle: item.DESCRIPTION,
+      IsHisColumn: true,
+    }));
+    console.log('Selected HIS Full Objects:', this.finalHISObjects);
+  }
+  displayColumn(item: any) {
+    if (!item) return '';
+    return item.ColumnID + ' - ' + item.ColumnTitle;
+  }
+
+  //==================get his columns for unique key=================
+  getHisColumnsForUniqueKey() {
+    this.dataservice.His_Columns_For_UniqueKey(name).subscribe((res: any) => {
+      console.log(res, 'his columns for unique key');
+      this.hisColumns = res || [];
+    });
   }
 }
 

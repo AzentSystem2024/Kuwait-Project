@@ -141,7 +141,7 @@
   [(visible)]="autoProcessPopup"
   [showCloseButton]="true"
   [width]="600"
-  [height]="420"
+  [height]="500"
   title="Process Records"
   (onShown)="onChangeAndProcess()"
   (onHidden)="handlePopupHidden()"
@@ -149,7 +149,37 @@
   <div *dxTemplate="let data of 'content'" class="p-3 h-100 d-flex flex-column">
     <!-- Section 1: Unique Key + Process -->
     <div class="mb-4">
-      <dx-tag-box
+           <dx-tag-box
+  [dataSource]="RA_columns"
+  displayExpr="ColumnTitle"
+  valueExpr="ColumnID"
+  [(value)]="selecteRAuniqueKeys"
+  label="RA Unique Key"
+  labelMode="floating"
+  [showSelectionControls]="true"
+  [showClearButton]="true"
+  [searchEnabled]="true"
+  width="100%"
+  (onValueChanged)="RADropdownOnchangeValue($event)"
+>
+</dx-tag-box>
+                  <div class="mb-3">
+     <dx-tag-box
+  [dataSource]="hisColumns"
+  displayExpr="DESCRIPTION"
+  valueExpr="ID"
+  [(value)]="selecteHISuniqueKeys"
+  label="HIS Unique Key"
+  labelMode="floating"
+  [showSelectionControls]="true"
+  [showClearButton]="true"
+  [searchEnabled]="true"
+  width="100%"
+  (onValueChanged)="HISDropdownOnchangeValue($event)"
+>
+</dx-tag-box>
+      </div>
+      <!-- <dx-tag-box
         [dataSource]="InsuranceColumns"
         displayExpr="ColumnTitle"
         valueExpr="ColumnID"
@@ -162,18 +192,19 @@
         width="100%"
         (onValueChanged)="onUniqueKeyChange($event)"
       >
-      </dx-tag-box>
+      </dx-tag-box> -->
 
       <div class="mt-3 d-flex justify-content-end">
         <dx-button
           text="Change & Process RA"
           type="default"
           stylingMode="contained"
-          [disabled]="selectedUniqueColumns.length === 0"
           (onClick)="onChangeAndProcess()"
         ></dx-button>
       </div>
+
     </div>
+
 
     <!-- Section 2: Summary -->
     <div class="border-top pt-3 flex-grow-1">
@@ -513,7 +544,7 @@
       </div>
     </div>
 
-    <!-- Buttons Row at Bottom Right -->
+    <!-- Buttons Row at Bottom Right Distribute RA Match  -->
     <div class="d-flex justify-content-end mt-1 gap-3">
       <dx-button
         text="Cancel"
@@ -522,7 +553,7 @@
         (onClick)="clearDistributePopup()"
       ></dx-button>
       <dx-button
-        text="Process"
+        text="Process "
         type="default"
         stylingMode="contained"
         (onClick)="onSubmitDistributeRA()"

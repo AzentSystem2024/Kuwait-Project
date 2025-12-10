@@ -37,6 +37,7 @@ import {
 import { AuthInterceptor } from './services/auth.interceptor';
 import { PayerWiseReportModule } from './pages/REPORT PAGES/payer-wise-report/payer-wise-report.component';
 import { BalanceAmountToBeReceivedModule } from './pages/REPORT PAGES/balance-amount-to-be-received/balance-amount-to-be-received.component';
+import { AgedReportModule } from './pages/REPORT PAGES/aged-report/aged-report.component';
 
 @NgModule({
   declarations: [AppComponent],
@@ -69,6 +70,7 @@ import { BalanceAmountToBeReceivedModule } from './pages/REPORT PAGES/balance-am
     ResubmissionSummaryModule,
     PayerWiseReportModule,
     BalanceAmountToBeReceivedModule,
+    AgedReportModule
   ],
   providers: [
     AuthService,

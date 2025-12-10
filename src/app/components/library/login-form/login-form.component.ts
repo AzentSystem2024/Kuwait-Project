@@ -144,40 +144,69 @@ export class LoginFormComponent implements OnInit {
     localStorage.setItem('Token', JSON.stringify(response.data.Token));
     localStorage.setItem('sidemenuItems', JSON.stringify(response.menus));
   }
-
   verify_PostOfficeCredencial_Data() {
-    this.SystemService.verify_PostOfficeCredencial().subscribe(
-      (response: any) => {
-        if (response.flag === 1) {
-          if (this.loginResponse.data.EnableMFA === true) {
-            this.router.navigateByUrl('/auth/two-step-verification');
-          } else {
-            this.inactive.setUserlogginValue();
 
-            this.router.navigateByUrl('/analytics-dashboard');
-          }
-        } else {
-          if (this.loginResponse.data.EnableMFA === true) {
-            this.router.navigateByUrl('/auth/two-step-verification');
-          } else {
-            this.inactive.setUserlogginValue();
+  const flag = 1; // or 0 → you can set your own condition manually
 
-            this.router.navigateByUrl('/analytics-dashboard');
-          }
-          notify(
-            {
-              message: response.message,
-              position: {
-                at: 'top right',
-                my: 'top right',
-              },
-            },
-            'error'
-          );
-        }
-      }
+  if (flag === 1) {
+    if (this.loginResponse.data.EnableMFA === true) {
+      this.router.navigateByUrl('/auth/two-step-verification');
+    } else {
+      this.inactive.setUserlogginValue();
+      this.router.navigateByUrl('/analytics-dashboard');
+    }
+  } else {
+    if (this.loginResponse.data.EnableMFA === true) {
+      this.router.navigateByUrl('/auth/two-step-verification');
+    } else {
+      this.inactive.setUserlogginValue();
+      this.router.navigateByUrl('/analytics-dashboard');
+    }
+
+    notify(
+      {
+        message: "Post office verification failed.",
+        position: { at: 'top right', my: 'top right' }
+      },
+      'error'
     );
   }
+}
+
+
+  // verify_PostOfficeCredencial_Data() {
+  //   this.SystemService.verify_PostOfficeCredencial().subscribe(
+  //     (response: any) => {
+  //       if (response.flag === 1) {
+  //         if (this.loginResponse.data.EnableMFA === true) {
+  //           this.router.navigateByUrl('/auth/two-step-verification');
+  //         } else {
+  //           this.inactive.setUserlogginValue();
+
+  //           this.router.navigateByUrl('/analytics-dashboard');
+  //         }
+  //       } else {
+  //         if (this.loginResponse.data.EnableMFA === true) {
+  //           this.router.navigateByUrl('/auth/two-step-verification');
+  //         } else {
+  //           this.inactive.setUserlogginValue();
+
+  //           this.router.navigateByUrl('/analytics-dashboard');
+  //         }
+  //         notify(
+  //           {
+  //             message: response.message,
+  //             position: {
+  //               at: 'top right',
+  //               my: 'top right',
+  //             },
+  //           },
+  //           'error'
+  //         );
+  //       }
+  //     }
+  //   );
+  // }
 
   onCreateAccountClick = () => {
     this.router.navigate([this.createAccountLink]);
