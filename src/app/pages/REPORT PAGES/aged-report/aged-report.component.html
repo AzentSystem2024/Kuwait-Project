@@ -53,7 +53,7 @@
             type="date"
             displayFormat="dd/MM/yyyy"
             valueFormat="yyyy/MM/dd"
-            [(value)]="From_Date_Value"
+            [(value)]="As_on_date"
             [min]="minDate"
             [max]="maxDate"
           >
@@ -246,7 +246,7 @@
       </dxo-export>
       <dxo-toolbar>
         <dxi-item location="before">
-          <div class="grid-header">Claim Details</div>
+          <div class="grid-header">Ageing Report</div>
         </dxi-item>
         <dxi-item
           location="after"
@@ -350,15 +350,102 @@
         [contextMenuEnabled]="true"
         [expandMode]="'rowClick'"
       ></dxo-grouping>
-   <dxo-master-detail 
-    [enabled]="true" 
-    [template]="'detail'"
-    [autoExpandAll]="false"
->
-</dxo-master-detail>
-
-           <!-- <div class="ms-3" *dxTemplate="let data of 'detail'"> -->
+  <dxo-master-detail [enabled]="true" template="detail"></dxo-master-detail>
+      <div class="ms-3" *dxTemplate="let data of 'detail'">
         <dx-data-grid
+          #detailsdatagrid
+          [dataSource]="FilteredDetailData"
+          [showBorders]="true"
+          [columnAutoWidth]="true"
+          [rowAlternationEnabled]="true"
+          [summary]="DetailsummaryColumns"
+          [height]="'40vh'"
+          (onCellClick)="onCellClick($event)"
+        >
+          <dxo-scrolling 
+      mode="standard" 
+      direction="both" 
+      showScrollbar="always">
+  </dxo-scrolling>
+          <dxo-pager
+            [visible]="false"
+            [allowedPageSizes]="allowedPageSizes"
+            [displayMode]="displayMode"
+            [showPageSizeSelector]="showPageSizeSelector"
+            [showInfo]="showInfo"
+            [showNavigationButtons]="showNavButtons"
+          >
+          </dxo-pager>
+            <!-- <dxi-column dataField="InsuranceID" caption="InsuranceID"></dxi-column> -->
+             <dxi-column dataField="InsuranceID" caption="InsuranceID"></dxi-column>
+<dxi-column dataField="InsuranceCode" caption="InsuranceCode"></dxi-column>
+<dxi-column dataField="InsuranceName" caption="InsuranceName"></dxi-column>
+<dxi-column dataField="AgeDays" caption="AgeDays"></dxi-column>
+<dxi-column dataField="Days_0_30" caption="Days 0–30"></dxi-column>
+<dxi-column dataField="Days_31_60" caption="Days 31–60"></dxi-column>
+<dxi-column dataField="Days_61_90" caption="Days 61–90"></dxi-column>
+<dxi-column dataField="Days_91_120" caption="Days 91–120"></dxi-column>
+<dxi-column dataField="Days_Above_120" caption="Days Above 120"></dxi-column>
+<dxi-column dataField="TotalAmount" caption="Total Amount"></dxi-column>
+<dxi-column dataField="TRANSACTION_DATE" caption="Transaction Date" dataType="date"></dxi-column>
+<dxi-column dataField="INVOICE_NO" caption="Invoice No"></dxi-column>
+<dxi-column dataField="PREINVOICENO" caption="PreInvoice No"></dxi-column>
+<dxi-column dataField="GROSS_CLAIM" caption="Gross Claim"></dxi-column>
+<dxi-column dataField="DISCOUNT_CLAIM" caption="Discount Claim"></dxi-column>
+<dxi-column dataField="NET_CLAIM" caption="Net Claim"></dxi-column>
+<dxi-column dataField="DISCOUNT_RA" caption="Discount RA"></dxi-column>
+<dxi-column dataField="EXCEEDING_LIMITED" caption="Exceeding Limited"></dxi-column>
+<dxi-column dataField="REJECTED_AMOUNT" caption="Rejected Amount"></dxi-column>
+<dxi-column dataField="PATIENT_ID" caption="Patient ID"></dxi-column>
+<dxi-column dataField="CIVIL_ID" caption="Civil ID"></dxi-column>
+<dxi-column dataField="IPOP" caption="IP/OP"></dxi-column>
+<dxi-column dataField="BENEFICIARY_NAME" caption="Beneficiary Name"></dxi-column>
+<dxi-column dataField="TREATING_PHYSICIAN" caption="Treating Physician"></dxi-column>
+<dxi-column dataField="ITEM_CODE" caption="Item Code"></dxi-column>
+<dxi-column dataField="ITEM_DESCRIPTION" caption="Item Description"></dxi-column>
+<dxi-column dataField="MAIN_SYMPTOMS" caption="Main Symptoms"></dxi-column>
+<dxi-column dataField="STATUS_NAME" caption="Status"></dxi-column>
+<dxi-column dataField="BATCH_NO" caption="Batch No"></dxi-column>
+<dxi-column dataField="PAYER" caption="Payer"></dxi-column>
+
+          <!-- <ng-container *ngFor="let column of DetailsColumns">
+            <dxi-column
+              *ngIf="column.isBand"
+              [caption]="column.caption"
+              [isBand]="true"
+            >
+              <dxi-column
+                *ngFor="let subColumn of column.columns"
+                [dataField]="subColumn.dataField"
+                [caption]="subColumn.caption"
+                [format]="subColumn.format"
+                [visible]="subColumn.visible"
+              ></dxi-column>
+            </dxi-column>
+
+            <dxi-column
+              *ngIf="!column.isBand"
+              [dataField]="column.dataField"
+              [caption]="column.caption"
+              [format]="column.format"
+              [visible]="column.visible"
+            ></dxi-column>
+          </ng-container> -->
+          <dxo-scrolling mode="virtual"></dxo-scrolling>
+          <dxo-header-filter [visible]="isFilterOpened">
+            <dxo-search [enabled]="true"></dxo-search>
+          </dxo-header-filter>
+          <dxo-filter-row
+            [visible]="isFilterOpened"
+            [applyFilter]="applyFilter"
+          ></dxo-filter-row>
+          <!-- <dxo-filter-panel [visible]="isFilterOpened"></dxo-filter-panel>
+          <dxo-filter-builder [allowHierarchicalFields]="true">
+          </dxo-filter-builder> -->
+        </dx-data-grid>
+      </div>
+           <!-- <div class="ms-3" *dxTemplate="let data of 'detail'"> -->
+        <!-- <dx-data-grid
           #detailsdatagrid
           [dataSource]="FilteredDetailData"
           [showBorders]="true"
@@ -405,7 +492,7 @@
           <dxo-filter-row
             [visible]="isFilterOpened"
             [applyFilter]="applyFilter"
-          ></dxo-filter-row></dx-data-grid>
+          ></dxo-filter-row></dx-data-grid> -->
            <!-- </div> -->
       <!-- <dxo-selection mode="multiple"></dxo-selection> -->
       <dxo-header-filter [visible]="true">

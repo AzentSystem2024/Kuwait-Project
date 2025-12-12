@@ -187,38 +187,6 @@ export class AgedReportComponent {
     this.isContentVisible = !this.isContentVisible;
   }
 
-  //================ Year value change ===================
-  onYearChanged(e: any): void {
-    this.selectedYear = e.value;
-    this.selectedmonth = '';
-    const currentYear = new Date().getFullYear();
-    const today = new Date();
-    if (this.selectedYear === currentYear) {
-      // Set from date to the start of the year and to date to today
-      this.From_Date_Value = new Date(this.selectedYear, 0, 1); // January 1 of the current year
-      this.To_Date_Value = today; // Today's date
-    } else {
-      this.From_Date_Value = new Date(this.selectedYear, 0, 1); // January 1
-      this.To_Date_Value = new Date(this.selectedYear, 11, 31); // December 31
-    }
-  }
-
-  //================Month value change ===================
-  onMonthValueChanged(e: any) {
-    this.selectedmonth = e.value ?? '';
-    if (this.selectedmonth === '') {
-      this.From_Date_Value = new Date(this.selectedYear, 0, 1); // January 1 of the selected year
-      this.To_Date_Value = new Date(this.selectedYear, 11, 31); // December 31 of the selected year
-    } else {
-      this.From_Date_Value = new Date(this.selectedYear, this.selectedmonth, 1);
-      this.To_Date_Value = new Date(
-        this.selectedYear,
-        this.selectedmonth + 1,
-        0
-      );
-    }
-  }
-
   //============Hide drop down after Value Selected======
   onDropdownValueChanged() {
     const lookupInstance = this.lookup.instance;
@@ -289,6 +257,7 @@ export class AgedReportComponent {
 }
 onCellClick(e:any){
 
+    this.dataGrid.instance.beginCustomLoading('');
   console.log(e,'==========detailed=============')
      const formData = {
       InsuranceID: e.data.InsuranceID,
@@ -301,9 +270,12 @@ onCellClick(e:any){
 
     this.dataservice.get_aged_details(formData).subscribe((res:any)=>{
       console.log(res)
+              this.dataGrid.instance.endCustomLoading();
       this.DetailsColumns=res.header.DetailData
 
       console.log(this.DetailsColumns)
+      this.FilteredDetailData = res.header.DetailData;
+
     })
 
 }
