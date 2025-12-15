@@ -25,6 +25,8 @@ import {
   DxTagBoxModule,
   DxTextAreaModule,
   DxTextBoxModule,
+  DxValidationGroupComponent,
+  DxValidationGroupModule,
   DxValidatorModule,
 } from 'devextreme-angular';
 import { FormPhotoUploaderModule, FormTextboxModule } from 'src/app/components';
@@ -41,6 +43,8 @@ import { firstValueFrom } from 'rxjs';
 export class InsuranceNewFormComponent implements OnInit {
   @ViewChild('availableGrid', { static: false })
   availableGrid?: DxDataGridComponent;
+    @ViewChild('FormValidation', { static: false })
+  FormValidation: DxValidationGroupComponent;
 
   @ViewChild('dataGrid', { static: false })
   dataGrid?: DxDataGridComponent;
@@ -514,45 +518,96 @@ export class InsuranceNewFormComponent implements OnInit {
 //   ];
 // };
 
+// onReorder = (e: any) => {
+//   const locked = ["PAYMENT_DATE", "REFERENCE_NO"];
+//   const dragged = e.itemData;
+
+//   // ❌ block locked items
+//   if (locked.includes(dragged.ColumnName)) {
+//     e.cancel = true;
+//     return;
+//   }
+
+//   // ✔ STEP 1 → Visible rows = only for position calculation
+//   const visibleRows = e.component.getVisibleRows();
+
+//   // ✔ STEP 2 → Build selected list from FULL DATA (not visible rows!)
+//   let selectedItems = this.fullcolumnsData.filter(x => x.Status === "selected");
+
+//   // ✔ STEP 3 → Find actual data index of dragged row
+//   const fromIndex = selectedItems.findIndex(
+//     x => x.ColumnName === dragged.ColumnName
+//   );
+
+//   // ✔ STEP 4 → Compute true target index
+//   let toIndex = e.toIndex;
+
+//   // Do NOT allow dropping before locked rows
+//   if (toIndex < locked.length) {
+//     toIndex = locked.length;
+//   }
+
+//   // ✔ STEP 5 → Move the item inside selected array
+//   const moved = selectedItems.splice(fromIndex, 1)[0];
+//   selectedItems.splice(toIndex, 0, moved);
+
+//   // ✔ STEP 6 → Merge back into fullcolumnsData (no missing rows)
+//   const notSelected = this.fullcolumnsData.filter(
+//     x => x.Status !== "selected"
+//   );
+
+//   this.fullcolumnsData = [...selectedItems, ...notSelected];
+// };
 onReorder = (e: any) => {
   const locked = ["PAYMENT_DATE", "REFERENCE_NO"];
-  const dragged = e.itemData;
 
-  // ❌ block locked items
-  if (locked.includes(dragged.ColumnName)) {
+  const draggedKey = e.itemData.ColumnName;
+
+  // 1️⃣ Block dragging locked columns
+  if (locked.includes(draggedKey)) {
     e.cancel = true;
     return;
   }
 
-  // ✔ STEP 1 → Visible rows = only for position calculation
+  // Get selected & available lists
+  const selectedList = this.fullcolumnsData.filter(x => x.Status === "selected");
+  const availableList = this.fullcolumnsData.filter(x => x.Status === "available");
+
+  // Actual index of dragged item
+  const fromIndex = selectedList.findIndex(x => x.ColumnName === draggedKey);
+
+  // DevExtreme visible rows
   const visibleRows = e.component.getVisibleRows();
 
-  // ✔ STEP 2 → Build selected list from FULL DATA (not visible rows!)
-  let selectedItems = this.fullcolumnsData.filter(x => x.Status === "selected");
+  // Handle drop at end (e.toIndex == count)
+  if (e.toIndex >= visibleRows.length) {
+    const moved = selectedList.splice(fromIndex, 1)[0];
+    selectedList.push(moved);
 
-  // ✔ STEP 3 → Find actual data index of dragged row
-  const fromIndex = selectedItems.findIndex(
-    x => x.ColumnName === dragged.ColumnName
-  );
-
-  // ✔ STEP 4 → Compute true target index
-  let toIndex = e.toIndex;
-
-  // Do NOT allow dropping before locked rows
-  if (toIndex < locked.length) {
-    toIndex = locked.length;
+    this.fullcolumnsData = [...selectedList, ...availableList];
+    return;
   }
 
-  // ✔ STEP 5 → Move the item inside selected array
-  const moved = selectedItems.splice(fromIndex, 1)[0];
-  selectedItems.splice(toIndex, 0, moved);
+  const toRow = visibleRows[e.toIndex];
 
-  // ✔ STEP 6 → Merge back into fullcolumnsData (no missing rows)
-  const notSelected = this.fullcolumnsData.filter(
-    x => x.Status !== "selected"
-  );
+  // 2️⃣ Block dropping ON locked columns
+  if (locked.includes(toRow.data.ColumnName)) {
+    e.cancel = true;
+    return;
+  }
 
-  this.fullcolumnsData = [...selectedItems, ...notSelected];
+  // Actual new index inside selectedList
+  let toIndex = selectedList.findIndex(x => x.ColumnName === toRow.data.ColumnName);
+
+  if (fromIndex === -1 || toIndex === -1) return;
+
+  // 3️⃣ Remove & insert WITHOUT subtracting index
+  const [movedItem] = selectedList.splice(fromIndex, 1);
+
+  selectedList.splice(toIndex, 0, movedItem);
+
+  // Final merge
+  this.fullcolumnsData = [...selectedList, ...availableList];
 };
 
 
@@ -600,6 +655,7 @@ onReorder = (e: any) => {
   }
   // ============= save insurance template ==========
   saveInsurance() {
+  if (!this.isValid()) return;
     const userId = Number(sessionStorage.getItem('UserID')) || 1;
     const insuranceId = this.insuranceCompany.insuranceId || 0;
 
@@ -653,6 +709,7 @@ onReorder = (e: any) => {
 
   // ============= update insurance template ==========
   updateInsurance() {
+        if (!this.isValid()) return;
     const userId = Number(sessionStorage.getItem('UserID')) || 1;
     const insuranceId = this.insuranceCompany.insuranceId || 0;
 
@@ -712,6 +769,11 @@ onReorder = (e: any) => {
         notify('Error occurred while updating insurance', 'error', 3000);
       },
     });
+  }
+
+  
+  isValid() {
+    return this.FormValidation.instance.validate().isValid;
   }
 
   // ========= clear entered data =============
@@ -805,6 +867,7 @@ onReorder = (e: any) => {
     DxButtonModule,
     DxPopupModule,
     DxTagBoxModule,
+    DxValidationGroupModule
   ],
   declarations: [InsuranceNewFormComponent],
   exports: [InsuranceNewFormComponent],

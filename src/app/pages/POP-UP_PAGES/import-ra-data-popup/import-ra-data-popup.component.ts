@@ -62,6 +62,7 @@ export class ImportRADataPopupComponent implements OnInit {
   gridLoading: boolean = false;
 
   isLoading: boolean = false;
+  isLoadingManualProcess: boolean = false;
   insuranceList: any;
 
   autoProcess: boolean = true;
@@ -117,7 +118,7 @@ export class ImportRADataPopupComponent implements OnInit {
   totalRaItems: number = 0;
   isFilterRowVisible: boolean = false;
   hisColumns: any[] = [];
-
+isInvalidData:boolean=false
   private uniqueKeyChanged = false;
   invalidColumns: Set<string> = new Set();
   selected_Insurance_id: any;
@@ -291,6 +292,7 @@ export class ImportRADataPopupComponent implements OnInit {
   highlightInvalidCell(e: any, message: string) {
     e.cellElement.style.backgroundColor = '#ffcccc';
     e.cellElement.title = message;
+    // this.invalidData=true
   }
 
   // =========== Highlight column header ==========
@@ -473,6 +475,19 @@ export class ImportRADataPopupComponent implements OnInit {
         return;
       }
 
+
+      if(this.invalidData){
+             notify({
+          message: 'The Excel file contains invalid data. Please correct it before saving.',
+          type: 'error',
+          displayTime: 4000,
+          position: { at: 'top right', my: 'top right', of: window },
+        });
+        this.isLoading = false;
+        this.isSaving = false;
+        return;
+
+      }
       // Generate one common BatchID for all payloads
       const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
       const commonBatchId = `${insuranceId}_${datetime}`;
@@ -644,11 +659,11 @@ export class ImportRADataPopupComponent implements OnInit {
 
       console.log('payload data:', payload);
 
-      this.isLoading = true;
+      this.isLoadingManualProcess = true;
       this.dataservice
         .manual_ReProcess_RA_Data(payload)
         .subscribe((res: any) => {
-          this.isLoading = false;
+          this.isLoadingManualProcess = false;
 
           if (res && res.flag === '1') {
             console.log(res);
@@ -672,7 +687,7 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // =========== process popup open and data fetching =============
   async onProcessClick() {
-    if (this.uniqueKeyChanged && this.selectedUniqueColumns.length > 0) {
+    if (this.uniqueKeyChanged) {
       await this.onChangeAndProcess();
     }
 
@@ -941,6 +956,8 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // ====== on click of RA distribute process button ====
   onSubmitDistributeRA() {
+
+
     if (!this.selectedRARow) {
       notify('Please select an RA before distributing.', 'warning', 3000);
       return;
@@ -957,6 +974,7 @@ export class ImportRADataPopupComponent implements OnInit {
       notify('Please select an RA before distributing.', 'warning', 3000);
       return;
     }
+
     console.log('selected ra data :>>', this.selectedRARow);
     const selectedClaimvalues=this.transformPayload(this.selectedDistributeRows)
     const totalGrossClaimed = this.getSelectedTotal('GROSS_CLAIMED');
@@ -964,7 +982,7 @@ export class ImportRADataPopupComponent implements OnInit {
    
     if(RaGrossAmount==totalGrossClaimed)
     {
-
+    this.isLoadingManualProcess = true;
     const payload = {
       RaID: this.selectedRARow.ID,
       distributed_data: this.transformPayload(this.selectedDistributeRows),
@@ -974,6 +992,7 @@ export class ImportRADataPopupComponent implements OnInit {
     this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
       next: (res: any) => {
         if (res.flag === '1') {
+           this.isLoadingManualProcess = false;
           notify(
             res.message || 'RA distribution completed successfully',
             'success',
@@ -1083,10 +1102,10 @@ else{
       if (!result) return;
     }
 
-    this.isLoading = true;
+    this.isLoadingManualProcess = true;
     this.dataservice.manual_Process_Data(payload).subscribe({
       next: async (response: any) => {
-        this.isLoading = false;
+        this.isLoadingManualProcess = false;
 
         if (response.flag === '1') {
           // Remove processed rows from grids
@@ -1154,6 +1173,7 @@ else{
   //==================RA dropdown onchange function===============
   RADropdownOnchangeValue(e: any) {
     console.log(e);
+     this.uniqueKeyChanged = true;
 
     const SelectedRaKey = e.component._dataSource._items.filter((item: any) =>
       e.value.includes(item.ColumnID)
@@ -1190,6 +1210,7 @@ else{
 
   HISDropdownOnchangeValue(e: any) {
     console.log(e);
+     this.uniqueKeyChanged = true;
 
     const selectedHISObjects = e.component._dataSource._items.filter(
       (item: any) => e.value.includes(item.ID)

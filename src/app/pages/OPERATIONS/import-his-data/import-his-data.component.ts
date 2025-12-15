@@ -202,6 +202,37 @@ export class ImportHISDataComponent implements OnInit {
       const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
       console.log(rawData, '=============Raw Data============');
 
+          // ---------------------------------------------
+    const excelColumns = Object.keys(rawData[0] || {});
+    const templateColumns = this.columnData.map(c => c.caption);
+
+    const missingColumns = templateColumns.filter(c => !excelColumns.includes(c));
+    const extraColumns = excelColumns.filter(c => !templateColumns.includes(c));
+
+    if (missingColumns.length > 0 || extraColumns.length > 0) {
+      let message = "Column mismatch detected:\n";
+
+      if (missingColumns.length > 0) {
+        message += ` Missing Columns: - ${missingColumns.join("- ")}`;
+      }
+
+      if (extraColumns.length > 0) {
+        message += `⚠ Extra Columns: - ${extraColumns.join("- ")}`;
+      }
+
+      notify({
+        message: message.replace(/\n/g, ""),
+        type: "error",
+        displayTime: 6000,
+        position: { my: "right top", at: "right top", of: window }
+      });
+
+      this.isLoading = false;
+      this.resetFileInput();
+      return;  //  STOP HERE
+    }
+
+
       // Map Captions to Data Fields
       const captionToField: Record<string, string> = {};
       this.columnData.forEach((col) => {
@@ -220,6 +251,8 @@ export class ImportHISDataComponent implements OnInit {
         });
         return newRow;
       });
+
+      
 
       // Date Fields from Column Settings
       const dateFields = this.columnData

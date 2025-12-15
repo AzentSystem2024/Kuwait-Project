@@ -567,7 +567,16 @@
   [(visible)]="isLoading"
   shadingColor="rgba(0,0,0,0.4)"
   [showPane]="true"
+  message="Loading..."
+  [closeOnOutsideClick]="false"
+>
+</dx-load-panel>
+<dx-load-panel
+  [(visible)]="isLoadingManualProcess"
+  shadingColor="rgba(0,0,0,0.4)"
+  [showPane]="true"
   message="Processing..."
   [closeOnOutsideClick]="false"
 >
 </dx-load-panel>
+

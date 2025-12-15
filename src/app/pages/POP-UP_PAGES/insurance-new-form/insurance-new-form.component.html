@@ -1,5 +1,6 @@
 <div class="container mt-3 d-flex flex-column">
   <!-- Main Content (Form + Grid) -->
+      <dx-validation-group #FormValidation>
   <div class="row border rounded p-2 flex-grow-1">
     <!-- Left Side Form -->
     <div class="col-md-6">
@@ -9,7 +10,13 @@
             label="Short Name"
             labelMode="floating"
             [(value)]="insuranceCompany.shortName"
-          ></dx-text-box>
+          > <dx-validator>
+                      <dxi-validation-rule
+                        type="required"
+                        message="This field is required"
+                      ></dxi-validation-rule>
+                    </dx-validator>
+  </dx-text-box>
         </div>
 
         <div class="col-auto">
@@ -25,7 +32,13 @@
           label="Company Name"
           labelMode="floating"
           [(value)]="insuranceCompany.companyName"
-        ></dx-text-box>
+        > <dx-validator>
+                      <dxi-validation-rule
+                        type="required"
+                        message="This field is required"
+                      ></dxi-validation-rule>
+                    </dx-validator>
+</dx-text-box>
       </div>
 
       <div class="mb-3">
@@ -35,8 +48,15 @@
           [(value)]="insuranceCompany.classification"
           [items]="classifications"
           valueExpr="ID"
+          [searchEnabled]="true"
           displayExpr="DESCRIPTION"
-        ></dx-select-box>
+        > <dx-validator>
+                      <dxi-validation-rule
+                        type="required"
+                        message="This field is required"
+                      ></dxi-validation-rule>
+                    </dx-validator>
+  </dx-select-box>
       </div>
 
       <div class="mb-3">
@@ -62,6 +82,12 @@
   width="100%"
   (onValueChanged)="RADropdownOnchangeValue($event)"
 >
+<dx-validator>
+                      <dxi-validation-rule
+                        type="required"
+                        message="This field is required"
+                      ></dxi-validation-rule>
+                    </dx-validator>
 </dx-tag-box>
 
 
@@ -79,7 +105,12 @@
   [searchEnabled]="true"
   width="100%"
   (onValueChanged)="HISDropdownOnchangeValue($event)"
->
+><dx-validator>
+                      <dxi-validation-rule
+                        type="required"
+                        message="This field is required"
+                      ></dxi-validation-rule>
+                    </dx-validator>
 </dx-tag-box>
       </div>
     </div>
@@ -131,6 +162,7 @@
       </div>
     </div>
   </div>
+  </dx-validation-group>
 
   <div class="mt-3 d-flex justify-content-end gap-2">
     <dx-button

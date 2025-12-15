@@ -202,6 +202,61 @@ onFileSelected(event: any) {
 
       // Raw Excel Data
     const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
+        // ----------------------------------------------------------
+    const excelColumns = Object.keys(rawData[0] || {});  // Excel header
+    const templateColumns = this.columnData.map((c: any) => c.caption); // Your template captions
+
+    const missing = templateColumns.filter(col => !excelColumns.includes(col));
+    const extra = excelColumns.filter(col => !templateColumns.includes(col));
+
+    if (missing.length > 0 || extra.length > 0) {
+      let msg = "Column Mismatch Found:";
+
+      if (missing.length > 0) {
+        msg += " Missing Columns: - " + missing.join(" - ");
+      }
+
+      if (extra.length > 0) {
+        msg += "⚠ Extra Columns in Excel: - " + extra.join(" - ");
+      }
+
+      notify({
+        message: msg,
+        type: "error",
+        displayTime: 7000,
+        position: { my: 'right top', at: 'right top', of: window },
+      });
+
+      this.isLoading = false;
+      this.resetFileInput();
+      return; //  STOP → Columns do NOT match
+    }
+   // 🔍 STEP 3: CHECK COLUMN ORDER EXACTLY MATCHES
+    // ----------------------------------------------------------
+    let wrongOrder = false;
+    let wrongPositions: string[] = [];
+
+    templateColumns.forEach((col, index) => {
+      if (excelColumns[index] !== col) {
+        wrongOrder = true;
+        wrongPositions.push(`Expected: ${col} | Found: ${excelColumns[index]}`);
+      }
+    });
+
+    if (wrongOrder) {
+      notify({
+        message:
+          " Column Order Does NOT Match Template<br><br>" +
+          wrongPositions.join("<br>"),
+        type: "error",
+        displayTime: 8000,
+        position: { my: 'right top', at: 'right top', of: window },
+      });
+
+      this.isLoading = false;
+      this.resetFileInput();
+      return; //  STOP — ORDER IS WRONG
+    }
 
       // Map Captions to Data Fields
     const captionToField: Record<string, string> = {};

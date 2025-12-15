@@ -102,7 +102,7 @@ export class AgedReportComponent {
     isFilterOpened = false; //filter row enable-desable variable
     GridSource: any;
     isEmptyDatagrid: boolean = true;
-    summaryColumnsData: any;
+  
     columndata: any;
     isAdvancefilterOpened: boolean = false;
     filterpopupWidth: any = '70%';
@@ -132,8 +132,10 @@ export class AgedReportComponent {
     isCloseButtonClicked: boolean = false;
     closedPopupsSet: Set<string> = new Set();
   FilteredDetailData:any=[]
-  DetailsummaryColumns
+  DetailsummaryColumns :any;
+
   DetailsColumns
+  summaryColumnsData: { totalItems: any[]; groupItems: any[]; };
     constructor(private dataservice:DataService, private reportengine: ReportEngineService ){
       this.get_searchParameters_Dropdown_Values()
           this.minDate = new Date(2000, 1, 1); // Set the minimum date
@@ -151,11 +153,11 @@ export class AgedReportComponent {
 
       //============Get search parameters dropdown values=======
   get_searchParameters_Dropdown_Values() {
-    this.loadingVisible = true;
+    // this.loadingVisible = true;
     this.dataservice.Get_GropDown('INSURANCE').subscribe((res: any) => {
       if (res) {
         this.Insurance_DataSource = res;
-        this.loadingVisible = false;
+        // this.loadingVisible = false;
       }
     });
   }
@@ -236,10 +238,13 @@ export class AgedReportComponent {
     };
     console.log(formData)
     this.isContentVisible = false;
+    // this.isEmptyDatagrid=false
     // this.dataGrid.instance.beginCustomLoading('Loading...');
     this.dataservice.get_Aged_Summary(formData).subscribe((res:any)=>{
       console.log(res)
       this.dataGrid_DataSource=res.header.SummaryData
+this.isEmptyDatagrid=false
+      this.summaryColumnsData = this.generateSummaryColumns(res.header.SummaryData);
     })
 
   }
@@ -275,63 +280,190 @@ onCellClick(e:any){
 
       console.log(this.DetailsColumns)
       this.FilteredDetailData = res.header.DetailData;
+      
 
     })
+      this.DetailsummaryColumns = {
+      totalItems: [
+        {
 
+          column: "Days_0_30",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "Days_0_30",
+          alignment: "right"
+        },
+         {
+
+          column: "Days_31_60",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "Days_31_60",
+          alignment: "right"
+        },
+         {
+          column: "Days_61_90",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "Days_61_90",
+          alignment: "right"
+        },
+         {
+          column: "Days_91_120",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "Days_91_120",
+          alignment: "right"
+        },
+         {
+          column: "Days_Above_120",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "Days_Above_120",
+          alignment: "right"
+        },
+            {
+          column: "TotalAmount",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "TotalAmount",
+          alignment: "right"
+        },
+         {
+
+          column: "GROSS_CLAIM",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "GROSS_CLAIM",
+          alignment: "right"
+        },
+         {
+
+          column: "DISCOUNT_CLAIM",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "DISCOUNT_CLAIM",
+          alignment: "right"
+        },
+         {
+
+          column: "NET_CLAIM",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "NET_CLAIM",
+          alignment: "right"
+        },
+         {
+
+          column: "DISCOUNT_RA",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "DISCOUNT_RA",
+          alignment: "right"
+        },
+         {
+          column: "EXCEEDING_LIMITED",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "EXCEEDING_LIMITED",
+          alignment: "right"
+        },
+         {
+          name: "totalAmountSum",
+          column: "REJECTED_AMOUNT",
+          summaryType: "sum",
+          displayFormat: "{0}",
+          valueFormat: { type: "fixedPoint", precision: 3 },
+          showInColumn: "REJECTED_AMOUNT",
+          alignment: "right"
+        }
+      ],
+      groupItems: []
+    };
+
+
+  }
+  // =========== Custom summary item with same smart decimal logic ==========
+  createSummaryItem(col, isGroupItem = false, summaryType = 'sum', formatType) {
+    return {
+      column: col.Name,
+      summaryType: summaryType,
+      displayFormat: formatType === 'count' ? 'Count: {0}' : '{0}',
+      valueFormat:
+        formatType === 'decimal'
+          ? {
+              formatter: (value) => {
+                if (value == null) return '';
+
+                const fixed = value.toFixed(3);
+                const decimals = fixed.split('.')[1] || '000';
+
+                // Decide 2 or 3 decimal places
+                const decimalPlaces = decimals[2] === '0' ? 2 : 3;
+
+                // Format number in US style, no currency, no grouping
+                return new Intl.NumberFormat('en-US', {
+                  minimumFractionDigits: decimalPlaces,
+                  maximumFractionDigits: decimalPlaces,
+                }).format(value);
+              },
+            }
+          : {
+              formatter: (value) =>
+                value != null
+                  ? new Intl.NumberFormat('en-US', {
+                      useGrouping: false,
+                    }).format(Number(value))
+                  : '',
+            },
+      alignByColumn: isGroupItem,
+      showInGroupFooter: isGroupItem,
+    };
+  }
+
+
+  // =========== Summary column formatting =============
+generateSummaryColumns(data: any[]) {
+  if (!data || data.length === 0) return { totalItems: [], groupItems: [] };
+
+  const firstRow = data[0];
+
+  // Pick only numeric columns
+  const numericColumns = Object.keys(firstRow).filter(key =>
+    typeof firstRow[key] === "number"
+  );
+
+  return {
+    totalItems: numericColumns.map(col => ({
+      column: col,
+      summaryType: "sum",
+      displayFormat: "{0}",
+      valueFormat: { 
+        type: "fixedPoint",
+        precision: 3 
+      },
+      showInColumn: col,
+      alignment: "right"
+    })),
+    groupItems: []
+  };
 }
 
-  // =========== Datagrid column formating =============
-  generateColumnsConfig(reportColumns, userLocale) {
-    return reportColumns.map((column) => {
-      let columnFormat;
 
-      if (column.Type === 'DateTime') {
-        columnFormat = {
-          type: 'date',
-          formatter: (date) =>
-            new Intl.DateTimeFormat(userLocale, {
-              year: 'numeric',
-              month: 'short',
-              day: '2-digit',
-            }).format(new Date(date)),
-        };
-      }
 
-      if (column.Type === 'Decimal') {
-        columnFormat = {
-          formatter: (value: number) => {
-            if (value == null) return '';
 
-            return new Intl.NumberFormat('en-US', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }).format(value);
-          },
-        };
-      }
 
-      if (column.Type === 'percentage') {
-        columnFormat = {
-          type: 'percent',
-          precision: 2,
-          formatter: (value) =>
-            new Intl.NumberFormat(userLocale, {
-              style: 'percent',
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }).format(value / 100),
-        };
-      }
-
-      return {
-        dataField: column.Name,
-        caption: column.Title,
-        visible: column.Visibility,
-        type: column.Type,
-        format: columnFormat,
-      };
-    });
-  }
 
 }
 @NgModule({

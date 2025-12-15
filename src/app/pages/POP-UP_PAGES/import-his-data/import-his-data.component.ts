@@ -388,15 +388,15 @@ console.log(this.UniqueKeys)
         return; // ❌ stop saving
       }
     }
-    // if(this.isValidData==false){
-    //         notify({
-    //       message: `Please correct invalid Data}`,
-    //       type: 'error',
-    //       displayTime: 4000,
-    //       position: { at: 'top right', my: 'top right', of: window },
-    //     });
-    //     return; // ❌ stop saving
-    // }
+    if(this.isValidData==false){
+            notify({
+          message: `The Excel file contains invalid data. Please correct it before saving`,
+          type: 'error',
+          displayTime: 4000,
+          position: { at: 'top right', my: 'top right', of: window },
+        });
+        return; // ❌ stop saving
+    }
 
     this.isSaving = true;
     this.isLoading = true;

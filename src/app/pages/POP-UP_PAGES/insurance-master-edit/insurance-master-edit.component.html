@@ -1,0 +1,267 @@
+<div class="container mt-3 d-flex flex-column">
+  <!-- Main Content (Form + Grid) -->
+  <div class="row border rounded p-2 flex-grow-1">
+    <!-- Left Side Form -->
+    <div class="col-md-6">
+      <div class="mb-3 row align-items-center">
+        <div class="col-8 col-sm-6 col-md-5">
+          <dx-text-box
+            label="Short Name"
+            labelMode="floating"
+            [(value)]="insuranceCompany.InsuranceShortName"
+          ></dx-text-box>
+        </div>
+
+        <div class="col-auto">
+          <dx-check-box
+            text="Inactive"
+            [(value)]="insuranceCompany.inactive"
+          ></dx-check-box>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <dx-text-box
+          label="Company Name"
+          labelMode="floating"
+          [(value)]="insuranceCompany.InsuranceName"
+        ></dx-text-box>
+      </div>
+
+      <div class="mb-3">
+        <dx-select-box
+          label="Classification"
+          labelMode="floating"
+          [(value)]="insuranceCompany.ClassificationID"
+          [items]="classifications"
+          valueExpr="ID"
+          displayExpr="DESCRIPTION"
+        ></dx-select-box>
+      </div>
+
+      <div class="mb-3">
+        <dx-text-area
+          label="Remarks"
+          labelMode="floating"
+          [(value)]="insuranceCompany.Remarks"
+          [height]="80"
+        ></dx-text-area>
+      </div>
+
+      <div class="mb-3">
+     <dx-tag-box
+  [dataSource]="RA_columns"
+  displayExpr="ColumnTitle"
+  valueExpr="ColumnID"
+  [(value)]="selecteRAuniqueKeys"
+  label="RA Unique Key"
+  labelMode="floating"
+  [showSelectionControls]="true"
+  [showClearButton]="true"
+  [searchEnabled]="true"
+  width="100%"
+  (onValueChanged)="RADropdownOnchangeValue($event)"
+>
+</dx-tag-box>
+
+
+      </div>
+            <div class="mb-3">
+     <dx-tag-box
+  [dataSource]="hisColumns"
+  displayExpr="DESCRIPTION"
+  valueExpr="ID"
+  [(value)]="selecteHISuniqueKeys"
+  label="HIS Unique Key"
+  labelMode="floating"
+  [showSelectionControls]="true"
+  [showClearButton]="true"
+  [searchEnabled]="true"
+  width="100%"
+  (onValueChanged)="HISDropdownOnchangeValue($event)"
+>
+</dx-tag-box>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <h6 class="mb-0">RA File Columns</h6>
+      <dx-data-grid
+        #dataGrid
+        [dataSource]="raFileColumns"
+        [showBorders]="true"
+        [columnAutoWidth]="false"
+        [hoverStateEnabled]="true"
+        [rowAlternationEnabled]="true"
+        rowAlternationInterval="2"
+        height="450"
+        [paging]="{ enabled: false }"
+      >
+        <dxo-scrolling
+          mode="virtual"
+          rowRenderingMode="virtual"
+        ></dxo-scrolling>
+
+        <!-- Custom selection column -->
+    
+
+        <dxi-column dataField="ColumnName" caption="Column Name"></dxi-column>
+        <dxi-column dataField="ColumnTitle" caption="Caption"></dxi-column>
+
+        <!-- Using *dxTemplate -->
+        <div *dxTemplate="let cell of 'selectionCell'">
+          <dx-check-box
+            *ngIf="cell.data.HisMatched; else disabledChk"
+            [value]="cell.component.isRowSelected(cell.key)"
+            (onValueChanged)="
+              cell.component.selectRows([cell.key], $event.value)
+            "
+          ></dx-check-box>
+
+          <ng-template #disabledChk>
+            <dx-check-box [value]="false" [visible]="false"></dx-check-box>
+          </ng-template>
+        </div>
+      </dx-data-grid>
+
+      <div class="d-flex justify-content-end mt-2">
+        <a class="btn-link" href="javascript:void(0)" (click)="manageColumns()"
+          >Manage Columns</a
+        >
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-3 d-flex justify-content-end gap-2">
+    <dx-button
+      text="Close"
+      stylingMode="contained"
+      type="normal"
+      (onClick)="close()"
+    ></dx-button>
+
+    <dx-button
+      text="Clear"
+      stylingMode="contained"
+      type="danger"
+      (onClick)="clear()"
+    ></dx-button>
+
+    <dx-button
+      text="Save"
+      stylingMode="contained"
+      type="default"
+      [visible]="!insuranceData"
+      (onClick)="saveInsurance()"
+    ></dx-button>
+
+    <dx-button
+      text="Update"
+      stylingMode="contained"
+      type="default"
+      [visible]="insuranceData"
+      (onClick)="updateInsurance()"
+    ></dx-button>
+  </div>
+</div>
+
+<!-- Popup -->
+<dx-popup
+  [(visible)]="ColumnpopupVisible"
+  [width]="900"
+  [height]="'auto'"
+  [showTitle]="true"
+  title="Manage Columns"
+  (onHiding)="ColumnpopupVisible = false"
+>
+  <div class="tables row">
+    <!-- Available Columns -->
+    <div class="col-md-6">
+      <p>Available Columns</p>
+      <dx-data-grid
+        #availableGrid
+        [dataSource]="fullcolumnsData"
+        [height]="450"
+        [showBorders]="true"
+        [filterValue]="['Status', '=', 'available']"
+        [paging]="{ enabled: false }"
+      >
+        <dxo-filter-row
+          [visible]="true"
+          [applyFilter]="'auto'"
+        ></dxo-filter-row>
+        <dxo-scrolling
+          mode="virtual"
+          rowRenderingMode="virtual"
+        ></dxo-scrolling>
+
+        <dxo-row-dragging
+          data="available"
+          group="columnsGroup"
+          [onAdd]="onAdd"
+        ></dxo-row-dragging>
+
+        <dxi-column dataField="ColumnName" caption="Column Name"></dxi-column>
+        <dxi-column dataField="ColumnTitle" caption="Caption"></dxi-column>
+        <dxi-column dataField="Status" [visible]="false"></dxi-column>
+      </dx-data-grid>
+    </div>
+
+    <!-- Selected Columns -->
+    <div class="col-md-6">
+      <p>Selected Columns</p>
+      <dx-data-grid
+        #selectedGrid
+        [dataSource]="fullcolumnsData"
+        [height]="450"
+        [showBorders]="true"
+        [filterValue]="['Status', '=', 'selected']"
+        [editing]="{ mode: 'cell', allowUpdating: true }"
+        [paging]="{ enabled: false }"
+       
+      >
+        <dxo-filter-row
+          [visible]="true"
+          [applyFilter]="'auto'"
+        ></dxo-filter-row>
+        <dxo-row-dragging
+          data="selected"
+          group="columnsGroup"
+          [onAdd]="onAdd"
+          [allowReordering]="true"
+          [onReorder]="onReorder"
+        ></dxo-row-dragging>
+
+        <dxo-scrolling
+          mode="virtual"
+          rowRenderingMode="virtual"
+        ></dxo-scrolling>
+
+        <dxi-column
+          dataField="ColumnName"
+          caption="Column"
+          [allowEditing]="false"
+        ></dxi-column>
+        <dxi-column dataField="ColumnTitle" caption="Caption"></dxi-column>
+        <dxi-column dataField="Status" [visible]="false"></dxi-column>
+      </dx-data-grid>
+    </div>
+  </div>
+
+  <!-- Popup Buttons -->
+  <div class="d-flex justify-content-end mt-3 MB-2 gap-2">
+    <dx-button
+      text="Close"
+      stylingMode="contained"
+      type="normal"
+      (onClick)="clearSelected()"
+    ></dx-button>
+
+    <dx-button
+      text="Apply"
+     style="background-color: rgba(30, 58, 138, 1);"
+      type="default"
+      (onClick)="applySelected()"
+    ></dx-button>
+  </div>
+</dx-popup>

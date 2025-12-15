@@ -38,6 +38,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
 import { PayerWiseReportModule } from './pages/REPORT PAGES/payer-wise-report/payer-wise-report.component';
 import { BalanceAmountToBeReceivedModule } from './pages/REPORT PAGES/balance-amount-to-be-received/balance-amount-to-be-received.component';
 import { AgedReportModule } from './pages/REPORT PAGES/aged-report/aged-report.component';
+import { InsuranceMasterEditComponent, InsuranceMasterEditModule } from './pages/POP-UP_PAGES/insurance-master-edit/insurance-master-edit.component';
 
 @NgModule({
   declarations: [AppComponent],
@@ -70,7 +71,8 @@ import { AgedReportModule } from './pages/REPORT PAGES/aged-report/aged-report.c
     ResubmissionSummaryModule,
     PayerWiseReportModule,
     BalanceAmountToBeReceivedModule,
-    AgedReportModule
+    AgedReportModule,
+    InsuranceMasterEditModule
   ],
   providers: [
     AuthService,

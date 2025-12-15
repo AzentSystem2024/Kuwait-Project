@@ -226,5 +226,11 @@
   font-size: 5px; /* Smaller font size */
   color: gray; /* Lighter color for minimized state */
 }
+.right-align {
+  display: flex;
+  justify-content: flex-end; /* Move items to right */
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
 

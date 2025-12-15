@@ -27,6 +27,7 @@ import { InsuranceNewFormModule } from '../../POP-UP_PAGES/insurance-new-form/in
 import DataSource from 'devextreme/data/data_source';
 import { Router } from '@angular/router';
 import { DataService } from 'src/app/services';
+import { InsuranceMasterEditModule } from '../../POP-UP_PAGES/insurance-master-edit/insurance-master-edit.component';
 
 @Component({
   selector: 'app-insurance',
@@ -201,6 +202,8 @@ export class InsuranceComponent {
     FormPopupModule,
     InsuranceNewFormModule,
     DxPopupModule,
+    InsuranceMasterEditModule
+
   ],
   providers: [],
   exports: [InsuranceComponent],

@@ -9,27 +9,15 @@
       <dxi-item
         itemType="group"
         cssClass="form-group"
-        [colCount]="8"
-        [colCountByScreen]="{ xs: 8, sm: 8, md: 8, lg: 8 }"
+        style="margin-left: 40px;"
+        [colCount]="5"
+
       >
-        <dxi-item [colSpan]="3">
-          <!-- <div>
-            <dx-select-box
-              labelMode="floating"
-              labelLocation="left"
-              label="Insurance"
-              [dataSource]="Insurance_DataSource"
-              displayExpr="DESCRIPTION"
-              valueExpr="ID"
-              [(value)]="Insurance_Value"
-              [searchEnabled]="true"
-              (valueChanged)="onDropdownValueChanged()"
-              [dropDownOptions]="{ width: '100%' }"
-              [showClearButton]="true"
-            >
-            </dx-select-box>
-          </div> -->
-        </dxi-item>
+              <!-- [colCount]="3"
+        [colCountByScreen]="{ xs: 3, sm: 3, md: 3, lg: 3 }" -->
+       <!-- <dxi-item location="before">
+          <div class="grid-header">Ageing Report</div>
+        </dxi-item> -->
 
         <!-- <dxi-item [colSpan]="1">
           <dx-select-box
@@ -138,7 +126,7 @@
       #dataGrid
       class="grid reportGrid reportGridFooter theme-dependent"
       [height]="isContentVisible ? '80vh' : '80vh'"
-      [noDataText]="!isContentVisible ? 'No Data Available' : ' '"
+      [noDataText]="!isContentVisible ? ' ' : ' '"
       [dataSource]="dataGrid_DataSource"
       [showBorders]="true"
       [allowColumnResizing]="false"
@@ -175,32 +163,38 @@
         ></dxi-button>
       </dxi-column> -->
 
-      <ng-container *ngFor="let column of columnsConfig">
-        <dxi-column
-          *ngIf="column.isBand"
-          [caption]="column.caption"
-          [isBand]="true"
-        >
-          <dxi-column
-            *ngFor="let subColumn of column.columns"
-            [dataField]="subColumn.dataField"
-            [caption]="subColumn.caption"
-            [format]="subColumn.format"
-            [visible]="subColumn.visible"
-            [width]="150"
-          ></dxi-column>
-        </dxi-column>
+     <ng-container *ngFor="let column of columnsConfig">
+  
+       <!-- <ng-container *ngIf="subColumn.dataField !== 'InsuranceID'"> -->
+  <!-- Skip InsuranceID column -->
+<ng-container *ngIf="column.dataField !== 'InsuranceID'">
 
-        <dxi-column
-          *ngIf="!column.isBand"
-          [dataField]="column.dataField"
-          [caption]="column.caption"
-          [format]="column.format"
-          [visible]="column.visible"
-          [width]="150"
-        ></dxi-column>
-      </ng-container>
+    <dxi-column
+      *ngIf="column.isBand"
+      [caption]="column.caption"
+      [isBand]="true"
+    >
+      <dxi-column
+        *ngFor="let subColumn of column.columns"
+        [dataField]="subColumn.dataField"
+        [caption]="subColumn.caption"
+        [format]="subColumn.format"
+        [visible]="subColumn.visible"
+        [width]="150"
+      ></dxi-column>
+    </dxi-column>
 
+    <dxi-column
+      *ngIf="!column.isBand"
+      [dataField]="column.dataField"
+      [caption]="column.caption"
+      [format]="column.format"
+      [visible]="column.visible"
+      [width]="150"
+    ></dxi-column>
+  
+</ng-container>
+</ng-container>
       <dxo-search-panel [visible]="true"></dxo-search-panel>
       <dxo-paging [pageSize]="20"></dxo-paging>
       <dxo-pager
@@ -360,6 +354,7 @@
           [rowAlternationEnabled]="true"
           [summary]="DetailsummaryColumns"
           [height]="'40vh'"
+          [noDataText]=""
           (onCellClick)="onCellClick($event)"
         >
           <dxo-scrolling 
@@ -374,10 +369,11 @@
             [showPageSizeSelector]="showPageSizeSelector"
             [showInfo]="showInfo"
             [showNavigationButtons]="showNavButtons"
+
           >
           </dxo-pager>
             <!-- <dxi-column dataField="InsuranceID" caption="InsuranceID"></dxi-column> -->
-             <dxi-column dataField="InsuranceID" caption="InsuranceID"></dxi-column>
+             <!-- <dxi-column dataField="InsuranceID" caption="InsuranceID"></dxi-column> -->
 <dxi-column dataField="InsuranceCode" caption="InsuranceCode"></dxi-column>
 <dxi-column dataField="InsuranceName" caption="InsuranceName"></dxi-column>
 <dxi-column dataField="AgeDays" caption="AgeDays"></dxi-column>
@@ -387,7 +383,7 @@
 <dxi-column dataField="Days_91_120" caption="Days 91–120"></dxi-column>
 <dxi-column dataField="Days_Above_120" caption="Days Above 120"></dxi-column>
 <dxi-column dataField="TotalAmount" caption="Total Amount"></dxi-column>
-<dxi-column dataField="TRANSACTION_DATE" caption="Transaction Date" dataType="date"></dxi-column>
+<dxi-column dataField="TRANSACTION_DATE" caption="Transaction Date" dataType="date"   format="dd-MM-yyyy"></dxi-column>
 <dxi-column dataField="INVOICE_NO" caption="Invoice No"></dxi-column>
 <dxi-column dataField="PREINVOICENO" caption="PreInvoice No"></dxi-column>
 <dxi-column dataField="GROSS_CLAIM" caption="Gross Claim"></dxi-column>
