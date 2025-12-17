@@ -436,6 +436,7 @@ isInvalidData:boolean=false
     return `${dd}/${mm}/${yyyy}`;
   }
 
+  
   // =========== save excel Ra data ==========
   async onSaveClick() {
     const userId = Number(sessionStorage.getItem('UserID')) || 0;
@@ -457,8 +458,12 @@ isInvalidData:boolean=false
     try {
       const allData = (this.dataSource || []).map((item) => ({
         ...item,
-        RA_RECEIVING_DATE: this.formatDateToDDMMYY(this.RA_RECEIVING_DATE),
-      }));
+        // RA_RECEIVING_DATE: this.formatDateToDDMMYY(this.RA_RECEIVING_DATE),
+
+        
+      }
+    ));
+      
 
       const batchSize = 15000;
       const totalRecords = allData.length;
@@ -474,6 +479,7 @@ isInvalidData:boolean=false
         this.isSaving = false;
         return;
       }
+      
 
 
       if(this.invalidData){
@@ -552,6 +558,158 @@ isInvalidData:boolean=false
       this.isSaving = false;
     }
   }
+
+
+// async onSaveClick() {
+//   const userId = Number(sessionStorage.getItem('UserID')) || 0;
+//   const insuranceId = this.selectedInsuranceId || 0;
+
+//   if (!insuranceId) {
+//     notify({
+//       message: 'Please select an Insurance before saving.',
+//       type: 'error',
+//       displayTime: 3000,
+//       position: { at: 'top right', my: 'top right', of: window },
+//     });
+//     return;
+//   }
+
+//   // ❌ Stop if invalid excel data exists
+//   if (this.invalidData === true) {
+//     notify({
+//       message: 'The Excel file contains invalid data. Please correct it before saving.',
+//       type: 'error',
+//       displayTime: 4000,
+//       position: { at: 'top right', my: 'top right', of: window },
+//     });
+//     return;
+//   }
+
+//   this.isLoading = true;
+//   this.isSaving = true;
+
+//   try {
+//     /* ------------------------------------
+//      * 1️⃣ Prepare & format data
+//      * ------------------------------------ */
+//     const allData = (this.dataSource || []).map((row: any) => {
+//       const newRow = { ...row };
+
+//       // Convert DATETIME columns
+//       this.columnData
+//         .filter(col => col.type === 'DATETIME')
+//         .forEach(col => {
+//           const value = newRow[col.dataField];
+//           if (value) {
+//             newRow[col.dataField] = this.convertToYYYYMMDD(value);
+//           }
+//         });
+
+//       return newRow;
+//     });
+
+//     if (allData.length === 0) {
+//       notify({
+//         message: 'No data available to save.',
+//         type: 'warning',
+//         displayTime: 3000,
+//         position: { at: 'top right', my: 'top right', of: window },
+//       });
+//       return;
+//     }
+
+//     /* ------------------------------------
+//      * 2️⃣ Batch processing
+//      * ------------------------------------ */
+//     const batchSize = 15000;
+//     const totalBatches = Math.ceil(allData.length / batchSize);
+
+//     const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
+//     const commonBatchId = `${insuranceId}_${datetime}`;
+
+//     for (let i = 0; i < totalBatches; i++) {
+//       const start = i * batchSize;
+//       const end = Math.min(start + batchSize, allData.length);
+
+//       const payload = {
+//         USerID: userId,
+//         InsuranceID: insuranceId,
+//         IsAutoProcessed: this.autoProcess,
+//         BatchNo: commonBatchId,
+//         import_ra_data: allData.slice(start, end),
+//       };
+
+//    const res: any = await this.dataservice
+//   .Import_RA_Data(payload)
+//   .toPromise();
+
+
+//       if (res.flag !== '1') {
+//         throw new Error(res.message || `Batch ${i + 1} failed`);
+//       }
+
+//       notify({
+//         message: `Batch ${i + 1}/${totalBatches} imported successfully`,
+//         type: 'success',
+//         displayTime: 2000,
+//         position: { at: 'top right', my: 'top right', of: window },
+//       });
+//     }
+
+//     notify({
+//       message: 'All batches imported successfully!',
+//       type: 'success',
+//       displayTime: 4000,
+//       position: { at: 'top right', my: 'top right', of: window },
+//     });
+
+//     this.close();
+
+//   } catch (error: any) {
+//     console.error(error);
+//     this.handleError(error);
+//   } finally {
+//     this.isLoading = false;
+//     this.isSaving = false;
+//   }
+// }
+
+convertToYYYYMMDD(value: any): string | null {
+  if (!value) return null;
+
+  // Case 1: dd/MM/yyyy or dd-MM-yyyy
+  if (typeof value === 'string') {
+    const parts = value.split(/[\/-]/);
+    if (parts.length === 3) {
+      const [dd, mm, yyyy] = parts;
+      if (dd && mm && yyyy) {
+        return `${yyyy}/${mm.padStart(2, '0')}/${dd.padStart(2, '0')}`;
+      }
+    }
+  }
+
+  // Case 2: Date object
+  if (value instanceof Date) {
+    const yyyy = value.getFullYear();
+    const mm = String(value.getMonth() + 1).padStart(2, '0');
+    const dd = String(value.getDate()).padStart(2, '0');
+    return `${yyyy}/${mm}/${dd}`;
+  }
+ // If string dd/MM/yyyy or dd-MM-yyyy
+  if (typeof value === 'string') {
+    const parts = value.includes('/')
+      ? value.split('/')
+      : value.split('-');
+
+    if (parts.length === 3) {
+      const [dd, mm, yyyy] = parts;
+      return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+    }
+  }
+
+  return null;
+}
+
 
   // ========== Error notifications =======
   handleError(error: any) {

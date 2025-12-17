@@ -258,7 +258,7 @@ onAdd = (e: any) => {
 //   this.fullcolumnsData = [...selectedList, ...availableList];
 // };
 onReorder = (e: any) => {
-  const locked = ["PAYMENT_DATE", "REFERENCE_NO"];
+  const locked = ["Payment Date", "Paymant Reference"];
 
   const draggedKey = e.itemData.ColumnName;
 
@@ -322,7 +322,7 @@ manageColumns() {
   this.ColumnpopupVisible = true;
 
   // 1) Columns that must always stay selected + locked
-  const defaultColumns = ['PAYMENT_DATE', 'REFERENCE_NO'];
+  const defaultColumns =["Payment Date", "Paymant Reference"];
 
   // 2) Load saved selected column order (example: ["REFERENCE_NO", "AGE", "NAME"])
   const savedSelectedOrder = (this.raFileColumns || []).map(

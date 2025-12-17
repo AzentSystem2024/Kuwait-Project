@@ -169,6 +169,7 @@ export class ImportHISDataComponent implements OnInit {
     }
   }
 
+  
   // ============ File Selected from Excel =========
   onFileSelected(event: any) {
     const target: DataTransfer = <DataTransfer>event.target;
@@ -202,37 +203,6 @@ export class ImportHISDataComponent implements OnInit {
       const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
       console.log(rawData, '=============Raw Data============');
 
-          // ---------------------------------------------
-    const excelColumns = Object.keys(rawData[0] || {});
-    const templateColumns = this.columnData.map(c => c.caption);
-
-    const missingColumns = templateColumns.filter(c => !excelColumns.includes(c));
-    const extraColumns = excelColumns.filter(c => !templateColumns.includes(c));
-
-    if (missingColumns.length > 0 || extraColumns.length > 0) {
-      let message = "Column mismatch detected:\n";
-
-      if (missingColumns.length > 0) {
-        message += ` Missing Columns: - ${missingColumns.join("- ")}`;
-      }
-
-      if (extraColumns.length > 0) {
-        message += `⚠ Extra Columns: - ${extraColumns.join("- ")}`;
-      }
-
-      notify({
-        message: message.replace(/\n/g, ""),
-        type: "error",
-        displayTime: 6000,
-        position: { my: "right top", at: "right top", of: window }
-      });
-
-      this.isLoading = false;
-      this.resetFileInput();
-      return;  //  STOP HERE
-    }
-
-
       // Map Captions to Data Fields
       const captionToField: Record<string, string> = {};
       this.columnData.forEach((col) => {
@@ -243,27 +213,34 @@ export class ImportHISDataComponent implements OnInit {
         captionToField,
         '============captionToField=================='
       );
-      let mappedData = rawData.map((row: any) => {
-        const newRow: any = {};
-        Object.keys(row).forEach((caption) => {
-          const field = captionToField[caption];
-          if (field) newRow[field] = row[caption];
-        });
-        return newRow;
-      });
-
-      
+      // let mappedData = rawData.map((row: any) => {
+      //   const newRow: any = {};
+      //   Object.keys(row).forEach((caption) => {
+      //     const field = captionToField[caption];
+      //     if (field) newRow[field] = row[caption];
+      //   });
+      //   return newRow;
+      // });
 
       // Date Fields from Column Settings
       const dateFields = this.columnData
         .filter((c) => c.type === 'DATETIME')
-        .map((c) => c.dataField);
+        .map((c) => c.caption);
+
+
+         // 4️ Collect DECIMAL / NUMBER fields
+    const decimalFields = this.columnData
+      .filter((c) => c.type === 'DECIMAL' || c.type === 'NUMBER')
+      .map((c) => c.caption);
 
       // Format and Fix Date Issues
-      mappedData = this.formatDateFields(mappedData, dateFields);
+      // let mappedData=rawData
+     const mappedData = this.formatDateFields(rawData, dateFields, decimalFields);
       console.log(mappedData);
 
       this.ImportedDataSource = mappedData;
+
+      console.log('imported data',this.ImportedDataSource)
       this.isLoading = false;
       this.isNewFormPopupOpened = true;
       this.resetFileInput();
@@ -271,6 +248,177 @@ export class ImportHISDataComponent implements OnInit {
 
     reader.readAsBinaryString(file);
   }
+
+
+//   onFileSelected(event: any) {
+//   const target: DataTransfer = <DataTransfer>event.target;
+
+//   if (target.files.length !== 1) {
+//     notify({
+//       message: 'Please select a single Excel file.',
+//       type: 'error',
+//       displayTime: 5000,
+//       position: { my: 'right top', at: 'right top', of: window },
+//     });
+//     return;
+//   }
+
+//   this.isLoading = true;
+//   const file = target.files[0];
+//   const reader: FileReader = new FileReader();
+
+//   reader.onload = (e: any) => {
+//     const bstr: string = e.target.result;
+
+//     const wb: XLSX.WorkBook = XLSX.read(bstr, {
+//       type: 'binary',
+//       cellDates: true,
+//     });
+
+//     const wsname: string = wb.SheetNames[0];
+//     const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+//     // 1️⃣ Read Excel as-is (NO mapping)
+//     let importedData: any[] = XLSX.utils.sheet_to_json(ws, {
+//       defval: '',
+//       raw: false,
+//     });
+
+//     console.log(importedData, '=== Raw Excel Data ===');
+
+//     // 2️⃣ Get Date fields from column settings
+//     const dateFields = this.columnData
+//       .filter(c => c.type === 'DATETIME')
+//       .map(c => c.dataField);
+
+//     // 3️⃣ Get Decimal / Number fields
+//     const decimalFields = this.columnData
+//       .filter(c => c.type === 'DECIMAL' || c.type === 'NUMBER')
+//       .map(c => c.dataField);
+
+//     // 4️⃣ Format dates & decimals (reuse your existing function)
+//     importedData = this.formatDateFields(
+//       importedData,
+//       dateFields,
+//       decimalFields
+//     );
+
+//     console.log(importedData, '=== Formatted Excel Data ===');
+
+//     // 5️⃣ Assign directly
+//     this.ImportedDataSource = importedData;
+
+//     this.isLoading = false;
+//     this.isNewFormPopupOpened = true;
+//     this.resetFileInput();
+//   };
+
+//   reader.readAsBinaryString(file);
+// }
+
+
+  // // ============ File Selected from Excel =========
+  // onFileSelected(event: any) {
+  //   const target: DataTransfer = <DataTransfer>event.target;
+  //   if (target.files.length !== 1) {
+  //     notify({
+  //       message: 'Please select a single Excel file.',
+  //       type: 'error',
+  //       displayTime: 5000,
+  //       position: { my: 'right top', at: 'right top', of: window },
+  //     });
+  //     return;
+  //   }
+
+  //   this.isLoading = true;
+  //   const file = target.files[0];
+  //   const reader: FileReader = new FileReader();
+
+  //   reader.onload = (e: any) => {
+  //     const bstr: string = e.target.result;
+
+  //     const wb: XLSX.WorkBook = XLSX.read(bstr, {
+  //       type: 'binary',
+  //       cellDates: true,
+  //     });
+
+  //     const wsname: string = wb.SheetNames[0];
+  //     const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+  //     // Raw Excel Data
+  //     console.log(XLSX);
+  //     const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
+  //     console.log(rawData, '=============Raw Data============');
+
+  //         // ---------------------------------------------
+  //   // const excelColumns = Object.keys(rawData[0] || {});
+  //   // const templateColumns = this.columnData.map(c => c.caption);
+
+  //   // const missingColumns = templateColumns.filter(c => !excelColumns.includes(c));
+  //   // const extraColumns = excelColumns.filter(c => !templateColumns.includes(c));
+
+  //   // if (missingColumns.length > 0 || extraColumns.length > 0) {
+  //   //   let message = "Column mismatch detected:\n";
+
+  //   //   if (missingColumns.length > 0) {
+  //   //     message += ` Missing Columns: - ${missingColumns.join("- ")}`;
+  //   //   }
+
+  //   //   if (extraColumns.length > 0) {
+  //   //     message += `⚠ Extra Columns: - ${extraColumns.join("- ")}`;
+  //   //   }
+
+  //     notify({
+  //       message: message.replace(/\n/g, ""),
+  //       type: "error",
+  //       displayTime: 6000,
+  //       position: { my: "right top", at: "right top", of: window }
+  //     });
+
+  //     this.isLoading = false;
+  //     // this.resetFileInput();
+  //     return;  //  STOP HERE
+  //   }
+
+
+  //     // Map Captions to Data Fields
+  //     const captionToField: Record<string, string> = {};
+  //     this.columnData.forEach((col) => {
+  //       captionToField[col.caption] = col.dataField;
+  //     });
+
+  //     console.log(
+  //       captionToField,
+  //       '============captionToField=================='
+  //     );
+  //     let mappedData = rawData.map((row: any) => {
+  //       const newRow: any = {};
+  //       Object.keys(row).forEach((caption) => {
+  //         const field = captionToField[caption];
+  //         if (field) newRow[field] = row[caption];
+  //       });
+  //       return newRow;
+  //     });
+
+      
+
+  //     // Date Fields from Column Settings
+  //     const dateFields = this.columnData
+  //       .filter((c) => c.type === 'DATETIME')
+  //       .map((c) => c.dataField);
+
+  //     // Format and Fix Date Issues
+  //     mappedData = this.formatDateFields(mappedData, dateFields);
+  //     console.log(mappedData);
+
+  //     this.ImportedDataSource = mappedData;
+  //     this.isLoading = false;
+  //     this.isNewFormPopupOpened = true;
+  //     this.resetFileInput();
+  //   };
+
+  //   reader.readAsBinaryString(file);
+  // }
 
   // ========= Format & Fix Date (One-Day Minus Bug Fixed) =========
   // formatDateFields(data: any[], dateFields: string[]): any[] {
@@ -313,7 +461,7 @@ export class ImportHISDataComponent implements OnInit {
   //   });
   // }
   // ✅ Format & Fix Date (No Timezone Shift, No Day Decrease)
-  formatDateFields(data: any[], dateFields: string[]): any[] {
+  formatDateFields(data: any[], dateFields: string[], decimalFields: string[] = []): any[] {
     return data.map((row) => {
       const newRow = { ...row };
 
@@ -356,6 +504,25 @@ export class ImportHISDataComponent implements OnInit {
           newRow[field] = `${day}/${month}/${year}`;
         }
       });
+
+          /* ================= DECIMAL FIELDS ================= */
+    decimalFields.forEach((field) => {
+      let value = newRow[field];
+
+      // Convert invalid decimal values to 0
+      if (
+        value === null ||
+        value === undefined ||
+        (typeof value === 'string' &&
+          value.replace(/[-\s]/g, '') === '')
+      ) {
+        newRow[field] = 0;
+      }
+      // Valid numeric string → number
+      else if (typeof value === 'string' && !isNaN(Number(value))) {
+        newRow[field] = Number(value);
+      }
+    });
 
       return newRow;
     });

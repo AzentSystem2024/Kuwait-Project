@@ -173,6 +173,124 @@ export class ImportRADataComponent implements OnInit {
   }
 
   // ============ File Selected from Excel =========
+// onFileSelected(event: any) {
+//   const target: DataTransfer = <DataTransfer>event.target;
+//   if (target.files.length !== 1) {
+//     notify({
+//       message: 'Please select a single Excel file.',
+//       type: 'error',
+//       displayTime: 5000,
+//       position: { my: 'right top', at: 'right top', of: window },
+//     });
+//     return;
+//   }
+
+//   this.isLoading = true;
+//   const file = target.files[0];
+//   const reader: FileReader = new FileReader();
+
+//   reader.onload = (e: any) => {
+//     const bstr: string = e.target.result;
+
+//     const wb: XLSX.WorkBook = XLSX.read(bstr, {
+//       type: 'binary',
+//       cellDates: true,
+//     });
+
+//     const wsname: string = wb.SheetNames[0];
+//     const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+//       // Raw Excel Data
+//     const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
+//         // ----------------------------------------------------------
+//     const excelColumns = Object.keys(rawData[0] || {});  // Excel header
+//     const templateColumns = this.columnData.map((c: any) => c.caption); // Your template captions
+
+//     const missing = templateColumns.filter(col => !excelColumns.includes(col));
+//     const extra = excelColumns.filter(col => !templateColumns.includes(col));
+
+//     if (missing.length > 0 || extra.length > 0) {
+//       let msg = "Column Mismatch Found:";
+
+//       if (missing.length > 0) {
+//         msg += " Missing Columns: - " + missing.join(" - ");
+//       }
+
+//       if (extra.length > 0) {
+//         msg += "⚠ Extra Columns in Excel: - " + extra.join(" - ");
+//       }
+
+//       notify({
+//         message: msg,
+//         type: "error",
+//         displayTime: 7000,
+//         position: { my: 'right top', at: 'right top', of: window },
+//       });
+
+//       this.isLoading = false;
+//       this.resetFileInput();
+//       return; //  STOP → Columns do NOT match
+//     }
+//    // 🔍 STEP 3: CHECK COLUMN ORDER EXACTLY MATCHES
+//     // ----------------------------------------------------------
+//     let wrongOrder = false;
+//     let wrongPositions: string[] = [];
+
+//     templateColumns.forEach((col, index) => {
+//       if (excelColumns[index] !== col) {
+//         wrongOrder = true;
+//         wrongPositions.push(`Expected: ${col} | Found: ${excelColumns[index]}`);
+//       }
+//     });
+
+//     if (wrongOrder) {
+//       notify({
+//         message:
+//           " Column Order Does NOT Match Template<br><br>" +
+//           wrongPositions.join("<br>"),
+//         type: "error",
+//         displayTime: 8000,
+//         position: { my: 'right top', at: 'right top', of: window },
+//       });
+
+//       this.isLoading = false;
+//       this.resetFileInput();
+//       return; //  STOP — ORDER IS WRONG
+//     }
+
+//       // Map Captions to Data Fields
+//     const captionToField: Record<string, string> = {};
+//     this.columnData.forEach((col) => {
+//       captionToField[col.caption] = col.dataField;
+//     });
+
+//     let mappedData = rawData.map((row: any) => {
+//       const newRow: any = {};
+//       Object.keys(row).forEach((caption) => {
+//         const field = captionToField[caption];
+//         if (field) newRow[field] = row[caption];
+//       });
+//       return newRow;
+//     });
+
+//       // Date Fields from Column Settings
+//       const dateFields = this.columnData
+//         .filter((c) => c.type === 'DATETIME')
+//         .map((c) => c.dataField);
+
+//       // Format and Fix Date Issues
+//       mappedData = this.formatDateFields(mappedData, dateFields);
+
+//     this.ImportedDataSource = mappedData;
+//     this.isLoading = false;
+//     this.isNewFormPopupOpened = true;
+//     this.resetFileInput();
+//   };
+
+//   reader.readAsBinaryString(file);
+// }
+
+  // ============ File Selected from Excel =========
 onFileSelected(event: any) {
   const target: DataTransfer = <DataTransfer>event.target;
   if (target.files.length !== 1) {
@@ -202,67 +320,14 @@ onFileSelected(event: any) {
 
       // Raw Excel Data
     const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
-        // ----------------------------------------------------------
-    const excelColumns = Object.keys(rawData[0] || {});  // Excel header
-    const templateColumns = this.columnData.map((c: any) => c.caption); // Your template captions
-
-    const missing = templateColumns.filter(col => !excelColumns.includes(col));
-    const extra = excelColumns.filter(col => !templateColumns.includes(col));
-
-    if (missing.length > 0 || extra.length > 0) {
-      let msg = "Column Mismatch Found:";
-
-      if (missing.length > 0) {
-        msg += " Missing Columns: - " + missing.join(" - ");
-      }
-
-      if (extra.length > 0) {
-        msg += "⚠ Extra Columns in Excel: - " + extra.join(" - ");
-      }
-
-      notify({
-        message: msg,
-        type: "error",
-        displayTime: 7000,
-        position: { my: 'right top', at: 'right top', of: window },
-      });
-
-      this.isLoading = false;
-      this.resetFileInput();
-      return; //  STOP → Columns do NOT match
-    }
-   // 🔍 STEP 3: CHECK COLUMN ORDER EXACTLY MATCHES
-    // ----------------------------------------------------------
-    let wrongOrder = false;
-    let wrongPositions: string[] = [];
-
-    templateColumns.forEach((col, index) => {
-      if (excelColumns[index] !== col) {
-        wrongOrder = true;
-        wrongPositions.push(`Expected: ${col} | Found: ${excelColumns[index]}`);
-      }
-    });
-
-    if (wrongOrder) {
-      notify({
-        message:
-          " Column Order Does NOT Match Template<br><br>" +
-          wrongPositions.join("<br>"),
-        type: "error",
-        displayTime: 8000,
-        position: { my: 'right top', at: 'right top', of: window },
-      });
-
-      this.isLoading = false;
-      this.resetFileInput();
-      return; //  STOP — ORDER IS WRONG
-    }
+    console.log(rawData,'RAW DATA-------')
 
       // Map Captions to Data Fields
     const captionToField: Record<string, string> = {};
     this.columnData.forEach((col) => {
       captionToField[col.caption] = col.dataField;
     });
+    console.log(this.columnData,'colum data type')
 
     let mappedData = rawData.map((row: any) => {
       const newRow: any = {};
@@ -278,10 +343,15 @@ onFileSelected(event: any) {
         .filter((c) => c.type === 'DATETIME')
         .map((c) => c.dataField);
 
+           const decimalFields = this.columnData
+      .filter((c) => c.type === 'DECIMAL' || c.type === 'NUMBER')
+      .map((c) => c.dataField);
+
       // Format and Fix Date Issues
-      mappedData = this.formatDateFields(mappedData, dateFields);
+      mappedData = this.formatDateFields(mappedData, dateFields,decimalFields);
 
     this.ImportedDataSource = mappedData;
+    
     this.isLoading = false;
     this.isNewFormPopupOpened = true;
     this.resetFileInput();
@@ -289,6 +359,7 @@ onFileSelected(event: any) {
 
   reader.readAsBinaryString(file);
 }
+
 
   // ========= Format & Fix Date (One-Day Minus Bug Fixed) =========
   // formatDateFields(data: any[], dateFields: string[]): any[] {
@@ -330,7 +401,7 @@ onFileSelected(event: any) {
   //     return newRow;
   //   });
   // }
-  formatDateFields(data: any[], dateFields: string[]): any[] {
+  formatDateFields(data: any[], dateFields: string[],decimalFields: string[] = []): any[] {
   return data.map((row) => {
     const newRow = { ...row };
 
@@ -364,6 +435,23 @@ onFileSelected(event: any) {
           );
         }
       }
+       // Case 3: String date (handles "2nd February 2025")
+      else if (typeof value === 'string') {
+        // 🔹 Remove ordinal suffixes: st, nd, rd, th
+        const cleaned = value.replace(
+          /(\d+)(st|nd|rd|th)/gi,
+          '$1'
+        );
+
+        const parsed = new Date(cleaned);
+        if (!isNaN(parsed.getTime())) {
+          dateObj = new Date(
+            parsed.getFullYear(),
+            parsed.getMonth(),
+            parsed.getDate()
+          );
+        }
+      }
 
       if (dateObj) {
         // Format: dd/MM/yyyy (local date, no UTC)
@@ -373,6 +461,26 @@ onFileSelected(event: any) {
         newRow[field] = `${day}/${month}/${year}`;
       }
     });
+
+              /* ================= DECIMAL FIELDS ================= */
+    decimalFields.forEach((field) => {
+      let value = newRow[field];
+
+      // Convert invalid decimal values to 0
+      if (
+        value === null ||
+        value === undefined ||
+        (typeof value === 'string' &&
+          value.replace(/[-\s]/g, '') === '')
+      ) {
+        newRow[field] = 0;
+      }
+      // Valid numeric string → number
+      else if (typeof value === 'string' && !isNaN(Number(value))) {
+        newRow[field] = Number(value);
+      }
+    });
+
 
     return newRow;
   });
