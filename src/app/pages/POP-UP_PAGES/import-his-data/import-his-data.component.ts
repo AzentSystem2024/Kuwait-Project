@@ -73,9 +73,10 @@ export class ImportHISDataFormComponent implements OnInit {
   hasColumnMismatch: boolean = false;
 
   // This will store the selected key
-  selectedPriorityKey: number = 1; 
+  selectedPriorityKey: number = 1;
   UniqueKeys: any[];
   mismathedTrue: boolean;
+  columnDatasss: any;
   constructor(
     private dataservice: DataService,
     private masterService: MasterReportService
@@ -157,6 +158,11 @@ export class ImportHISDataFormComponent implements OnInit {
         this.columnData = res.data.map((col: any) => ({
           dataField: col.ColumnTitle,
           caption: col.ColumnName,
+          type: col.Type,
+        }));
+        this.columnDatasss = res.data.map((col: any) => ({
+          dataField: col.ColumnTitle,
+          caption: col.ColumnTitle,
           type: col.Type,
           width: 150,
           wordWrapEnabled: true,

@@ -118,11 +118,11 @@ export class ImportRADataPopupComponent implements OnInit {
   totalRaItems: number = 0;
   isFilterRowVisible: boolean = false;
   hisColumns: any[] = [];
-isInvalidData:boolean=false
+  isInvalidData: boolean = false;
   private uniqueKeyChanged = false;
   invalidColumns: Set<string> = new Set();
   selected_Insurance_id: any;
-  invalidData: boolean=false;
+  invalidData: boolean = false;
   constructor(
     private dataservice: DataService,
     private mastersrvce: MasterReportService
@@ -163,7 +163,6 @@ isInvalidData:boolean=false
     if (!logid) {
       return;
     }
-
     this.isLoading = true; // 🔹 start loading
     try {
       const res: any = await this.fetchRecordDetails(logid);
@@ -308,7 +307,7 @@ isInvalidData:boolean=false
         ) {
           headerCell.style.color = '#ff9999';
           headerCell.title = 'Contains invalid data';
-          this.invalidData=true
+          this.invalidData = true;
         }
       });
     }, 0);
@@ -357,6 +356,7 @@ isInvalidData:boolean=false
   toggleFilterRow = () => {
     this.isFilterRowVisible = !this.isFilterRowVisible;
   };
+  
   // ============= hide popup ===========
   handlePopupHidden(): void {
     this.viewDetails();
@@ -411,6 +411,7 @@ isInvalidData:boolean=false
       });
     }
   }
+
   // ======== get_insurance_dropdown ========
   fetch_insurance_dropdown_data(): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -436,7 +437,6 @@ isInvalidData:boolean=false
     return `${dd}/${mm}/${yyyy}`;
   }
 
-  
   // =========== save excel Ra data ==========
   async onSaveClick() {
     const userId = Number(sessionStorage.getItem('UserID')) || 0;
@@ -458,12 +458,7 @@ isInvalidData:boolean=false
     try {
       const allData = (this.dataSource || []).map((item) => ({
         ...item,
-        // RA_RECEIVING_DATE: this.formatDateToDDMMYY(this.RA_RECEIVING_DATE),
-
-        
-      }
-    ));
-      
+      }));
 
       const batchSize = 15000;
       const totalRecords = allData.length;
@@ -479,12 +474,11 @@ isInvalidData:boolean=false
         this.isSaving = false;
         return;
       }
-      
 
-
-      if(this.invalidData){
-             notify({
-          message: 'The Excel file contains invalid data. Please correct it before saving.',
+      if (this.invalidData) {
+        notify({
+          message:
+            'The Excel file contains invalid data. Please correct it before saving.',
           type: 'error',
           displayTime: 4000,
           position: { at: 'top right', my: 'top right', of: window },
@@ -492,7 +486,6 @@ isInvalidData:boolean=false
         this.isLoading = false;
         this.isSaving = false;
         return;
-
       }
       // Generate one common BatchID for all payloads
       const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
@@ -559,157 +552,39 @@ isInvalidData:boolean=false
     }
   }
 
-
-// async onSaveClick() {
-//   const userId = Number(sessionStorage.getItem('UserID')) || 0;
-//   const insuranceId = this.selectedInsuranceId || 0;
-
-//   if (!insuranceId) {
-//     notify({
-//       message: 'Please select an Insurance before saving.',
-//       type: 'error',
-//       displayTime: 3000,
-//       position: { at: 'top right', my: 'top right', of: window },
-//     });
-//     return;
-//   }
-
-//   // ❌ Stop if invalid excel data exists
-//   if (this.invalidData === true) {
-//     notify({
-//       message: 'The Excel file contains invalid data. Please correct it before saving.',
-//       type: 'error',
-//       displayTime: 4000,
-//       position: { at: 'top right', my: 'top right', of: window },
-//     });
-//     return;
-//   }
-
-//   this.isLoading = true;
-//   this.isSaving = true;
-
-//   try {
-//     /* ------------------------------------
-//      * 1️⃣ Prepare & format data
-//      * ------------------------------------ */
-//     const allData = (this.dataSource || []).map((row: any) => {
-//       const newRow = { ...row };
-
-//       // Convert DATETIME columns
-//       this.columnData
-//         .filter(col => col.type === 'DATETIME')
-//         .forEach(col => {
-//           const value = newRow[col.dataField];
-//           if (value) {
-//             newRow[col.dataField] = this.convertToYYYYMMDD(value);
-//           }
-//         });
-
-//       return newRow;
-//     });
-
-//     if (allData.length === 0) {
-//       notify({
-//         message: 'No data available to save.',
-//         type: 'warning',
-//         displayTime: 3000,
-//         position: { at: 'top right', my: 'top right', of: window },
-//       });
-//       return;
-//     }
-
-//     /* ------------------------------------
-//      * 2️⃣ Batch processing
-//      * ------------------------------------ */
-//     const batchSize = 15000;
-//     const totalBatches = Math.ceil(allData.length / batchSize);
-
-//     const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
-//     const commonBatchId = `${insuranceId}_${datetime}`;
-
-//     for (let i = 0; i < totalBatches; i++) {
-//       const start = i * batchSize;
-//       const end = Math.min(start + batchSize, allData.length);
-
-//       const payload = {
-//         USerID: userId,
-//         InsuranceID: insuranceId,
-//         IsAutoProcessed: this.autoProcess,
-//         BatchNo: commonBatchId,
-//         import_ra_data: allData.slice(start, end),
-//       };
-
-//    const res: any = await this.dataservice
-//   .Import_RA_Data(payload)
-//   .toPromise();
-
-
-//       if (res.flag !== '1') {
-//         throw new Error(res.message || `Batch ${i + 1} failed`);
-//       }
-
-//       notify({
-//         message: `Batch ${i + 1}/${totalBatches} imported successfully`,
-//         type: 'success',
-//         displayTime: 2000,
-//         position: { at: 'top right', my: 'top right', of: window },
-//       });
-//     }
-
-//     notify({
-//       message: 'All batches imported successfully!',
-//       type: 'success',
-//       displayTime: 4000,
-//       position: { at: 'top right', my: 'top right', of: window },
-//     });
-
-//     this.close();
-
-//   } catch (error: any) {
-//     console.error(error);
-//     this.handleError(error);
-//   } finally {
-//     this.isLoading = false;
-//     this.isSaving = false;
-//   }
-// }
-
-convertToYYYYMMDD(value: any): string | null {
-  if (!value) return null;
-
-  // Case 1: dd/MM/yyyy or dd-MM-yyyy
-  if (typeof value === 'string') {
-    const parts = value.split(/[\/-]/);
-    if (parts.length === 3) {
-      const [dd, mm, yyyy] = parts;
-      if (dd && mm && yyyy) {
-        return `${yyyy}/${mm.padStart(2, '0')}/${dd.padStart(2, '0')}`;
+  convertToYYYYMMDD(value: any): string | null {
+    if (!value) return null;
+    // Case 1: dd/MM/yyyy or dd-MM-yyyy
+    if (typeof value === 'string') {
+      const parts = value.split(/[\/-]/);
+      if (parts.length === 3) {
+        const [dd, mm, yyyy] = parts;
+        if (dd && mm && yyyy) {
+          return `${yyyy}/${mm.padStart(2, '0')}/${dd.padStart(2, '0')}`;
+        }
       }
     }
-  }
 
-  // Case 2: Date object
-  if (value instanceof Date) {
-    const yyyy = value.getFullYear();
-    const mm = String(value.getMonth() + 1).padStart(2, '0');
-    const dd = String(value.getDate()).padStart(2, '0');
-    return `${yyyy}/${mm}/${dd}`;
-  }
- // If string dd/MM/yyyy or dd-MM-yyyy
-  if (typeof value === 'string') {
-    const parts = value.includes('/')
-      ? value.split('/')
-      : value.split('-');
-
-    if (parts.length === 3) {
-      const [dd, mm, yyyy] = parts;
-      return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+    // Case 2: Date object
+    if (value instanceof Date) {
+      const yyyy = value.getFullYear();
+      const mm = String(value.getMonth() + 1).padStart(2, '0');
+      const dd = String(value.getDate()).padStart(2, '0');
+      return `${yyyy}/${mm}/${dd}`;
     }
+
+    // If string dd/MM/yyyy or dd-MM-yyyy
+    if (typeof value === 'string') {
+      const parts = value.includes('/') ? value.split('/') : value.split('-');
+
+      if (parts.length === 3) {
+        const [dd, mm, yyyy] = parts;
+        return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+      }
+    }
+
+    return null;
   }
-
-  return null;
-}
-
 
   // ========== Error notifications =======
   handleError(error: any) {
@@ -743,7 +618,6 @@ convertToYYYYMMDD(value: any): string | null {
         'error'
       );
     }
-    console.error('Error during data import:', error);
     this.isSaving = false;
     this.isLoading = false;
   }
@@ -892,7 +766,7 @@ convertToYYYYMMDD(value: any): string | null {
 
   // =============== Ra data row selection change event =========
   onRADataRowSelected(e: any) {
-    console.log(e)
+    console.log(e);
     if (!e.selectedRowsData?.length) {
       this.isRASelected = false;
       this.lastRASelection = null;
@@ -975,7 +849,7 @@ convertToYYYYMMDD(value: any): string | null {
   distributeRA = () => {
     if (!this.lastRASelection) return;
     this.selectedRARow = this.lastRASelection;
-    console.log('selecte ra column in Distribute RA',this.selectedRARow)
+    console.log('selecte ra column in Distribute RA', this.selectedRARow);
 
     // Load HIS claims matching RA's unique key
     this.DistributeHISGridData = this.HISGridData.filter(
@@ -1114,8 +988,6 @@ convertToYYYYMMDD(value: any): string | null {
 
   // ====== on click of RA distribute process button ====
   onSubmitDistributeRA() {
-
-
     if (!this.selectedRARow) {
       notify('Please select an RA before distributing.', 'warning', 3000);
       return;
@@ -1128,59 +1000,63 @@ convertToYYYYMMDD(value: any): string | null {
       );
       return;
     }
-     if (!this.selectedRARow) {
+    if (!this.selectedRARow) {
       notify('Please select an RA before distributing.', 'warning', 3000);
       return;
     }
 
     console.log('selected ra data :>>', this.selectedRARow);
-    const selectedClaimvalues=this.transformPayload(this.selectedDistributeRows)
+    const selectedClaimvalues = this.transformPayload(
+      this.selectedDistributeRows
+    );
     const totalGrossClaimed = this.getSelectedTotal('GROSS_CLAIMED');
-    const RaGrossAmount=this.selectedRARow.GROSS_CLAIMED
-   
-    if(RaGrossAmount==totalGrossClaimed)
-    {
-    this.isLoadingManualProcess = true;
-    const payload = {
-      RaID: this.selectedRARow.ID,
-      distributed_data: this.transformPayload(this.selectedDistributeRows),
-    };
-    console.log('distribution payload :>>', payload);
+    const RaGrossAmount = this.selectedRARow.GROSS_CLAIMED;
 
-    this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
-      next: (res: any) => {
-        if (res.flag === '1') {
-           this.isLoadingManualProcess = false;
-          notify(
-            res.message || 'RA distribution completed successfully',
-            'success',
-            3000
-          );
+    if (RaGrossAmount == totalGrossClaimed) {
+      this.isLoadingManualProcess = true;
+      const payload = {
+        RaID: this.selectedRARow.ID,
+        distributed_data: this.transformPayload(this.selectedDistributeRows),
+      };
+      console.log('distribution payload :>>', payload);
 
-          // Reset UI state
-          this.selectedDistributeRows = [];
-          this.distributeGrid?.instance.refresh();
-          this.RAGridData = [];
-          this.HISGridData = [];
-          this.clearDistributePopup();
-          this.onProcessClick();
-        } else {
-          notify(
-            res.message || 'Failed to process RA distribution',
-            'error',
-            3000
-          );
-        }
-      },
-      error: (err) => {
-        console.error('RA Distribution Error:', err);
-        notify('Server error while distributing RA', 'error', 4000);
-      },
-    });
-}
-else{
-   notify('The RA gross amount and HIS gross amount are different ', 'error', 4000);
-}
+      this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
+        next: (res: any) => {
+          if (res.flag === '1') {
+            this.isLoadingManualProcess = false;
+            notify(
+              res.message || 'RA distribution completed successfully',
+              'success',
+              3000
+            );
+
+            // Reset UI state
+            this.selectedDistributeRows = [];
+            this.distributeGrid?.instance.refresh();
+            this.RAGridData = [];
+            this.HISGridData = [];
+            this.clearDistributePopup();
+            this.onProcessClick();
+          } else {
+            notify(
+              res.message || 'Failed to process RA distribution',
+              'error',
+              3000
+            );
+          }
+        },
+        error: (err) => {
+          console.error('RA Distribution Error:', err);
+          notify('Server error while distributing RA', 'error', 4000);
+        },
+      });
+    } else {
+      notify(
+        'The RA gross amount and HIS gross amount are different ',
+        'error',
+        4000
+      );
+    }
   }
 
   // ====== Transform rows into distribution payload ======
@@ -1331,7 +1207,7 @@ else{
   //==================RA dropdown onchange function===============
   RADropdownOnchangeValue(e: any) {
     console.log(e);
-     this.uniqueKeyChanged = true;
+    this.uniqueKeyChanged = true;
 
     const SelectedRaKey = e.component._dataSource._items.filter((item: any) =>
       e.value.includes(item.ColumnID)
@@ -1368,7 +1244,7 @@ else{
 
   HISDropdownOnchangeValue(e: any) {
     console.log(e);
-     this.uniqueKeyChanged = true;
+    this.uniqueKeyChanged = true;
 
     const selectedHISObjects = e.component._dataSource._items.filter(
       (item: any) => e.value.includes(item.ID)
