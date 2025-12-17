@@ -2,7 +2,7 @@
   <dx-data-grid
     #dataGrid
     [dataSource]="dataSource"
-    [columns]="columnData"
+
     [showBorders]="true"
     [allowColumnResizing]="true"
     [allowColumnReordering]="true"
@@ -14,7 +14,7 @@
     [width]="'100%'"
     (onCellPrepared)="onCellPrepared($event)"
     (onRowValidating)="onRowValidating($event)"
-      (onRowPrepared)="onRowPrepared($event)"   
+    (onRowPrepared)="onRowPrepared($event)"
   >
     <dxo-paging [pageSize]="100"></dxo-paging>
     <dxo-pager
@@ -38,7 +38,6 @@
 
     <!-- Toolbar -->
     <dxo-toolbar class="toolBarDiv p-0 m-0">
-
       <dxi-item location="after" locateInMenu="auto">
         <dx-select-box
           label="insurance"
@@ -61,25 +60,26 @@
       </dxi-item>
     </dxo-toolbar>
   </dx-data-grid>
-<div  *ngIf="!viewData&&Duplication_data" style=" border: 1px solid #b5c3cf;
-    padding-left: 10px;
-    width: 60%;
-    border-radius: 5px;
-">
-  <label for="">Manage Duplicated Data</label>
+  <div
+    *ngIf="!viewData && Duplication_data"
+    style="
+      border: 1px solid #b5c3cf;
+      padding-left: 10px;
+      width: 60%;
+      border-radius: 5px;
+    "
+  >
+    <label for="">Manage Duplicated Data</label>
 
-<dx-radio-group
-  [items]="priorities"
-  displayExpr="value"
-  valueExpr="key"
-  [(value)]="selectedPriorityKey"
-  layout="horizontal"
->
-</dx-radio-group>
-
-
-
-</div>
+    <dx-radio-group
+      [items]="priorities"
+      displayExpr="value"
+      valueExpr="key"
+      [(value)]="selectedPriorityKey"
+      layout="horizontal"
+    >
+    </dx-radio-group>
+  </div>
 </div>
 
 <div *ngIf="!viewData" class="d-flex justify-content-end gap-2 mt-2">
