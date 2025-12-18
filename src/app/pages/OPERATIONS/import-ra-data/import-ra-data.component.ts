@@ -125,7 +125,6 @@ export class ImportRADataComponent implements OnInit {
     this.fetch_RA_Column_Data_ByInsurance(insuranceId).subscribe();
   }
 
-
   //======= fetch column data ========
   fetch_RA_Column_Data_ByInsurance(insuranceId: number) {
     const payload = { InsuranceID: insuranceId };
@@ -143,6 +142,14 @@ export class ImportRADataComponent implements OnInit {
                 ? 'date'
                 : 'string',
             type: col.Type,
+
+            format:
+              col.Type === 'DECIMAL'
+                ? {
+                    type: 'fixedPoint',
+                    precision: 3,
+                  }
+                : undefined,
           }));
 
           this.RaSummaryColumns = this.generateSummaryColumns(res.data);
