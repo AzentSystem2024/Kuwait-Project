@@ -71,7 +71,7 @@ export class ImportHISDataFormComponent implements OnInit {
 
   mismatchedColumns: Set<string> = new Set();
   hasColumnMismatch: boolean = false;
-
+ summaryColumnsData: any = null;  
   // This will store the selected key
   selectedPriorityKey: number = 1;
   UniqueKeys: any[];
@@ -90,6 +90,8 @@ export class ImportHISDataFormComponent implements OnInit {
         const columnList = res.data;
         const rawData = this.viewData.import_his_data;
         const convertedData = this.convertViewResponseKeys(rawData, columnList);
+        console.log(convertedData)
+        this.buildSummaryFromData(convertedData);
         this.dataSource = convertedData;
       });
     }
@@ -98,6 +100,45 @@ export class ImportHISDataFormComponent implements OnInit {
     this.fetch_His_Column_List();
     this.find_Unique_key();
   }
+
+getNumericColumns(data: any[]): string[] {
+  if (!data || data.length === 0) return [];
+
+  const numericCols: string[] = [];
+
+  Object.keys(data[0]).forEach(key => {
+    const isPureNumberColumn = data.some(row => {
+      const val = row[key];
+
+      // ✅ ONLY real numbers
+      return typeof val === 'number' && !isNaN(val);
+    });
+
+    if (isPureNumberColumn) {
+      numericCols.push(key);
+    }
+  });
+
+  return numericCols;
+}
+
+
+buildSummaryFromData(data: any[]) {
+  const numericCols = this.getNumericColumns(data);
+
+  this.summaryColumnsData = {
+    totalItems: numericCols.map(col => ({
+      column: col,
+      summaryType: 'sum',
+      displayFormat: '{0}',
+      valueFormat: {
+        type: 'fixedPoint',
+        precision: 2
+      }
+    }))
+  };
+}
+
 
   createColumnMap(columnList: any[]) {
     const map: Record<string, string> = {};

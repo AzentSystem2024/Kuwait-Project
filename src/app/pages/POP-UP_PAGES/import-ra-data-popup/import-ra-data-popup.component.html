@@ -116,6 +116,7 @@
     [(value)]="autoProcess"
     [iconSize]="20"
     text="Auto Process"
+    (onValueChanged)="onAutoProcessChanged($event)"
   ></dx-check-box>
 
   <div class="d-flex gap-2">
@@ -145,6 +146,7 @@
   title="Process Records"
   (onShown)="onChangeAndProcess()"
   (onHidden)="handlePopupHidden()"
+  
 >
   <div *dxTemplate="let data of 'content'" class="p-3 h-100 d-flex flex-column">
     <!-- Section 1: Unique Key + Process -->

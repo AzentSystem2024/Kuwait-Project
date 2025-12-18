@@ -73,6 +73,7 @@ export class ImportRADataComponent implements OnInit {
 
   isLoading: boolean = false;
   LogID: any;
+  selectedInsuranceName: any;
 
   constructor(private service: DataService) {
     this.UserID = sessionStorage.getItem('UserID');
@@ -110,6 +111,27 @@ export class ImportRADataComponent implements OnInit {
       }
     });
   }
+
+onInsuranceChanged(e: any) {
+  console.log(e, '=========insurance');
+
+  // Selected ID
+  const insuranceId = e.value;
+
+  // Get full object from datasource
+  const selectedInsurance = this.insuranceList.find(
+    (x: any) => x.ID === insuranceId
+  );
+
+  // Insurance name (display text)
+  this.selectedInsuranceName = selectedInsurance?.DESCRIPTION || '';
+
+  console.log('Insurance ID:', insuranceId);
+  console.log('Insurance Name:', this.selectedInsuranceName);
+
+  this.fetch_RA_Column_Data();
+}
+
 
   //======= fetch column data ========
   fetch_RA_Column_Data() {
@@ -151,11 +173,14 @@ export class ImportRADataComponent implements OnInit {
       notify('No columns to download template.', 'error', 1000);
       return;
     }
+
+     const fileName = `${this.selectedInsuranceName}_RA_Template.xlsx`;
+
     const headers = this.columnData.map((c) => c.caption);
     const worksheet = XLSX.utils.aoa_to_sheet([headers]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
-    XLSX.writeFile(workbook, 'RA_template.xlsx');
+    XLSX.writeFile(workbook, fileName);
   }
 
   // ===== trigger file input =====

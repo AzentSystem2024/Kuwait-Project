@@ -65,7 +65,7 @@ export class ImportRADataPopupComponent implements OnInit {
   isLoadingManualProcess: boolean = false;
   insuranceList: any;
 
-  autoProcess: boolean = true;
+  autoProcess: boolean = false;
   fullcolumnsData: any;
   selectedKeys: any[] = [];
   UniqueColumnData: any[];
@@ -228,6 +228,7 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // ============ initialize DataSource ==========
   private initDataSource(data: any): void {
+    
     this.dataSource = new DataSource<any>({
       load: () =>
         new Promise((resolveLoad, rejectLoad) => {
@@ -501,7 +502,7 @@ export class ImportRADataPopupComponent implements OnInit {
         const payload = {
           USerID: userId,
           InsuranceID: insuranceId,
-          IsAutoProcessed: this.autoProcess,
+          IsAutoProcessed: false,
           BatchNo: commonBatchId,
           import_ra_data: currentBatch,
         };
@@ -519,6 +520,13 @@ export class ImportRADataPopupComponent implements OnInit {
                 displayTime: 2000,
                 position: { at: 'top right', my: 'top right', of: window },
               });
+
+              if(this.autoProcess){
+                this.autoProcessPopup=true
+              }
+              else{
+                  this.autoProcessPopup=false
+              }
             } else {
               throw new Error(res.message || `Batch ${i + 1} import failed.`);
             }
@@ -551,6 +559,17 @@ export class ImportRADataPopupComponent implements OnInit {
       this.isSaving = false;
     }
   }
+
+  //==================porcessing popup autoprocess is checked
+  onAutoProcessChanged(e: any) {
+  this.autoProcess = e.value;
+
+  // if (this.autoProcess === true) {
+  //   this.autoProcessPopup = true; 
+  // } else {
+  //   this.autoProcessPopup = false;  
+  // }
+}
 
   convertToYYYYMMDD(value: any): string | null {
     if (!value) return null;
@@ -1012,7 +1031,6 @@ export class ImportRADataPopupComponent implements OnInit {
     const totalGrossClaimed = this.getSelectedTotal('GROSS_CLAIMED');
     const RaGrossAmount = this.selectedRARow.GROSS_CLAIMED;
 
-    if (RaGrossAmount == totalGrossClaimed) {
       this.isLoadingManualProcess = true;
       const payload = {
         RaID: this.selectedRARow.ID,
@@ -1050,13 +1068,7 @@ export class ImportRADataPopupComponent implements OnInit {
           notify('Server error while distributing RA', 'error', 4000);
         },
       });
-    } else {
-      notify(
-        'The RA gross amount and HIS gross amount are different ',
-        'error',
-        4000
-      );
-    }
+    
   }
 
   // ====== Transform rows into distribution payload ======
