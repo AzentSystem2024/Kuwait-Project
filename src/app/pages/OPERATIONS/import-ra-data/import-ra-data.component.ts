@@ -74,6 +74,7 @@ export class ImportRADataComponent implements OnInit {
   isLoading: boolean = false;
   LogID: any;
   selectedInsuranceName: any;
+  RaSummaryColumns: any;
 
   constructor(private service: DataService) {
     this.UserID = sessionStorage.getItem('UserID');
@@ -112,39 +113,83 @@ export class ImportRADataComponent implements OnInit {
     });
   }
 
-onInsuranceChanged(e: any) {
-  console.log(e, '=========insurance');
-
-  // Selected ID
-  const insuranceId = e.value;
-
-  // Get full object from datasource
-  const selectedInsurance = this.insuranceList.find(
-    (x: any) => x.ID === insuranceId
-  );
-
-  // Insurance name (display text)
-  this.selectedInsuranceName = selectedInsurance?.DESCRIPTION || '';
-
-  console.log('Insurance ID:', insuranceId);
-  console.log('Insurance Name:', this.selectedInsuranceName);
-
-  this.fetch_RA_Column_Data();
-}
-
+  onInsuranceChanged(e: any) {
+    const insuranceId = e.value;
+    // Get full object from datasource
+    const selectedInsurance = this.insuranceList.find(
+      (x: any) => x.ID === insuranceId
+    );
+    // Insurance name (display text)
+    this.selectedInsuranceName = selectedInsurance?.DESCRIPTION || '';
+    this.fetch_RA_Column_Data();
+  }
 
   //======= fetch column data ========
   fetch_RA_Column_Data() {
     const payload = { InsuranceID: this.selectedInsuranceId };
     this.service.get_RA_Data_Column_List(payload).subscribe((res: any) => {
       if (res.flag === '1') {
+        //  Columns first
         this.columnData = res.data.map((col: any) => ({
           dataField: col.ColumnName,
           caption: col.ColumnTitle,
+          dataType:
+            col.Type === 'DECIMAL'
+              ? 'number'
+              : col.Type === 'DATETIME'
+              ? 'date'
+              : 'string',
           type: col.Type,
         }));
+        this.RaSummaryColumns = this.generateSummaryColumns(res.data);
       }
     });
+  }
+
+  //======= finding summary columns and summary format =======
+  generateSummaryColumns(reportColumns) {
+    const decimalColumns = reportColumns.filter(
+      (col) => col.Type === 'DECIMAL'
+    );
+
+    const intColumns = reportColumns.filter((col) => col.Type === 'Int32');
+
+    return {
+      totalItems: [
+        ...decimalColumns.map((col) =>
+          this.createSummaryItem(col, false, 'sum', 'decimal')
+        ),
+        ...intColumns.map((col) =>
+          this.createSummaryItem(col, false, 'sum', 'count')
+        ),
+      ],
+      groupItems: [
+        ...decimalColumns.map((col) =>
+          this.createSummaryItem(col, true, 'sum', 'decimal')
+        ),
+        ...intColumns.map((col) =>
+          this.createSummaryItem(col, true, 'sum', 'count')
+        ),
+      ],
+    };
+  }
+  //========== summary format making ========
+  createSummaryItem(col, isGroupItem = false, summaryType = 'sum', formatType) {
+    return {
+      column: col.ColumnName,
+      summaryType: summaryType,
+      displayFormat: formatType === 'count' ? 'Count: {0} ' : 'Total: {0}',
+      valueFormat:
+        formatType === 'decimal'
+          ? {
+              style: 'decimal',
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }
+          : null,
+      alignByColumn: isGroupItem, // Align by column if it's a group item
+      showInGroupFooter: isGroupItem, // Show in group footer for group items
+    };
   }
 
   // ======== Load Import HIS Log DataSource ========
@@ -174,7 +219,7 @@ onInsuranceChanged(e: any) {
       return;
     }
 
-     const fileName = `${this.selectedInsuranceName}_RA_Template.xlsx`;
+    const fileName = `${this.selectedInsuranceName}_RA_Template.xlsx`;
 
     const headers = this.columnData.map((c) => c.caption);
     const worksheet = XLSX.utils.aoa_to_sheet([headers]);
@@ -198,319 +243,158 @@ onInsuranceChanged(e: any) {
   }
 
   // ============ File Selected from Excel =========
-// onFileSelected(event: any) {
-//   const target: DataTransfer = <DataTransfer>event.target;
-//   if (target.files.length !== 1) {
-//     notify({
-//       message: 'Please select a single Excel file.',
-//       type: 'error',
-//       displayTime: 5000,
-//       position: { my: 'right top', at: 'right top', of: window },
-//     });
-//     return;
-//   }
+  onFileSelected(event: any) {
+    const target: DataTransfer = <DataTransfer>event.target;
+    if (target.files.length !== 1) {
+      notify({
+        message: 'Please select a single Excel file.',
+        type: 'error',
+        displayTime: 5000,
+        position: { my: 'right top', at: 'right top', of: window },
+      });
+      return;
+    }
 
-//   this.isLoading = true;
-//   const file = target.files[0];
-//   const reader: FileReader = new FileReader();
+    this.isLoading = true;
+    const file = target.files[0];
+    const reader: FileReader = new FileReader();
 
-//   reader.onload = (e: any) => {
-//     const bstr: string = e.target.result;
+    reader.onload = (e: any) => {
+      const bstr: string = e.target.result;
 
-//     const wb: XLSX.WorkBook = XLSX.read(bstr, {
-//       type: 'binary',
-//       cellDates: true,
-//     });
+      const wb: XLSX.WorkBook = XLSX.read(bstr, {
+        type: 'binary',
+        cellDates: true,
+      });
 
-//     const wsname: string = wb.SheetNames[0];
-//     const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-
-//       // Raw Excel Data
-//     const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
-//         // ----------------------------------------------------------
-//     const excelColumns = Object.keys(rawData[0] || {});  // Excel header
-//     const templateColumns = this.columnData.map((c: any) => c.caption); // Your template captions
-
-//     const missing = templateColumns.filter(col => !excelColumns.includes(col));
-//     const extra = excelColumns.filter(col => !templateColumns.includes(col));
-
-//     if (missing.length > 0 || extra.length > 0) {
-//       let msg = "Column Mismatch Found:";
-
-//       if (missing.length > 0) {
-//         msg += " Missing Columns: - " + missing.join(" - ");
-//       }
-
-//       if (extra.length > 0) {
-//         msg += "⚠ Extra Columns in Excel: - " + extra.join(" - ");
-//       }
-
-//       notify({
-//         message: msg,
-//         type: "error",
-//         displayTime: 7000,
-//         position: { my: 'right top', at: 'right top', of: window },
-//       });
-
-//       this.isLoading = false;
-//       this.resetFileInput();
-//       return; //  STOP → Columns do NOT match
-//     }
-//    // 🔍 STEP 3: CHECK COLUMN ORDER EXACTLY MATCHES
-//     // ----------------------------------------------------------
-//     let wrongOrder = false;
-//     let wrongPositions: string[] = [];
-
-//     templateColumns.forEach((col, index) => {
-//       if (excelColumns[index] !== col) {
-//         wrongOrder = true;
-//         wrongPositions.push(`Expected: ${col} | Found: ${excelColumns[index]}`);
-//       }
-//     });
-
-//     if (wrongOrder) {
-//       notify({
-//         message:
-//           " Column Order Does NOT Match Template<br><br>" +
-//           wrongPositions.join("<br>"),
-//         type: "error",
-//         displayTime: 8000,
-//         position: { my: 'right top', at: 'right top', of: window },
-//       });
-
-//       this.isLoading = false;
-//       this.resetFileInput();
-//       return; //  STOP — ORDER IS WRONG
-//     }
-
-//       // Map Captions to Data Fields
-//     const captionToField: Record<string, string> = {};
-//     this.columnData.forEach((col) => {
-//       captionToField[col.caption] = col.dataField;
-//     });
-
-//     let mappedData = rawData.map((row: any) => {
-//       const newRow: any = {};
-//       Object.keys(row).forEach((caption) => {
-//         const field = captionToField[caption];
-//         if (field) newRow[field] = row[caption];
-//       });
-//       return newRow;
-//     });
-
-//       // Date Fields from Column Settings
-//       const dateFields = this.columnData
-//         .filter((c) => c.type === 'DATETIME')
-//         .map((c) => c.dataField);
-
-//       // Format and Fix Date Issues
-//       mappedData = this.formatDateFields(mappedData, dateFields);
-
-//     this.ImportedDataSource = mappedData;
-//     this.isLoading = false;
-//     this.isNewFormPopupOpened = true;
-//     this.resetFileInput();
-//   };
-
-//   reader.readAsBinaryString(file);
-// }
-
-  // ============ File Selected from Excel =========
-onFileSelected(event: any) {
-  const target: DataTransfer = <DataTransfer>event.target;
-  if (target.files.length !== 1) {
-    notify({
-      message: 'Please select a single Excel file.',
-      type: 'error',
-      displayTime: 5000,
-      position: { my: 'right top', at: 'right top', of: window },
-    });
-    return;
-  }
-
-  this.isLoading = true;
-  const file = target.files[0];
-  const reader: FileReader = new FileReader();
-
-  reader.onload = (e: any) => {
-    const bstr: string = e.target.result;
-
-    const wb: XLSX.WorkBook = XLSX.read(bstr, {
-      type: 'binary',
-      cellDates: true,
-    });
-
-    const wsname: string = wb.SheetNames[0];
-    const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+      const wsname: string = wb.SheetNames[0];
+      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
       // Raw Excel Data
-    const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
-    console.log(rawData,'RAW DATA-------')
+      const rawData = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
+      console.log(rawData, 'RAW DATA-------');
 
       // Map Captions to Data Fields
-    const captionToField: Record<string, string> = {};
-    this.columnData.forEach((col) => {
-      captionToField[col.caption] = col.dataField;
-    });
-    console.log(this.columnData,'colum data type')
-
-    let mappedData = rawData.map((row: any) => {
-      const newRow: any = {};
-      Object.keys(row).forEach((caption) => {
-        const field = captionToField[caption];
-        if (field) newRow[field] = row[caption];
+      const captionToField: Record<string, string> = {};
+      this.columnData.forEach((col) => {
+        captionToField[col.caption] = col.dataField;
       });
-      return newRow;
-    });
+      console.log(this.columnData, 'colum data type');
+
+      let mappedData = rawData.map((row: any) => {
+        const newRow: any = {};
+        Object.keys(row).forEach((caption) => {
+          const field = captionToField[caption];
+          if (field) newRow[field] = row[caption];
+        });
+        return newRow;
+      });
 
       // Date Fields from Column Settings
       const dateFields = this.columnData
         .filter((c) => c.type === 'DATETIME')
         .map((c) => c.dataField);
 
-           const decimalFields = this.columnData
-      .filter((c) => c.type === 'DECIMAL' || c.type === 'NUMBER')
-      .map((c) => c.dataField);
+      const decimalFields = this.columnData
+        .filter((c) => c.type === 'DECIMAL' || c.type === 'NUMBER')
+        .map((c) => c.dataField);
 
       // Format and Fix Date Issues
-      mappedData = this.formatDateFields(mappedData, dateFields,decimalFields);
+      mappedData = this.formatDateFields(mappedData, dateFields, decimalFields);
 
-    this.ImportedDataSource = mappedData;
-    
-    this.isLoading = false;
-    this.isNewFormPopupOpened = true;
-    this.resetFileInput();
-  };
+      this.ImportedDataSource = mappedData;
 
-  reader.readAsBinaryString(file);
-}
+      this.isLoading = false;
+      this.isNewFormPopupOpened = true;
+      this.resetFileInput();
+    };
 
+    reader.readAsBinaryString(file);
+  }
 
-  // ========= Format & Fix Date (One-Day Minus Bug Fixed) =========
-  // formatDateFields(data: any[], dateFields: string[]): any[] {
-  //   return data.map((row) => {
-  //     const newRow = { ...row };
+  formatDateFields(
+    data: any[],
+    dateFields: string[],
+    decimalFields: string[] = []
+  ): any[] {
+    return data.map((row) => {
+      const newRow = { ...row };
 
-  //     dateFields.forEach((field) => {
-  //       let value = newRow[field];
-  //       if (!value) return;
+      dateFields.forEach((field) => {
+        let value = newRow[field];
+        if (!value) return;
 
-  //       let dateObj: Date | null = null;
+        let dateObj: Date | null = null;
 
-  //       // Case 1: Excel Serial Number (e.g., 45857)
-  //       if (typeof value === 'number') {
-  //         // Excel epoch conversion (handles 1900 bug)
-  //         dateObj = new Date(Math.round((value - 25567 - 1) * 86400 * 1000));
-  //       }
-  //       // Case 2: Already a Date object
-  //       else if (value instanceof Date) {
-  //         dateObj = new Date(
-  //           Date.UTC(value.getFullYear(), value.getMonth(), value.getDate())
-  //         );
-  //       }
-  //       // Case 3: String date input
-  //       else {
-  //         const temp = new Date(value);
-  //         if (!isNaN(temp.getTime())) dateObj = temp;
-  //       }
-
-  //       if (dateObj) {
-  //         // Format dd/MM/yyyy
-  //         const day = String(dateObj.getUTCDate()).padStart(2, '0');
-  //         const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-  //         const year = dateObj.getUTCFullYear();
-  //         newRow[field] = `${day}/${month}/${year}`;
-  //       }
-  //     });
-
-  //     return newRow;
-  //   });
-  // }
-  formatDateFields(data: any[], dateFields: string[],decimalFields: string[] = []): any[] {
-  return data.map((row) => {
-    const newRow = { ...row };
-
-    dateFields.forEach((field) => {
-      let value = newRow[field];
-      if (!value) return;
-
-      let dateObj: Date | null = null;
-
-      // Case 1: Excel Serial Number (e.g., 45857)
-      if (typeof value === 'number') {
-        // Convert Excel serial to JS date (local, no UTC)
-        dateObj = new Date((value - 25569) * 86400 * 1000);
-      }
-      // Case 2: Already a Date object
-      else if (value instanceof Date) {
-        dateObj = new Date(
-          value.getFullYear(),
-          value.getMonth(),
-          value.getDate()
-        );
-      }
-      // Case 3: String date input
-      else if (typeof value === 'string') {
-        const parsed = new Date(value);
-        if (!isNaN(parsed.getTime())) {
+        // Case 1: Excel Serial Number (e.g., 45857)
+        if (typeof value === 'number') {
+          // Convert Excel serial to JS date (local, no UTC)
+          dateObj = new Date((value - 25569) * 86400 * 1000);
+        }
+        // Case 2: Already a Date object
+        else if (value instanceof Date) {
           dateObj = new Date(
-            parsed.getFullYear(),
-            parsed.getMonth(),
-            parsed.getDate()
+            value.getFullYear(),
+            value.getMonth(),
+            value.getDate()
           );
         }
-      }
-       // Case 3: String date (handles "2nd February 2025")
-      else if (typeof value === 'string') {
-        // 🔹 Remove ordinal suffixes: st, nd, rd, th
-        const cleaned = value.replace(
-          /(\d+)(st|nd|rd|th)/gi,
-          '$1'
-        );
-
-        const parsed = new Date(cleaned);
-        if (!isNaN(parsed.getTime())) {
-          dateObj = new Date(
-            parsed.getFullYear(),
-            parsed.getMonth(),
-            parsed.getDate()
-          );
+        // Case 3: String date input
+        else if (typeof value === 'string') {
+          const parsed = new Date(value);
+          if (!isNaN(parsed.getTime())) {
+            dateObj = new Date(
+              parsed.getFullYear(),
+              parsed.getMonth(),
+              parsed.getDate()
+            );
+          }
         }
-      }
+        // Case 3: String date (handles "2nd February 2025")
+        else if (typeof value === 'string') {
+          // 🔹 Remove ordinal suffixes: st, nd, rd, th
+          const cleaned = value.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
 
-      if (dateObj) {
-        // Format: dd/MM/yyyy (local date, no UTC)
-        const day = String(dateObj.getDate()).padStart(2, '0');
-        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const year = dateObj.getFullYear();
-        newRow[field] = `${day}/${month}/${year}`;
-      }
+          const parsed = new Date(cleaned);
+          if (!isNaN(parsed.getTime())) {
+            dateObj = new Date(
+              parsed.getFullYear(),
+              parsed.getMonth(),
+              parsed.getDate()
+            );
+          }
+        }
+
+        if (dateObj) {
+          // Format: dd/MM/yyyy (local date, no UTC)
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const year = dateObj.getFullYear();
+          newRow[field] = `${day}/${month}/${year}`;
+        }
+      });
+
+      /* ================= DECIMAL FIELDS ================= */
+      decimalFields.forEach((field) => {
+        let value = newRow[field];
+
+        // Convert invalid decimal values to 0
+        if (
+          value === null ||
+          value === undefined ||
+          (typeof value === 'string' && value.replace(/[-\s]/g, '') === '')
+        ) {
+          newRow[field] = 0;
+        }
+        // Valid numeric string → number
+        else if (typeof value === 'string' && !isNaN(Number(value))) {
+          newRow[field] = Number(value);
+        }
+      });
+
+      return newRow;
     });
-
-              /* ================= DECIMAL FIELDS ================= */
-    decimalFields.forEach((field) => {
-      let value = newRow[field];
-
-      // Convert invalid decimal values to 0
-      if (
-        value === null ||
-        value === undefined ||
-        (typeof value === 'string' &&
-          value.replace(/[-\s]/g, '') === '')
-      ) {
-        newRow[field] = 0;
-      }
-      // Valid numeric string → number
-      else if (typeof value === 'string' && !isNaN(Number(value))) {
-        newRow[field] = Number(value);
-      }
-    });
-
-
-    return newRow;
-  });
-}
-
+  }
 
   // ========= Strict dd/MM/yyyy Validator =========
   isValidDDMMYYYY(value: any): boolean {

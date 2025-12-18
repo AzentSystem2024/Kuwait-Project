@@ -49,6 +49,7 @@ export class ImportRADataPopupComponent implements OnInit {
   @Input() fetchedData: any = null;
   @Input() dataSource: any = null;
   @Input() columnData: any = null;
+  @Input() summaryColumns: any = null;
   @Input() selectedInsuranceId: any = null;
 
   @Output() closeForm = new EventEmitter();
@@ -127,14 +128,13 @@ export class ImportRADataPopupComponent implements OnInit {
     private dataservice: DataService,
     private mastersrvce: MasterReportService
   ) {
-    // this.get_RA_Columns_Data()
     this.getHisColumnsForUniqueKey();
   }
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-    console.log(this.dataSource, '-data--------------');
-    // this.get_RA_Columns_Data()
+    console.log('columns are :', this.columnData);
+
     try {
       await this.fetch_insurance_dropdown_data();
 
@@ -209,7 +209,7 @@ export class ImportRADataPopupComponent implements OnInit {
     }));
 
     this.initDataSource(res);
-    console.log(res);
+
 
     this.selected_Insurance_id = res.InsuranceID;
 
@@ -228,7 +228,6 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // ============ initialize DataSource ==========
   private initDataSource(data: any): void {
-    
     this.dataSource = new DataSource<any>({
       load: () =>
         new Promise((resolveLoad, rejectLoad) => {
@@ -357,7 +356,7 @@ export class ImportRADataPopupComponent implements OnInit {
   toggleFilterRow = () => {
     this.isFilterRowVisible = !this.isFilterRowVisible;
   };
-  
+
   // ============= hide popup ===========
   handlePopupHidden(): void {
     this.viewDetails();
@@ -369,14 +368,14 @@ export class ImportRADataPopupComponent implements OnInit {
     if (insuranceId) {
       this.mastersrvce.selected_Insurance_Row_Data(insuranceId).subscribe({
         next: (res: any) => {
-          console.log(res);
+
           if (res && res.flag === '1') {
             this.InsuranceColumns = res.data[0].columns.filter(
               (col: any) => col.HisMatched === true
             );
-            console.log(this.InsuranceColumns);
+
             const uniqueKeyhis = res.data[0].uniqueKeys;
-            console.log(uniqueKeyhis);
+
             this.uniqueKeyData = res.data[0].uniqueKeys;
             // set selected values (array of ColumnID from uniqueKeyData)
             this.selectedUniqueColumns = this.uniqueKeyData.map(
@@ -391,10 +390,7 @@ export class ImportRADataPopupComponent implements OnInit {
               .filter((item) => item.IsHisColumn === true)
               .map((item) => item.ColumnID);
 
-            console.log(
-              'Default HIS selected keys:',
-              this.selecteHISuniqueKeys
-            );
+
 
             // this.selecteHISuniqueKeys=this.
           } else {
@@ -406,7 +402,7 @@ export class ImportRADataPopupComponent implements OnInit {
           }
         },
         error: (err) => {
-          console.error('Error fetching row data:', err);
+
           notify('Something went wrong while fetching row data', 'error', 3000);
         },
       });
@@ -521,18 +517,17 @@ export class ImportRADataPopupComponent implements OnInit {
                 position: { at: 'top right', my: 'top right', of: window },
               });
 
-              if(this.autoProcess){
-                this.autoProcessPopup=true
-              }
-              else{
-                  this.autoProcessPopup=false
+              if (this.autoProcess) {
+                this.autoProcessPopup = true;
+              } else {
+                this.autoProcessPopup = false;
               }
             } else {
               throw new Error(res.message || `Batch ${i + 1} import failed.`);
             }
           })
           .catch((err) => {
-            console.error(`Error importing batch ${i + 1}:`, err);
+
             notify({
               message: `Error importing batch ${i + 1}: ${err.message}`,
               type: 'error',
@@ -562,14 +557,14 @@ export class ImportRADataPopupComponent implements OnInit {
 
   //==================porcessing popup autoprocess is checked
   onAutoProcessChanged(e: any) {
-  this.autoProcess = e.value;
+    this.autoProcess = e.value;
 
-  // if (this.autoProcess === true) {
-  //   this.autoProcessPopup = true; 
-  // } else {
-  //   this.autoProcessPopup = false;  
-  // }
-}
+    // if (this.autoProcess === true) {
+    //   this.autoProcessPopup = true;
+    // } else {
+    //   this.autoProcessPopup = false;
+    // }
+  }
 
   convertToYYYYMMDD(value: any): string | null {
     if (!value) return null;
@@ -708,7 +703,7 @@ export class ImportRADataPopupComponent implements OnInit {
         HIS_UNIQUE_KEY: this.selecteHISuniqueKeys.join(','),
       };
 
-      console.log('payload data:', payload);
+
 
       this.isLoadingManualProcess = true;
       this.dataservice
@@ -717,7 +712,7 @@ export class ImportRADataPopupComponent implements OnInit {
           this.isLoadingManualProcess = false;
 
           if (res && res.flag === '1') {
-            console.log(res);
+
 
             this.totalProcessed = res.TotalProcessed;
             this.totalPendingprocessed = res.PendingProcess;
@@ -785,7 +780,7 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // =============== Ra data row selection change event =========
   onRADataRowSelected(e: any) {
-    console.log(e);
+
     if (!e.selectedRowsData?.length) {
       this.isRASelected = false;
       this.lastRASelection = null;
@@ -868,7 +863,7 @@ export class ImportRADataPopupComponent implements OnInit {
   distributeRA = () => {
     if (!this.lastRASelection) return;
     this.selectedRARow = this.lastRASelection;
-    console.log('selecte ra column in Distribute RA', this.selectedRARow);
+
 
     // Load HIS claims matching RA's unique key
     this.DistributeHISGridData = this.HISGridData.filter(
@@ -1024,51 +1019,49 @@ export class ImportRADataPopupComponent implements OnInit {
       return;
     }
 
-    console.log('selected ra data :>>', this.selectedRARow);
     const selectedClaimvalues = this.transformPayload(
       this.selectedDistributeRows
     );
     const totalGrossClaimed = this.getSelectedTotal('GROSS_CLAIMED');
     const RaGrossAmount = this.selectedRARow.GROSS_CLAIMED;
 
-      this.isLoadingManualProcess = true;
-      const payload = {
-        RaID: this.selectedRARow.ID,
-        distributed_data: this.transformPayload(this.selectedDistributeRows),
-      };
-      console.log('distribution payload :>>', payload);
+    this.isLoadingManualProcess = true;
+    const payload = {
+      RaID: this.selectedRARow.ID,
+      distributed_data: this.transformPayload(this.selectedDistributeRows),
+    };
 
-      this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
-        next: (res: any) => {
-          if (res.flag === '1') {
-            this.isLoadingManualProcess = false;
-            notify(
-              res.message || 'RA distribution completed successfully',
-              'success',
-              3000
-            );
 
-            // Reset UI state
-            this.selectedDistributeRows = [];
-            this.distributeGrid?.instance.refresh();
-            this.RAGridData = [];
-            this.HISGridData = [];
-            this.clearDistributePopup();
-            this.onProcessClick();
-          } else {
-            notify(
-              res.message || 'Failed to process RA distribution',
-              'error',
-              3000
-            );
-          }
-        },
-        error: (err) => {
-          console.error('RA Distribution Error:', err);
-          notify('Server error while distributing RA', 'error', 4000);
-        },
-      });
-    
+    this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
+      next: (res: any) => {
+        if (res.flag === '1') {
+          this.isLoadingManualProcess = false;
+          notify(
+            res.message || 'RA distribution completed successfully',
+            'success',
+            3000
+          );
+
+          // Reset UI state
+          this.selectedDistributeRows = [];
+          this.distributeGrid?.instance.refresh();
+          this.RAGridData = [];
+          this.HISGridData = [];
+          this.clearDistributePopup();
+          this.onProcessClick();
+        } else {
+          notify(
+            res.message || 'Failed to process RA distribution',
+            'error',
+            3000
+          );
+        }
+      },
+      error: (err) => {
+
+        notify('Server error while distributing RA', 'error', 4000);
+      },
+    });
   }
 
   // ====== Transform rows into distribution payload ======
@@ -1194,7 +1187,7 @@ export class ImportRADataPopupComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        console.error('Error processing:', err);
+
         notify({
           message: 'Something went wrong. Please try again.',
           type: 'error',
@@ -1218,7 +1211,7 @@ export class ImportRADataPopupComponent implements OnInit {
 
   //==================RA dropdown onchange function===============
   RADropdownOnchangeValue(e: any) {
-    console.log(e);
+
     this.uniqueKeyChanged = true;
 
     const SelectedRaKey = e.component._dataSource._items.filter((item: any) =>
@@ -1234,7 +1227,7 @@ export class ImportRADataPopupComponent implements OnInit {
     };
 
     this.dataservice.RA_Columns_For_UniqueKey(payload).subscribe((res: any) => {
-      console.log(res, 'RA columns for unique key');
+
       // Convert to TagBox expected structure
       this.RA_columns = (res || []).map((item: any) => ({
         ColumnID: item.ID,
@@ -1248,14 +1241,11 @@ export class ImportRADataPopupComponent implements OnInit {
 
       // 3) Preselect those IDs in TagBox
       this.selecteRAuniqueKeys = hisMatchedIds;
-
-      console.log('Preselected RA keys:', this.selecteRAuniqueKeys);
     });
-    // this.RA_columns = res|| [];
   }
 
   HISDropdownOnchangeValue(e: any) {
-    console.log(e);
+
     this.uniqueKeyChanged = true;
 
     const selectedHISObjects = e.component._dataSource._items.filter(
@@ -1270,8 +1260,8 @@ export class ImportRADataPopupComponent implements OnInit {
       ColumnTitle: item.DESCRIPTION,
       IsHisColumn: true,
     }));
-    console.log('Selected HIS Full Objects:', this.finalHISObjects);
   }
+
   displayColumn(item: any) {
     if (!item) return '';
     return item.ColumnID + ' - ' + item.ColumnTitle;
@@ -1280,7 +1270,6 @@ export class ImportRADataPopupComponent implements OnInit {
   //==================get his columns for unique key=================
   getHisColumnsForUniqueKey() {
     this.dataservice.His_Columns_For_UniqueKey(name).subscribe((res: any) => {
-      console.log(res, 'his columns for unique key');
       this.hisColumns = res || [];
     });
   }

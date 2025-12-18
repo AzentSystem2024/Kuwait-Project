@@ -52,7 +52,7 @@
             width="400"
             [showClearButton]="true"
             [searchEnabled]="true"
-  (onValueChanged)="onInsuranceChanged($event)"
+            (onValueChanged)="onInsuranceChanged($event)"
           >
           </dx-select-box>
         </div>
@@ -101,7 +101,6 @@
       ></dxi-item>
     </dxo-toolbar>
 
-
     <input
       #fileInput
       type="file"
@@ -145,6 +144,7 @@
     <app-import-ra-data-popup
       *ngIf="isNewFormPopupOpened"
       [columnData]="columnData"
+      [summaryColumns]="RaSummaryColumns"
       [selectedInsuranceId]="selectedInsuranceId"
       [dataSource]="ImportedDataSource"
       (closeForm)="CloseEditForm()"
