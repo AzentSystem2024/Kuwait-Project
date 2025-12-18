@@ -106,19 +106,6 @@
       [allowSearch]="true"
     >
     </dxo-column-chooser>
-
-    <!-- <dxo-summary>
-      <ng-container *ngFor="let col of columnData">
-        <dxi-total-item
-          *ngIf="col.dataType === 'number'"
-          [column]="col.dataField"
-          summaryType="sum"
-          [valueFormat]="{ type: 'fixedPoint', precision: 2 }"
-          displayFormat="{0}"
-        >
-        </dxi-total-item>
-      </ng-container>
-    </dxo-summary> -->
   </dx-data-grid>
 </div>
 
@@ -130,7 +117,6 @@
     [(value)]="autoProcess"
     [iconSize]="20"
     text="Auto Process"
-    (onValueChanged)="onAutoProcessChanged($event)"
   ></dx-check-box>
 
   <div class="d-flex gap-2">

@@ -173,6 +173,7 @@ export class ImportRADataComponent implements OnInit {
       ],
     };
   }
+
   //========== summary format making ========
   createSummaryItem(col, isGroupItem = false, summaryType = 'sum', formatType) {
     return {
@@ -375,25 +376,34 @@ export class ImportRADataComponent implements OnInit {
       });
 
       /* ================= DECIMAL FIELDS ================= */
+      /* ================= DECIMAL FIELDS ================= */
       decimalFields.forEach((field) => {
-        let value = newRow[field];
-
-        // Convert invalid decimal values to 0
-        if (
-          value === null ||
-          value === undefined ||
-          (typeof value === 'string' && value.replace(/[-\s]/g, '') === '')
-        ) {
-          newRow[field] = 0;
-        }
-        // Valid numeric string → number
-        else if (typeof value === 'string' && !isNaN(Number(value))) {
-          newRow[field] = Number(value);
-        }
+        newRow[field] = this.normalizeDecimal(newRow[field]);
       });
 
       return newRow;
     });
+  }
+
+  private normalizeDecimal(value: any): number {
+    if (value === null || value === undefined) return 0;
+
+    // If already a number
+    if (typeof value === 'number' && !isNaN(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const cleaned = value.trim().replace(/,/g, '').replace(/\s+/g, '');
+
+      if (cleaned === '' || isNaN(Number(cleaned))) {
+        return 0;
+      }
+
+      return Number(cleaned);
+    }
+
+    return 0;
   }
 
   // ========= Strict dd/MM/yyyy Validator =========

@@ -66,7 +66,7 @@ export class ImportRADataPopupComponent implements OnInit {
   isLoadingManualProcess: boolean = false;
   insuranceList: any;
 
-  autoProcess: boolean = false;
+  autoProcess: boolean = true;
   fullcolumnsData: any;
   selectedKeys: any[] = [];
   UniqueColumnData: any[];
@@ -210,7 +210,6 @@ export class ImportRADataPopupComponent implements OnInit {
 
     this.initDataSource(res);
 
-
     this.selected_Insurance_id = res.InsuranceID;
 
     this.totalRaItems = res.data.length;
@@ -259,14 +258,24 @@ export class ImportRADataPopupComponent implements OnInit {
 
     // DATETIME validation (strict dd/MM/yyyy)
     if (colInfo.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
-      isInvalid = true;
+      isInvalid = false;
       reason = 'Invalid Date format';
     }
 
     // DECIMAL validation
-    if (colInfo.type === 'DECIMAL' && isNaN(Number(value))) {
-      isInvalid = true;
-      reason = 'Invalid Decimal number';
+    if (colInfo.type === 'DECIMAL') {
+      const rawVal = value?.toString().trim();
+      // Allow empty or dash
+      if (rawVal === '' || rawVal === '-') {
+        return; // valid
+      }
+      // Remove commas for numeric check
+      const normalizedVal = rawVal.replace(/,/g, '');
+      // Validate number
+      if (isNaN(Number(normalizedVal))) {
+        isInvalid = true;
+        reason = 'Invalid Decimal number';
+      }
     }
 
     if (isInvalid) {
@@ -368,7 +377,6 @@ export class ImportRADataPopupComponent implements OnInit {
     if (insuranceId) {
       this.mastersrvce.selected_Insurance_Row_Data(insuranceId).subscribe({
         next: (res: any) => {
-
           if (res && res.flag === '1') {
             this.InsuranceColumns = res.data[0].columns.filter(
               (col: any) => col.HisMatched === true
@@ -390,8 +398,6 @@ export class ImportRADataPopupComponent implements OnInit {
               .filter((item) => item.IsHisColumn === true)
               .map((item) => item.ColumnID);
 
-
-
             // this.selecteHISuniqueKeys=this.
           } else {
             notify(
@@ -402,7 +408,6 @@ export class ImportRADataPopupComponent implements OnInit {
           }
         },
         error: (err) => {
-
           notify('Something went wrong while fetching row data', 'error', 3000);
         },
       });
@@ -498,7 +503,7 @@ export class ImportRADataPopupComponent implements OnInit {
         const payload = {
           USerID: userId,
           InsuranceID: insuranceId,
-          IsAutoProcessed: false,
+          IsAutoProcessed: this.autoProcess,
           BatchNo: commonBatchId,
           import_ra_data: currentBatch,
         };
@@ -517,17 +522,16 @@ export class ImportRADataPopupComponent implements OnInit {
                 position: { at: 'top right', my: 'top right', of: window },
               });
 
-              if (this.autoProcess) {
-                this.autoProcessPopup = true;
-              } else {
-                this.autoProcessPopup = false;
-              }
+              // if (this.autoProcess) {
+              //   this.autoProcessPopup = true;
+              // } else {
+              //   this.autoProcessPopup = false;
+              // }
             } else {
               throw new Error(res.message || `Batch ${i + 1} import failed.`);
             }
           })
           .catch((err) => {
-
             notify({
               message: `Error importing batch ${i + 1}: ${err.message}`,
               type: 'error',
@@ -703,8 +707,6 @@ export class ImportRADataPopupComponent implements OnInit {
         HIS_UNIQUE_KEY: this.selecteHISuniqueKeys.join(','),
       };
 
-
-
       this.isLoadingManualProcess = true;
       this.dataservice
         .manual_ReProcess_RA_Data(payload)
@@ -712,8 +714,6 @@ export class ImportRADataPopupComponent implements OnInit {
           this.isLoadingManualProcess = false;
 
           if (res && res.flag === '1') {
-
-
             this.totalProcessed = res.TotalProcessed;
             this.totalPendingprocessed = res.PendingProcess;
             this.manualProcess = res.ManualProcess;
@@ -780,7 +780,6 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // =============== Ra data row selection change event =========
   onRADataRowSelected(e: any) {
-
     if (!e.selectedRowsData?.length) {
       this.isRASelected = false;
       this.lastRASelection = null;
@@ -863,7 +862,6 @@ export class ImportRADataPopupComponent implements OnInit {
   distributeRA = () => {
     if (!this.lastRASelection) return;
     this.selectedRARow = this.lastRASelection;
-
 
     // Load HIS claims matching RA's unique key
     this.DistributeHISGridData = this.HISGridData.filter(
@@ -1031,7 +1029,6 @@ export class ImportRADataPopupComponent implements OnInit {
       distributed_data: this.transformPayload(this.selectedDistributeRows),
     };
 
-
     this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
       next: (res: any) => {
         if (res.flag === '1') {
@@ -1058,7 +1055,6 @@ export class ImportRADataPopupComponent implements OnInit {
         }
       },
       error: (err) => {
-
         notify('Server error while distributing RA', 'error', 4000);
       },
     });
@@ -1211,7 +1207,6 @@ export class ImportRADataPopupComponent implements OnInit {
 
   //==================RA dropdown onchange function===============
   RADropdownOnchangeValue(e: any) {
-
     this.uniqueKeyChanged = true;
 
     const SelectedRaKey = e.component._dataSource._items.filter((item: any) =>
@@ -1227,7 +1222,6 @@ export class ImportRADataPopupComponent implements OnInit {
     };
 
     this.dataservice.RA_Columns_For_UniqueKey(payload).subscribe((res: any) => {
-
       // Convert to TagBox expected structure
       this.RA_columns = (res || []).map((item: any) => ({
         ColumnID: item.ID,
@@ -1245,7 +1239,6 @@ export class ImportRADataPopupComponent implements OnInit {
   }
 
   HISDropdownOnchangeValue(e: any) {
-
     this.uniqueKeyChanged = true;
 
     const selectedHISObjects = e.component._dataSource._items.filter(
@@ -1260,6 +1253,7 @@ export class ImportRADataPopupComponent implements OnInit {
       ColumnTitle: item.DESCRIPTION,
       IsHisColumn: true,
     }));
+    console.log('Selected HIS Full Objects:', this.finalHISObjects);
   }
 
   displayColumn(item: any) {
