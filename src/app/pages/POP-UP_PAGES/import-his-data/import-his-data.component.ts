@@ -126,7 +126,7 @@ export class ImportHISDataFormComponent implements OnInit {
         displayFormat: '{0}',
         valueFormat: {
           type: 'fixedPoint',
-          precision: 2,
+          precision: 3,
         },
       })),
     };

@@ -459,8 +459,8 @@ export class ClaimDetailsComponent implements OnInit {
         formatType === 'decimal'
           ? {
               style: 'decimal',
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
+              minimumFractionDigits: 3,
+              maximumFractionDigits: 3,
             }
           : null,
       alignByColumn: isGroupItem, // Align by column if it's a group item

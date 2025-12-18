@@ -3,6 +3,7 @@
     #dataGrid
     [dataSource]="dataSource"
     [columns]="columnData"
+    [summary]="summaryColumns"
     [showBorders]="true"
     [height]="'80vh'"
     [width]="'100%'"
@@ -106,7 +107,7 @@
     >
     </dxo-column-chooser>
 
-    <dxo-summary>
+    <!-- <dxo-summary>
       <ng-container *ngFor="let col of columnData">
         <dxi-total-item
           *ngIf="col.dataType === 'number'"
@@ -117,7 +118,7 @@
         >
         </dxi-total-item>
       </ng-container>
-    </dxo-summary>
+    </dxo-summary> -->
   </dx-data-grid>
 </div>
 
