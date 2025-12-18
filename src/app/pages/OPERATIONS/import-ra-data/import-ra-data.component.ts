@@ -20,6 +20,7 @@ import { DataSource } from 'devextreme/common/data';
 import notify from 'devextreme/ui/notify';
 import { FormPopupModule } from 'src/app/components';
 import { DataService } from 'src/app/services';
+import { tap } from 'rxjs/operators';
 
 import * as XLSX from 'xlsx';
 import {
@@ -121,29 +122,32 @@ export class ImportRADataComponent implements OnInit {
     );
     // Insurance name (display text)
     this.selectedInsuranceName = selectedInsurance?.DESCRIPTION || '';
-    this.fetch_RA_Column_Data();
+    this.fetch_RA_Column_Data_ByInsurance(this.selectedInsuranceId);
   }
 
   //======= fetch column data ========
-  fetch_RA_Column_Data() {
-    const payload = { InsuranceID: this.selectedInsuranceId };
-    this.service.get_RA_Data_Column_List(payload).subscribe((res: any) => {
-      if (res.flag === '1') {
-        //  Columns first
-        this.columnData = res.data.map((col: any) => ({
-          dataField: col.ColumnName,
-          caption: col.ColumnTitle,
-          dataType:
-            col.Type === 'DECIMAL'
-              ? 'number'
-              : col.Type === 'DATETIME'
-              ? 'date'
-              : 'string',
-          type: col.Type,
-        }));
-        this.RaSummaryColumns = this.generateSummaryColumns(res.data);
-      }
-    });
+  fetch_RA_Column_Data_ByInsurance(insuranceId: number) {
+    const payload = { InsuranceID: insuranceId };
+
+    return this.service.get_RA_Data_Column_List(payload).pipe(
+      tap((res: any) => {
+        if (res.flag === '1') {
+          this.columnData = res.data.map((col: any) => ({
+            dataField: col.ColumnName,
+            caption: col.ColumnTitle,
+            dataType:
+              col.Type === 'DECIMAL'
+                ? 'number'
+                : col.Type === 'DATETIME'
+                ? 'date'
+                : 'string',
+            type: col.Type,
+          }));
+
+          this.RaSummaryColumns = this.generateSummaryColumns(res.data);
+        }
+      })
+    );
   }
 
   //======= finding summary columns and summary format =======
@@ -456,8 +460,10 @@ export class ImportRADataComponent implements OnInit {
   }
   // ============ detailed view click ========
   viewDetails = (e: any) => {
-    this.LogID = e.row.key.ID;
-    if (!this.LogID && e) {
+    const rowData = e?.row?.data;
+    this.LogID = e?.row?.key?.ID;
+
+    if (!this.LogID || !rowData) {
       notify({
         message: 'No valid record selected.',
         type: 'warning',
@@ -466,30 +472,57 @@ export class ImportRADataComponent implements OnInit {
       });
       return;
     }
+
+    // 🔹 Resolve InsuranceID from InsuranceName
+    const insuranceId = this.getInsuranceIdByName(rowData.InsuranceName);
+
+    if (!insuranceId) {
+      notify({
+        message: 'Unable to resolve Insurance.',
+        type: 'error',
+        displayTime: 3000,
+        position: 'top right',
+      });
+      return;
+    }
+
+    this.selectedInsuranceId = insuranceId;
     this.isLoading = true;
 
-    this.service.fetch_RA_Data_log_view(this.LogID).subscribe({
-      next: (res: any) => {
-        if (res) {
-          this.selectedData = res;
-          this.isLoading = false;
-
-          this.ViewDataPopup = true;
-        } else {
-          this.isLoading = false;
-
-          notify({
-            message: 'No details found for this record.',
-            type: 'info',
-            displayTime: 3000,
-            position: 'top right',
-          });
-        }
+    // 🔹 1) Load columns + summary
+    this.fetch_RA_Column_Data_ByInsurance(insuranceId).subscribe({
+      next: () => {
+        // 🔹 2) Load selected record data
+        this.service.fetch_RA_Data_log_view(this.LogID).subscribe({
+          next: (res: any) => {
+            if (res) {
+              this.selectedData = res;
+              this.ViewDataPopup = true;
+            } else {
+              notify({
+                message: 'No details found for this record.',
+                type: 'info',
+                displayTime: 3000,
+                position: 'top right',
+              });
+            }
+            this.isLoading = false;
+          },
+          error: () => {
+            this.isLoading = false;
+            notify({
+              message: 'Failed to fetch record details.',
+              type: 'error',
+              displayTime: 5000,
+              position: 'top right',
+            });
+          },
+        });
       },
       error: () => {
         this.isLoading = false;
         notify({
-          message: 'Failed to fetch record details.',
+          message: 'Failed to load column configuration.',
           type: 'error',
           displayTime: 5000,
           position: 'top right',
@@ -497,6 +530,16 @@ export class ImportRADataComponent implements OnInit {
       },
     });
   };
+
+  private getInsuranceIdByName(name: string): number | null {
+    if (!name || !this.insuranceList?.length) return null;
+
+    const match = this.insuranceList.find(
+      (x: any) => x.DESCRIPTION?.toLowerCase() === name.toLowerCase()
+    );
+
+    return match ? match.ID : null;
+  }
 
   formatImportTime(rowData: any): string {
     const celldate = rowData.ImportTime;
