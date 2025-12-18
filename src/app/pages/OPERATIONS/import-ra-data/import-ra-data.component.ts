@@ -116,14 +116,15 @@ export class ImportRADataComponent implements OnInit {
 
   onInsuranceChanged(e: any) {
     const insuranceId = e.value;
-    // Get full object from datasource
+    this.selectedInsuranceId = insuranceId;
     const selectedInsurance = this.insuranceList.find(
       (x: any) => x.ID === insuranceId
     );
-    // Insurance name (display text)
     this.selectedInsuranceName = selectedInsurance?.DESCRIPTION || '';
-    this.fetch_RA_Column_Data_ByInsurance(this.selectedInsuranceId);
+    // ✅ MUST subscribe
+    this.fetch_RA_Column_Data_ByInsurance(insuranceId).subscribe();
   }
+
 
   //======= fetch column data ========
   fetch_RA_Column_Data_ByInsurance(insuranceId: number) {
