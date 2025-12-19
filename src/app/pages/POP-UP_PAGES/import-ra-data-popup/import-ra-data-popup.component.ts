@@ -51,6 +51,14 @@ export class ImportRADataPopupComponent implements OnInit {
   @Input() columnData: any = null;
   @Input() summaryColumns: any = null;
   @Input() selectedInsuranceId: any = null;
+  @Input() mismatchedColumns: {
+    [dataField: string]: {
+      expectedCaption: string;
+      expectedField: string;
+      index: number;
+      actualField: string;
+    };
+  } = {};
 
   @Output() closeForm = new EventEmitter();
 
@@ -124,6 +132,13 @@ export class ImportRADataPopupComponent implements OnInit {
   invalidColumns: Set<string> = new Set();
   selected_Insurance_id: any;
   invalidData: boolean = false;
+
+  // Header mismatch tracker (child-component only)
+  private headerMismatchMap = new Map<
+    string,
+    { expected: string; actual: string }
+  >();
+
   constructor(
     private dataservice: DataService,
     private mastersrvce: MasterReportService
@@ -133,7 +148,8 @@ export class ImportRADataPopupComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-    console.log('columns are :', this.columnData);
+    console.log('column fetched:', this.columnData);
+    console.log('column fetched:', this.dataSource);
 
     try {
       await this.fetch_insurance_dropdown_data();
@@ -163,7 +179,7 @@ export class ImportRADataPopupComponent implements OnInit {
     if (!logid) {
       return;
     }
-    this.isLoading = true; // 🔹 start loading
+    this.isLoading = true; //  start loading
     try {
       const res: any = await this.fetchRecordDetails(logid);
       if (res) {
@@ -184,7 +200,7 @@ export class ImportRADataPopupComponent implements OnInit {
         position: 'top right',
       });
     } finally {
-      this.isLoading = false; // 🔹 stop loading
+      this.isLoading = false; //  stop loading
     }
   }
 
@@ -241,6 +257,22 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // ========== onCellPrepared validator ==========
   onCellPrepared(e: any) {
+    if (e.rowType === 'header' && e.column?.dataField) {
+      const mismatch = this.mismatchedColumns?.[e.column.dataField];
+
+      if (mismatch) {
+        e.cellElement.style.color = '#ff4d4f';
+        e.cellElement.style.fontWeight = '600';
+        e.cellElement.title =
+          `Expected:\n${mismatch.expectedCaption} (${mismatch.expectedField})\n\n` +
+          `Current Excel Column ${mismatch.index}:\n${mismatch.actualField}`;
+
+        this.invalidData = true;
+      }
+      return;
+    }
+
+    /* ================= DATA VALIDATION ================= */
     if (e.rowType !== 'data') return;
 
     const colInfo = this.columnData.find(
@@ -248,30 +280,29 @@ export class ImportRADataPopupComponent implements OnInit {
     );
     if (!colInfo) return;
 
-    const value = e.value;
+    // 🚫 Skip entire column if mismatch exists
+    if (this.mismatchedColumns?.[colInfo.dataField]) {
+      return;
+    }
 
-    // Skip empty/null values
+    const value = e.value;
     if (value === null || value === '') return;
 
     let isInvalid = false;
     let reason = '';
 
-    // DATETIME validation (strict dd/MM/yyyy)
+    // DATETIME validation (all formats allowed)
     if (colInfo.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
-      isInvalid = false;
+      isInvalid = true;
       reason = 'Invalid Date format';
     }
 
     // DECIMAL validation
     if (colInfo.type === 'DECIMAL') {
       const rawVal = value?.toString().trim();
-      // Allow empty or dash
-      if (rawVal === '' || rawVal === '-') {
-        return; // valid
-      }
-      // Remove commas for numeric check
+      if (rawVal === '' || rawVal === '-') return;
+
       const normalizedVal = rawVal.replace(/,/g, '');
-      // Validate number
       if (isNaN(Number(normalizedVal))) {
         isInvalid = true;
         reason = 'Invalid Decimal number';
@@ -279,28 +310,10 @@ export class ImportRADataPopupComponent implements OnInit {
     }
 
     if (isInvalid) {
-      // Highlight the cell with tooltip showing reason and current value
       this.highlightInvalidCell(e, `${reason}: "${value}"`);
-
-      // Track column as invalid and highlight header
       this.invalidColumns.add(colInfo.dataField);
       this.highlightColumnHeader(colInfo.dataField);
     }
-  }
-
-  // ========== Strict dd/MM/yyyy or dd-MM-yyyy format validator ==========
-  isValidDDMMYYYY(value: any): boolean {
-    if (!value || typeof value !== 'string') return false;
-    // Allows dd/mm/yyyy or dd-mm-yyyy
-    const regex = /^(0[1-9]|[12][0-9]|3[01])[\/-](0[1-9]|1[0-2])[\/-]\d{4}$/;
-    return regex.test(value);
-  }
-
-  // =========== Highlight invalid cell ==========
-  highlightInvalidCell(e: any, message: string) {
-    e.cellElement.style.backgroundColor = '#ffcccc';
-    e.cellElement.title = message;
-    // this.invalidData=true
   }
 
   // =========== Highlight column header ==========
@@ -309,20 +322,36 @@ export class ImportRADataPopupComponent implements OnInit {
       const headerCells = document.querySelectorAll(
         `.dx-header-row .dx-datagrid-text-content`
       );
+
       headerCells.forEach((headerCell: any) => {
         if (
           headerCell.innerText === dataField ||
           this.getCaptionByField(dataField) === headerCell.innerText
         ) {
+          // do NOT override mismatch tooltip
+          if (!headerCell.title) {
+            headerCell.title = 'Contains invalid data';
+          }
           headerCell.style.color = '#ff9999';
-          headerCell.title = 'Contains invalid data';
           this.invalidData = true;
         }
       });
     }, 0);
   }
 
-  // =========== Utility: get caption from columnData ==========
+  // ========== Flexible Date / DateTime Validator ==========
+  isValidDDMMYYYY(value: any): boolean {
+    if (!value || typeof value !== 'string') return false;
+    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    return regex.test(value);
+  }
+
+  highlightInvalidCell(e: any, message: string) {
+    e.cellElement.style.backgroundColor = '#ffcccc';
+    e.cellElement.title = message;
+  }
+
+  // =========== Utility: get caption from columnData =========
   getCaptionByField(field: string) {
     const col = this.columnData.find((c: any) => c.dataField === field);
     return col ? col.caption : '';
@@ -371,7 +400,7 @@ export class ImportRADataPopupComponent implements OnInit {
     this.viewDetails();
   }
 
-  // =============== fetch ra columns and unique key of selected data ========
+  // ========= fetch ra columns and unique key of selected data ========
   fetch_all_column_and_uniqueKey_data() {
     const insuranceId = this.selectedInsuranceId;
     if (insuranceId) {
@@ -427,7 +456,7 @@ export class ImportRADataPopupComponent implements OnInit {
     });
   }
 
-  //===================date format conversion ===================
+  //======== date format conversion =========
   formatDateToDDMMYY(date: Date): string {
     if (!date) return '';
 
