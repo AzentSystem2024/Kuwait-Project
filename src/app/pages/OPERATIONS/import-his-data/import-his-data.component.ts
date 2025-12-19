@@ -330,12 +330,12 @@ export class ImportHISDataComponent implements OnInit {
 
         let dateObj: Date | null = null;
 
-        // Excel serial number
+        // Case 1: Excel serial number
         if (typeof value === 'number') {
           dateObj = new Date((value - 25569) * 86400 * 1000);
         }
 
-        // Date object
+        // Case 2: Date object
         else if (value instanceof Date && !isNaN(value.getTime())) {
           dateObj = new Date(
             value.getFullYear(),
@@ -344,32 +344,41 @@ export class ImportHISDataComponent implements OnInit {
           );
         }
 
-        // String date (ALL formats)
+        // Case 3: String-based date (ALL formats)
         else if (typeof value === 'string') {
-          let cleaned = value
-            .trim()
-            .replace(/(\d+)(st|nd|rd|th)/gi, '$1')
-            .replace(/GMT\s*\+.*$/i, 'GMT');
-
-          if (/GMT$/i.test(cleaned)) {
-            cleaned = cleaned.replace(/GMT$/i, 'GMT+0000');
+          let cleaned = value.trim();
+          // Remove ordinal suffixes: 1st, 2nd, 3rd, 4th
+          cleaned = cleaned.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+          let parsed: Date | null = null;
+          // Handle dd-MM-yyyy or dd/MM/yyyy
+          if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(cleaned)) {
+            const [dd, mm, yyyy] = cleaned.split(/[-/]/);
+            parsed = new Date(+yyyy, +mm - 1, +dd);
+          } else {
+            // Fix GMT issues
+            cleaned = cleaned.replace(/GMT\s*\+.*$/i, 'GMT');
+            if (/GMT$/i.test(cleaned)) {
+              cleaned = cleaned.replace(/GMT$/i, 'GMT+0000');
+            }
+            parsed = new Date(cleaned);
           }
 
-          const parsed = new Date(cleaned);
-          if (!isNaN(parsed.getTime())) {
-            dateObj = new Date(
-              parsed.getFullYear(),
-              parsed.getMonth(),
-              parsed.getDate()
-            );
+          // FORCE OUTPUT FORMAT dd/MM/yyyy
+          if (parsed && !isNaN(parsed.getTime())) {
+            const day = String(parsed.getDate()).padStart(2, '0');
+            const month = String(parsed.getMonth() + 1).padStart(2, '0');
+            const year = parsed.getFullYear();
+
+            newRow[field] = `${day}/${month}/${year}`;
           }
         }
 
+        // Final formatting: dd/MM/yyyy
         if (dateObj) {
-          const dd = String(dateObj.getDate()).padStart(2, '0');
-          const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-          const yyyy = dateObj.getFullYear();
-          newRow[field] = `${dd}/${mm}/${yyyy}`;
+          const day = String(dateObj.getDate()).padStart(2, '0');
+          const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const year = dateObj.getFullYear();
+          newRow[field] = `${day}/${month}/${year}`;
         }
       });
 

@@ -85,6 +85,7 @@ export class ImportHISDataFormComponent implements OnInit {
   UniqueKeys: any[];
   mismathedTrue: boolean;
   columnDatasss: any;
+
   constructor(
     private dataservice: DataService,
     private masterService: MasterReportService
@@ -247,6 +248,7 @@ export class ImportHISDataFormComponent implements OnInit {
 
   // ========== onCellPrepared validator ==========
   onCellPrepared(e: any) {
+    console.log('content ready loaded :', e.row);
     /* ================= HEADER (MISMATCH) ================= */
     if (e.rowType === 'header' && e.column?.dataField) {
       const mismatch = this.mismatchedColumn?.[e.column.dataField];
@@ -349,7 +351,7 @@ export class ImportHISDataFormComponent implements OnInit {
 
   // =========== Utility: get caption from columnData ==========
   getCaptionByField(field: string) {
-    const col = this.columnData.find((c: any) => c.dataField === field);
+    const col = this.columnDatasss.find((c: any) => c.dataField === field);
     return col ? col.caption : '';
   }
 
@@ -360,8 +362,8 @@ export class ImportHISDataFormComponent implements OnInit {
     e.isValid = true;
     e.errorText = '';
 
-    this.columnData.forEach((col: any) => {
-      // 🚫 Skip mismatched columns completely — ALWAYS
+    this.columnDatasss.forEach((col: any) => {
+      // Skip mismatched columns completely — ALWAYS
       if (this.mismatchedColumns?.[col.dataField]) {
         return;
       }

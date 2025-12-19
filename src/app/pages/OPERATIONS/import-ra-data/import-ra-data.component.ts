@@ -414,30 +414,33 @@ export class ImportRADataComponent implements OnInit {
             value.getDate()
           );
         }
-
+        
         // Case 3: String-based date (ALL formats)
         else if (typeof value === 'string') {
           let cleaned = value.trim();
-
           // Remove ordinal suffixes: 1st, 2nd, 3rd, 4th
           cleaned = cleaned.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
-
-          // FIX: Broken GMT formats like "Thu Apr 03 2025 00:00:00 GMT +"
-          cleaned = cleaned.replace(/GMT\s*\+.*$/i, 'GMT');
-
-          // FIX: Some Excel exports miss timezone offset
-          if (/GMT$/i.test(cleaned)) {
-            cleaned = cleaned.replace(/GMT$/i, 'GMT+0000');
+          let parsed: Date | null = null;
+          // Handle dd-MM-yyyy or dd/MM/yyyy
+          if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(cleaned)) {
+            const [dd, mm, yyyy] = cleaned.split(/[-/]/);
+            parsed = new Date(+yyyy, +mm - 1, +dd);
+          } else {
+            // Fix GMT issues
+            cleaned = cleaned.replace(/GMT\s*\+.*$/i, 'GMT');
+            if (/GMT$/i.test(cleaned)) {
+              cleaned = cleaned.replace(/GMT$/i, 'GMT+0000');
+            }
+            parsed = new Date(cleaned);
           }
 
-          const parsed = new Date(cleaned);
+          // FORCE OUTPUT FORMAT dd/MM/yyyy
+          if (parsed && !isNaN(parsed.getTime())) {
+            const day = String(parsed.getDate()).padStart(2, '0');
+            const month = String(parsed.getMonth() + 1).padStart(2, '0');
+            const year = parsed.getFullYear();
 
-          if (!isNaN(parsed.getTime())) {
-            dateObj = new Date(
-              parsed.getFullYear(),
-              parsed.getMonth(),
-              parsed.getDate()
-            );
+            newRow[field] = `${day}/${month}/${year}`;
           }
         }
 

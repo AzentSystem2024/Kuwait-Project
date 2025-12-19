@@ -12,9 +12,9 @@
     [columnFixing]="{ enabled: true }"
     [height]="'80vh'"
     [width]="'100%'"
-    (onCellPrepared)="onCellPrepared($event)"
     (onRowValidating)="onRowValidating($event)"
     (onRowPrepared)="onRowPrepared($event)"
+    (onContentReady)="onCellPrepared($event)"
     [summary]="summaryColumnsData"
   >
     <dxo-paging [pageSize]="100"></dxo-paging>
