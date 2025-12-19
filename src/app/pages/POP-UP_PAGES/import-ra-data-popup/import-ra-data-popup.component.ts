@@ -260,7 +260,8 @@ export class ImportRADataPopupComponent implements OnInit {
       const mismatch = this.mismatchedColumns?.[e.column.dataField];
 
       if (mismatch) {
-        e.cellElement.style.color = '#ff4d4f';
+        e.cellElement.style.backgroundColor = '#bd3341';
+        e.cellElement.style.color = '#171717';
         e.cellElement.style.fontWeight = '600';
         e.cellElement.title =
           `Expected:\n${mismatch.expectedCaption} (${mismatch.expectedField})\n\n` +
@@ -338,7 +339,7 @@ export class ImportRADataPopupComponent implements OnInit {
     }, 0);
   }
 
-  // ========== Flexible Date / DateTime Validator ==========
+  // ========== Flexible Date / DateTime Validator =======
   isValidDDMMYYYY(value: any): boolean {
     if (!value || typeof value !== 'string') return false;
     const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
