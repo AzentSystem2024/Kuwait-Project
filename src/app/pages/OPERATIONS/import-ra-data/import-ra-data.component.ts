@@ -138,12 +138,10 @@ export class ImportRADataComponent implements OnInit {
           this.columnData = res.data.map((col: any) => ({
             dataField: col.ColumnName,
             caption: col.ColumnTitle,
-            dataType:
-              col.Type === 'DECIMAL'
-                ? 'number'
-                : col.Type === 'DATETIME'
-                ? 'date'
-                : 'string',
+
+            // IMPORTANT FIX
+            dataType: col.Type === 'DECIMAL' ? 'number' : 'string',
+
             type: col.Type,
 
             format:
@@ -194,7 +192,7 @@ export class ImportRADataComponent implements OnInit {
     return {
       column: col.ColumnName,
       summaryType: summaryType,
-      displayFormat: formatType === 'count' ? 'Count: {0} ' : 'Total: {0}',
+      displayFormat: formatType === 'count' ? '{0} ' : '{0}',
       valueFormat:
         formatType === 'decimal'
           ? {
@@ -298,8 +296,11 @@ export class ImportRADataComponent implements OnInit {
       }
 
       const excelCaptions = Object.keys(rawData[0] || {});
+      const normalizedExcelCaptions = excelCaptions.map((c) =>
+        this.normalizeCaption(c)
+      );
 
-      // COLUMN MISMATCH MAP (SOURCE OF TRUTH)
+      // ================= COLUMN MISMATCH MAP (SOURCE OF TRUTH) =================
       this.excelColumnMismatchMap = {};
       const mismatchMessages: string[] = [];
 
@@ -307,8 +308,11 @@ export class ImportRADataComponent implements OnInit {
         const expectedCaption = col.caption;
         const expectedField = col.dataField;
 
-        // PRIMARY: caption-based check
-        const captionExists = excelCaptions.includes(expectedCaption);
+        const normalizedExpected = this.normalizeCaption(expectedCaption);
+
+        // PRIMARY: caption-based match (normalized)
+        const captionExists =
+          normalizedExcelCaptions.includes(normalizedExpected);
 
         if (!captionExists) {
           // SECONDARY: index-based fallback
@@ -331,17 +335,18 @@ export class ImportRADataComponent implements OnInit {
         mismatchMessages.length > 0
           ? `Excel column mismatch detected:\n${mismatchMessages.join('\n')}`
           : null;
+      // ========================================================================
 
-      // MAP EXCEL DATA (caption → dataField)
+      // ================= MAP EXCEL DATA (caption → dataField) =================
       const captionToField: Record<string, string> = {};
       this.columnData.forEach((col) => {
-        captionToField[col.caption] = col.dataField;
+        captionToField[this.normalizeCaption(col.caption)] = col.dataField;
       });
 
       let mappedData = rawData.map((row: any) => {
         const newRow: any = {};
         Object.keys(row).forEach((caption) => {
-          const field = captionToField[caption];
+          const field = captionToField[this.normalizeCaption(caption)];
           if (field) newRow[field] = row[caption];
         });
         return newRow;
@@ -396,22 +401,37 @@ export class ImportRADataComponent implements OnInit {
 
         let dateObj: Date | null = null;
 
-        // Excel serial number
+        // Case 1: Excel serial number
         if (typeof value === 'number') {
           dateObj = new Date((value - 25569) * 86400 * 1000);
         }
-        // Date object
-        else if (value instanceof Date) {
+
+        // Case 2: Date object
+        else if (value instanceof Date && !isNaN(value.getTime())) {
           dateObj = new Date(
             value.getFullYear(),
             value.getMonth(),
             value.getDate()
           );
         }
-        // String date
+
+        // Case 3: String-based date (ALL formats)
         else if (typeof value === 'string') {
-          const cleaned = value.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+          let cleaned = value.trim();
+
+          // Remove ordinal suffixes: 1st, 2nd, 3rd, 4th
+          cleaned = cleaned.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+
+          // FIX: Broken GMT formats like "Thu Apr 03 2025 00:00:00 GMT +"
+          cleaned = cleaned.replace(/GMT\s*\+.*$/i, 'GMT');
+
+          // FIX: Some Excel exports miss timezone offset
+          if (/GMT$/i.test(cleaned)) {
+            cleaned = cleaned.replace(/GMT$/i, 'GMT+0000');
+          }
+
           const parsed = new Date(cleaned);
+
           if (!isNaN(parsed.getTime())) {
             dateObj = new Date(
               parsed.getFullYear(),
@@ -421,6 +441,7 @@ export class ImportRADataComponent implements OnInit {
           }
         }
 
+        // Final formatting: dd/MM/yyyy
         if (dateObj) {
           const day = String(dateObj.getDate()).padStart(2, '0');
           const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -436,6 +457,15 @@ export class ImportRADataComponent implements OnInit {
 
       return newRow;
     });
+  }
+
+  private normalizeCaption(value: string): string {
+    return value
+      ?.toString()
+      .replace(/\u00A0/g, ' ') // non-breaking space
+      .replace(/\s+/g, ' ') // collapse multiple spaces
+      .trim()
+      .toLowerCase();
   }
 
   // ============ normalize decimal ============
@@ -520,7 +550,7 @@ export class ImportRADataComponent implements OnInit {
       return;
     }
 
-    // 🔹 Resolve InsuranceID from InsuranceName
+    // Resolve InsuranceID from InsuranceName
     const insuranceId = this.getInsuranceIdByName(rowData.InsuranceName);
 
     if (!insuranceId) {
@@ -536,10 +566,10 @@ export class ImportRADataComponent implements OnInit {
     this.selectedInsuranceId = insuranceId;
     this.isLoading = true;
 
-    // 🔹 1) Load columns + summary
+    // 1) Load columns + summary
     this.fetch_RA_Column_Data_ByInsurance(insuranceId).subscribe({
       next: () => {
-        // 🔹 2) Load selected record data
+        // 2) Load selected record data
         this.service.fetch_RA_Data_log_view(this.LogID).subscribe({
           next: (res: any) => {
             if (res) {

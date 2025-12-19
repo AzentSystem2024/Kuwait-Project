@@ -148,7 +148,6 @@ export class ImportRADataPopupComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-    console.log('column fetched:', this.columnData);
     console.log('column fetched:', this.dataSource);
 
     try {
