@@ -43,7 +43,7 @@ import { firstValueFrom } from 'rxjs';
 export class InsuranceNewFormComponent implements OnInit {
   @ViewChild('availableGrid', { static: false })
   availableGrid?: DxDataGridComponent;
-    @ViewChild('FormValidation', { static: false })
+  @ViewChild('FormValidation', { static: false })
   FormValidation: DxValidationGroupComponent;
 
   @ViewChild('dataGrid', { static: false })
@@ -145,7 +145,6 @@ export class InsuranceNewFormComponent implements OnInit {
     this.selecteRAuniqueKeys = this.hisColumns
       .filter((item) => item.IsHisColumn === false)
       .map((item) => item.ColumnID);
-    console.log('Default HIS selected keys:', this.selecteHISuniqueKeys);
 
     // console.log(this.selectedKeys,'==============')
   }
@@ -178,81 +177,6 @@ export class InsuranceNewFormComponent implements OnInit {
     // this.RA_columns = res|| [];
   }
 
-  // ======== ENABLE POPUP FOR SELECTING COLUMN DATA ========
-  // manageColumns() {
-  //   this.get_All_Column_data();
-  //   this.ColumnpopupVisible = true;
-  // }
-
-  //   async manageColumns() {
-  //   // Fetch full column list first
-  //   await this.get_All_Column_data();
-
-  //   if (this.fullcolumnsData && this.fullcolumnsData.length > 0) {
-  //   const defaultColumns = ['PAYMENT_DATE', 'REFERENCE_NO'];
-
-  //   this.fullcolumnsData = this.fullcolumnsData.map(col => {
-  //     const isLocked = defaultColumns.includes(col.ColumnName);
-  //     return {
-  //       ...col,
-  //       Status: isLocked ? 'selected' : 'available',
-  //       isLocked
-  //     };
-  //   });
-  // }
-
-  // // Make sure locked rows always appear first
-  // this.fullcolumnsData.sort((a, b) => {
-  //   if (a.isLocked && !b.isLocked) return -1;
-  //   if (!a.isLocked && b.isLocked) return 1;
-  //   return 0;
-  // });
-
-  //   // Finally open the popup
-  //   this.ColumnpopupVisible = true;
-
-  //   // Optional: refresh grids
-  //   setTimeout(() => {
-  //     this.availableGrid?.instance.refresh();
-  //     this.selectedGrid?.instance.refresh();
-  //   });
-  // }
-
-  // async manageColumns() {
-  //   // Step 1: Fetch all columns
-  //   await this.get_All_Column_data();
-
-  //   if (this.fullcolumnsData && this.fullcolumnsData.length > 0) {
-  //     const defaultColumns = ['PAYMENT_DATE', 'REFERENCE_NO'];
-
-  //     // Step 2: Tag locked columns
-  //     this.fullcolumnsData = this.fullcolumnsData.map(col => {
-  //       const isLocked = defaultColumns.includes(col.ColumnName);
-  //       return {
-  //         ...col,
-  //         Status: isLocked ? 'selected' : 'available',
-  //         isLocked
-  //       };
-  //     });
-  //   }
-
-  //   // Step 3: Keep locked rows always on top
-  //   this.fullcolumnsData.sort((a, b) => {
-  //     if (a.isLocked && !b.isLocked) return -1;
-  //     if (!a.isLocked && b.isLocked) return 1;
-  //     return 0;
-  //   });
-
-  //   // Step 4: Open popup
-  //   this.ColumnpopupVisible = true;
-
-  //   // Step 5: Refresh grids
-  //   setTimeout(() => {
-  //     this.availableGrid?.instance.refresh();
-  //     this.selectedGrid?.instance.refresh();
-  //   });
-  // }
-
   //-----------------selected columns in his data----------
   onColumnSelectionChanged(e: any) {
     this.selectedColumns = e.selectedRowsData;
@@ -263,62 +187,12 @@ export class InsuranceNewFormComponent implements OnInit {
     console.log('Selected Columns:', this.selectedColumns);
     console.log('Selected Field Names:', this.selectedFieldNames);
   }
-  // async manageColumns() {
-  //   // Step 1: Fetch all columns
-  //   await this.get_All_Column_data();
 
-  //   const defaultColumns = ['PAYMENT_DATE', 'REFERENCE_NO'];
-
-  //   // Step 2: When editing, keep already selected columns
-  //   const existingSelected = new Set(
-  //     (this.raFileColumns || []).map((col: any) => col.ColumnName)
-  //   );
-
-  //   // Step 3: Prepare full columns list
-  //   this.fullcolumnsData = this.fullcolumnsData.map((col: any) => {
-  //     const isLocked = defaultColumns.includes(col.ColumnName);
-  //     const isSelected = existingSelected.has(col.ColumnName);
-
-  //     return {
-  //       ...col,
-  //       // If editing, keep selected status; else auto select locked ones
-  //       Status: isSelected || isLocked ? 'selected' : 'available',
-  //       isLocked,
-  //     };
-  //   });
-
-  //   // Step 4: Keep locked rows always at top
-  //   this.fullcolumnsData.sort((a, b) => {
-  //     if (a.isLocked && !b.isLocked) return -1;
-  //     if (!a.isLocked && b.isLocked) return 1;
-  //     return 0;
-  //   });
-
-  //   // Step 5: If it's a *new* form (not editing), ensure locked columns are in raFileColumns
-  //   if (!this.insuranceData) {
-  //     const lockedColumns = this.fullcolumnsData.filter((c) => c.isLocked);
-  //     const otherSelected = this.raFileColumns || [];
-
-  //     // Merge locked ones at top (avoid duplicates)
-  //     const uniqueByName = new Map();
-  //     [...lockedColumns, ...otherSelected].forEach((c) =>
-  //       uniqueByName.set(c.ColumnName, c)
-  //     );
-  //     this.raFileColumns = Array.from(uniqueByName.values());
-  //   }
-
-  //   // Step 6: Open popup and refresh grids
-  //   this.ColumnpopupVisible = true;
-  //   setTimeout(() => {
-  //     this.availableGrid?.instance.refresh();
-  //     this.selectedGrid?.instance.refresh();
-  //   });
-  // }
   async manageColumns() {
     // Step 1: Fetch all columns
     await this.get_All_Column_data();
 
-    const defaultColumns =["Payment Date", "Paymant Reference"];
+    const defaultColumns = ['Payment Date', 'Paymant Reference'];
 
     // Step 2: Already selected column names (saved order)
     const savedSelectedOrder = (this.raFileColumns || []).map(
@@ -433,184 +307,65 @@ export class InsuranceNewFormComponent implements OnInit {
     this.fullcolumnsData.push(updatedItem);
   };
 
-  // ======== Reorder inside Selected Columns grid =======
-// onReorder = (e: any) => {
-//   const locked = ['PAYMENT_DATE', 'REFERENCE_NO'];
+  onReorder = (e: any) => {
+    const locked = ['Payment Date', 'Paymant Reference'];
 
-//   // Get the dragged row object
-//   const draggedRow = e.itemData;
+    const draggedKey = e.itemData.ColumnName;
 
-//   // Stop dragging locked rows
-//   if (locked.includes(draggedRow.ColumnName)) {
-//     e.cancel = true;
-//     return;
-//   }
+    // 1️⃣ Block dragging locked columns
+    if (locked.includes(draggedKey)) {
+      e.cancel = true;
+      return;
+    }
 
-//   // Build selected list fresh (filtered from full list)
-//   const selectedItems = this.fullcolumnsData.filter(
-//     (x) => x.Status === 'selected'
-//   );
+    // Get selected & available lists
+    const selectedList = this.fullcolumnsData.filter(
+      (x) => x.Status === 'selected'
+    );
+    const availableList = this.fullcolumnsData.filter(
+      (x) => x.Status === 'available'
+    );
 
-//   // Find actual positions using ColumnName, NOT filtered index
-//   const fromIndex = selectedItems.findIndex(
-//     (x) => x.ColumnName === draggedRow.ColumnName
-//   );
-//   const toIndex = e.toIndex;
+    // Actual index of dragged item
+    const fromIndex = selectedList.findIndex(
+      (x) => x.ColumnName === draggedKey
+    );
 
-//   // Prevent drop into locked positions
-//   if (toIndex < locked.length) {
-//     e.cancel = true;
-//     return;
-//   }
+    // DevExtreme visible rows
+    const visibleRows = e.component.getVisibleRows();
 
-//   // Perform reorder safely
-//   const movedItem = selectedItems.splice(fromIndex, 1)[0];
-//   selectedItems.splice(toIndex, 0, movedItem);
+    // Handle drop at end (e.toIndex == count)
+    if (e.toIndex >= visibleRows.length) {
+      const moved = selectedList.splice(fromIndex, 1)[0];
+      selectedList.push(moved);
 
-//   // Merge updated items back into full list
-//   this.fullcolumnsData = [
-//     ...selectedItems,
-//     ...this.fullcolumnsData.filter((x) => x.Status !== 'selected'),
-//   ];
-// };
+      this.fullcolumnsData = [...selectedList, ...availableList];
+      return;
+    }
 
-// onReorder = (e: any) => {
-//   const locked = ['PAYMENT_DATE', 'REFERENCE_NO'];
+    const toRow = visibleRows[e.toIndex];
 
-//   // Object being dragged
-//   const draggedRow = e.itemData;
+    // 2️⃣ Block dropping ON locked columns
+    if (locked.includes(toRow.data.ColumnName)) {
+      e.cancel = true;
+      return;
+    }
 
-//   // STEP 1 → BLOCK dragging locked items entirely
-//   if (locked.includes(draggedRow.ColumnName)) {
-//     e.cancel = true;
-//     return;
-//   }
+    // Actual new index inside selectedList
+    let toIndex = selectedList.findIndex(
+      (x) => x.ColumnName === toRow.data.ColumnName
+    );
 
-//   // STEP 2 → Build selected rows list
-//   const selectedItems = this.fullcolumnsData.filter(
-//     (x) => x.Status === 'selected'
-//   );
+    if (fromIndex === -1 || toIndex === -1) return;
 
-//   // STEP 3 → Find real index of the dragged row
-//   const fromIndex = selectedItems.findIndex(
-//     (x) => x.ColumnName === draggedRow.ColumnName
-//   );
+    // 3️⃣ Remove & insert WITHOUT subtracting index
+    const [movedItem] = selectedList.splice(fromIndex, 1);
 
-//   let toIndex = e.toIndex;
+    selectedList.splice(toIndex, 0, movedItem);
 
-//   // STEP 4 → Prevent dropping into locked area (index 0 & 1)
-//   if (toIndex < locked.length) {
-//     toIndex = locked.length;      // auto move AFTER locked rows
-//   }
-
-//   // STEP 5 → Reorder
-//   const movedItem = selectedItems.splice(fromIndex, 1)[0];
-//   selectedItems.splice(toIndex, 0, movedItem);
-
-//   // STEP 6 → Rebuild final list always keeping locked rows on top
-//   const lockedRows = selectedItems.filter(x => locked.includes(x.ColumnName));
-//   const normalRows = selectedItems.filter(x => !locked.includes(x.ColumnName));
-
-//   this.fullcolumnsData = [
-//     ...lockedRows,                    // Always remain first
-//     ...normalRows,                    // User reorder applies here
-//     ...this.fullcolumnsData.filter(x => x.Status !== 'selected')
-//   ];
-// };
-
-// onReorder = (e: any) => {
-//   const locked = ["PAYMENT_DATE", "REFERENCE_NO"];
-//   const dragged = e.itemData;
-
-//   // ❌ block locked items
-//   if (locked.includes(dragged.ColumnName)) {
-//     e.cancel = true;
-//     return;
-//   }
-
-//   // ✔ STEP 1 → Visible rows = only for position calculation
-//   const visibleRows = e.component.getVisibleRows();
-
-//   // ✔ STEP 2 → Build selected list from FULL DATA (not visible rows!)
-//   let selectedItems = this.fullcolumnsData.filter(x => x.Status === "selected");
-
-//   // ✔ STEP 3 → Find actual data index of dragged row
-//   const fromIndex = selectedItems.findIndex(
-//     x => x.ColumnName === dragged.ColumnName
-//   );
-
-//   // ✔ STEP 4 → Compute true target index
-//   let toIndex = e.toIndex;
-
-//   // Do NOT allow dropping before locked rows
-//   if (toIndex < locked.length) {
-//     toIndex = locked.length;
-//   }
-
-//   // ✔ STEP 5 → Move the item inside selected array
-//   const moved = selectedItems.splice(fromIndex, 1)[0];
-//   selectedItems.splice(toIndex, 0, moved);
-
-//   // ✔ STEP 6 → Merge back into fullcolumnsData (no missing rows)
-//   const notSelected = this.fullcolumnsData.filter(
-//     x => x.Status !== "selected"
-//   );
-
-//   this.fullcolumnsData = [...selectedItems, ...notSelected];
-// };
-onReorder = (e: any) => {
-  const locked = ["Payment Date", "Paymant Reference"];
-
-  const draggedKey = e.itemData.ColumnName;
-
-  // 1️⃣ Block dragging locked columns
-  if (locked.includes(draggedKey)) {
-    e.cancel = true;
-    return;
-  }
-
-  // Get selected & available lists
-  const selectedList = this.fullcolumnsData.filter(x => x.Status === "selected");
-  const availableList = this.fullcolumnsData.filter(x => x.Status === "available");
-
-  // Actual index of dragged item
-  const fromIndex = selectedList.findIndex(x => x.ColumnName === draggedKey);
-
-  // DevExtreme visible rows
-  const visibleRows = e.component.getVisibleRows();
-
-  // Handle drop at end (e.toIndex == count)
-  if (e.toIndex >= visibleRows.length) {
-    const moved = selectedList.splice(fromIndex, 1)[0];
-    selectedList.push(moved);
-
+    // Final merge
     this.fullcolumnsData = [...selectedList, ...availableList];
-    return;
-  }
-
-  const toRow = visibleRows[e.toIndex];
-
-  // 2️⃣ Block dropping ON locked columns
-  if (locked.includes(toRow.data.ColumnName)) {
-    e.cancel = true;
-    return;
-  }
-
-  // Actual new index inside selectedList
-  let toIndex = selectedList.findIndex(x => x.ColumnName === toRow.data.ColumnName);
-
-  if (fromIndex === -1 || toIndex === -1) return;
-
-  // 3️⃣ Remove & insert WITHOUT subtracting index
-  const [movedItem] = selectedList.splice(fromIndex, 1);
-
-  selectedList.splice(toIndex, 0, movedItem);
-
-  // Final merge
-  this.fullcolumnsData = [...selectedList, ...availableList];
-};
-
-
+  };
 
   // ==== Apply: Save selected columns to raFileColumns and close popup ====
   applySelected() {
@@ -653,17 +408,13 @@ onReorder = (e: any) => {
       this.selectedGrid?.instance.refresh();
     });
   }
+  
   // ============= save insurance template ==========
   saveInsurance() {
-  if (!this.isValid()) return;
+    if (!this.isValid()) return;
     const userId = Number(sessionStorage.getItem('UserID')) || 1;
     const insuranceId = this.insuranceCompany.insuranceId || 0;
 
-    // const uniqueKeys = this.UniqueColumnData.map((col: any) => ({
-    //   ColumnID: col.ColumnID || 0,
-    //   ColumnName: col.ColumnName || '',
-    //   ColumnTitle: col.ColumnTitle || '',
-    // }));
     const uniqueKeys = [...this.finalHISObjects, ...this.finalRAObjects];
     const hisMatchedIds = this.finalRAObjects.map((x) => x.ColumnID);
 
@@ -709,20 +460,13 @@ onReorder = (e: any) => {
 
   // ============= update insurance template ==========
   updateInsurance() {
-        if (!this.isValid()) return;
+    if (!this.isValid()) return;
     const userId = Number(sessionStorage.getItem('UserID')) || 1;
     const insuranceId = this.insuranceCompany.insuranceId || 0;
-
-    // const uniqueKeys = this.UniqueColumnData.map((col: any) => ({
-    //   ColumnID: col.ColumnID || 0,
-    //   ColumnName: col.ColumnName || '',
-    //   ColumnTitle: col.ColumnTitle || '',
-    // }));
     const hisObjects = this.finalHISObjects?.length
       ? this.finalHISObjects
       : this.otherHISObjects;
 
-    // const uniqueKeys = [...this.finalHISObjects,...this.finalRAObjects];
     const uniqueKeys = [...hisObjects, ...this.finalRAObjects];
     const columns = this.raFileColumns.map((col: any) => ({
       ColumnID: col.ColumnID || 0,
@@ -771,7 +515,6 @@ onReorder = (e: any) => {
     });
   }
 
-  
   isValid() {
     return this.FormValidation.instance.validate().isValid;
   }
@@ -804,25 +547,31 @@ onReorder = (e: any) => {
 
   RADropdownOnchangeValue(e: any) {
     const ds = e.component.getDataSource();
-
+    console.log('RA file columns:', this.raFileColumns);
     ds.load().then((items: any[]) => {
-      // items = always updated dataset
       const selected = items.filter((item: any) =>
         e.value.includes(item.ColumnID)
       );
+      this.finalRAObjects = selected.map((item: any) => {
+        // 🔹 Find matching column from RA file list
+        const raCol = this.raFileColumns.find(
+          (col: any) => col.ColumnID === item.ColumnID
+        );
 
-      this.finalRAObjects = selected.map((item: any) => ({
-        ID: 0,
-        InsuranceID: this.insurance_id || 0,
-        ColumnID: item.ColumnID,
-        ColumnName: '',
-        ColumnTitle: item.ColumnTitle ?? '',
-        IsHisColumn: false,
-      }));
+        return {
+          ID: 0,
+          InsuranceID: this.insurance_id || 0,
+          ColumnID: item.ColumnID,
+          ColumnName: raCol?.ColumnName ?? '',
+          ColumnTitle: raCol?.ColumnTitle ?? '',
+          IsHisColumn: false,
+        };
+      });
 
       console.log('Final RA Objects:', this.finalRAObjects);
     });
   }
+
 
   HISDropdownOnchangeValue(e: any) {
     const ds = e.component.getDataSource();
@@ -832,14 +581,21 @@ onReorder = (e: any) => {
         e.value.includes(item.ID || item.ColumnID)
       );
 
-      this.finalHISObjects = selectedHISObjects.map((item: any) => ({
-        ID: 0,
-        InsuranceID: this.insurance_id || 0,
-        ColumnID: item.ID || item.ColumnID,
-        ColumnName: item.ColumnName ?? '',
-        ColumnTitle: item.DESCRIPTION ?? item.ColumnTitle ?? '',
-        IsHisColumn: true,
-      }));
+      this.finalHISObjects = selectedHISObjects.map((item: any) => {
+        const columnName = item.ColumnName ?? item.DESCRIPTION ?? '';
+
+        return {
+          ID: 0,
+          InsuranceID: this.insurance_id || 0,
+          ColumnID: item.ID || item.ColumnID,
+
+          // SAME VALUE FOR BOTH
+          ColumnName: columnName,
+          ColumnTitle: columnName,
+
+          IsHisColumn: true,
+        };
+      });
 
       console.log('Updated HIS Objects:', this.finalHISObjects);
     });
@@ -867,7 +623,7 @@ onReorder = (e: any) => {
     DxButtonModule,
     DxPopupModule,
     DxTagBoxModule,
-    DxValidationGroupModule
+    DxValidationGroupModule,
   ],
   declarations: [InsuranceNewFormComponent],
   exports: [InsuranceNewFormComponent],

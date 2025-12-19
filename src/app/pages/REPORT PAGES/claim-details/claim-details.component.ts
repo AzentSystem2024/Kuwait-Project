@@ -486,11 +486,11 @@ export class ClaimDetailsComponent implements OnInit {
       if (column.Type === 'Decimal') {
         columnFormat = {
           type: 'fixedPoint',
-          precision: 2,
+          precision: 3,
           formatter: (value) =>
             new Intl.NumberFormat(userLocale, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
+              minimumFractionDigits: 3,
+              maximumFractionDigits: 3,
             }).format(value),
         };
       }
