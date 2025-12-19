@@ -148,18 +148,6 @@ export class ImportHISDataFormComponent implements OnInit {
     return map;
   }
 
-  // convertViewResponseKeys(viewData: any[], columnList: any[]) {
-  //   const columnMap = this.createColumnMap(columnList);
-  //   return viewData.map((row) => {
-  //     const converted: any = {};
-  //     Object.keys(row).forEach((key) => {
-  //       const newKey = columnMap[key] || key;
-  //       converted[newKey] = row[key];
-  //     });
-  //     return converted;
-  //   });
-  // }
-
   detectMismatchedColumns() {
     this.mismatchedColumns.clear();
     this.hasColumnMismatch = false;
@@ -280,7 +268,7 @@ export class ImportHISDataFormComponent implements OnInit {
     /* ================= DATA VALIDATION ================= */
     if (e.rowType !== 'data') return;
 
-    const colInfo = this.columnData.find(
+    const colInfo = this.columnDatasss.find(
       (c: any) => c.dataField === e.column.dataField
     );
     if (!colInfo) return;
