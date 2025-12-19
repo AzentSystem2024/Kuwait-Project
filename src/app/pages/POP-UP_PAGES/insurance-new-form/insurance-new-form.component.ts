@@ -318,7 +318,7 @@ export class InsuranceNewFormComponent implements OnInit {
     // Step 1: Fetch all columns
     await this.get_All_Column_data();
 
-    const defaultColumns =["Payment Date", "Paymant Reference"];
+    const defaultColumns = ['PAYMENT_DATE', 'REFERENCE_NO']
 
     // Step 2: Already selected column names (saved order)
     const savedSelectedOrder = (this.raFileColumns || []).map(
@@ -559,7 +559,7 @@ export class InsuranceNewFormComponent implements OnInit {
 //   this.fullcolumnsData = [...selectedItems, ...notSelected];
 // };
 onReorder = (e: any) => {
-  const locked = ["Payment Date", "Paymant Reference"];
+  const locked = ['PAYMENT_DATE', 'REFERENCE_NO'];
 
   const draggedKey = e.itemData.ColumnName;
 
