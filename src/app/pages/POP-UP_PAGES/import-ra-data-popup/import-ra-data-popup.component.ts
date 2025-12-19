@@ -265,7 +265,7 @@ export class ImportRADataPopupComponent implements OnInit {
         e.cellElement.style.fontWeight = '600';
         e.cellElement.title =
           `Expected:\n${mismatch.expectedCaption} (${mismatch.expectedField})\n\n` +
-          `Current Excel Column ${mismatch.index}:\n${mismatch.actualField}`;
+          `Current Excel Column:\n${mismatch.actualField}`;
 
         this.invalidData = true;
       }
