@@ -142,6 +142,7 @@
       *ngIf="isNewFormPopupOpened"
       [dataSource]="ImportedDataSource"
       [selectedInsurance]="selectedInsuranceId"
+      [mismatchedColumn]="excelColumnMismatchMap"
       (closeForm)="CloseEditForm()"
     ></app-import-his-data-import>
   </dx-popup>

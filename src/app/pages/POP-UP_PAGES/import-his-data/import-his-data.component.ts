@@ -43,6 +43,15 @@ export class ImportHISDataFormComponent implements OnInit {
   @Input() viewData: any = null;
   @Input() dataSource: any = null;
   @Input() selectedInsurance: any = null;
+  @Input() mismatchedColumn: Record<
+    string,
+    {
+      expectedCaption: string;
+      expectedField: string;
+      index: number;
+      actualField: string;
+    }
+  > = {};
 
   readonly allowedPageSizes: any = [50, 100, 1000];
   displayMode: any = 'full';
@@ -88,10 +97,9 @@ export class ImportHISDataFormComponent implements OnInit {
       this.dataservice.get_His_Data_Column_List().subscribe((res: any) => {
         const columnList = res.data;
         const rawData = this.viewData.import_his_data;
-        const convertedData = this.convertViewResponseKeys(rawData, columnList);
-        console.log(convertedData);
-        this.buildSummaryFromData(convertedData);
-        this.dataSource = convertedData;
+        // const convertedData = this.convertViewResponseKeys(rawData, columnList);
+        this.buildSummaryFromData(rawData);
+        this.dataSource = rawData;
       });
     }
     console.log('fetched datasource :>', this.dataSource);
@@ -140,17 +148,17 @@ export class ImportHISDataFormComponent implements OnInit {
     return map;
   }
 
-  convertViewResponseKeys(viewData: any[], columnList: any[]) {
-    const columnMap = this.createColumnMap(columnList);
-    return viewData.map((row) => {
-      const converted: any = {};
-      Object.keys(row).forEach((key) => {
-        const newKey = columnMap[key] || key;
-        converted[newKey] = row[key];
-      });
-      return converted;
-    });
-  }
+  // convertViewResponseKeys(viewData: any[], columnList: any[]) {
+  //   const columnMap = this.createColumnMap(columnList);
+  //   return viewData.map((row) => {
+  //     const converted: any = {};
+  //     Object.keys(row).forEach((key) => {
+  //       const newKey = columnMap[key] || key;
+  //       converted[newKey] = row[key];
+  //     });
+  //     return converted;
+  //   });
+  // }
 
   detectMismatchedColumns() {
     this.mismatchedColumns.clear();
@@ -194,19 +202,13 @@ export class ImportHISDataFormComponent implements OnInit {
           type: col.Type,
         }));
         this.columnDatasss = res.data.map((col: any) => ({
-          dataField: col.ColumnTitle,
+          dataField: col.ColumnName,
           caption: col.ColumnTitle,
           type: col.Type,
           width: 150,
           wordWrapEnabled: true,
-          dataType:
-            col.Type === 'DECIMAL'
-              ? 'number'
-              : col.Type === 'DATETIME'
-              ? 'date'
-              : 'string',
+          dataType: col.Type === 'DECIMAL' ? 'number' : 'string',
 
-          // 3-digit decimal formatting
           format:
             col.Type === 'DECIMAL'
               ? {
@@ -257,50 +259,66 @@ export class ImportHISDataFormComponent implements OnInit {
 
   // ========== onCellPrepared validator ==========
   onCellPrepared(e: any) {
+    /* ================= HEADER (MISMATCH) ================= */
+    if (e.rowType === 'header' && e.column?.dataField) {
+      const mismatch = this.mismatchedColumn?.[e.column.dataField];
+
+      if (mismatch) {
+        e.cellElement.style.backgroundColor = '#bd3341';
+        e.cellElement.style.color = '#171717';
+        e.cellElement.style.fontWeight = '600';
+        e.cellElement.title =
+          `Expected HIS Column:\n${mismatch.expectedCaption}\n\n` +
+          `Excel Column Found:\n${mismatch.actualField}`;
+
+        this.mismathedTrue = true;
+        this.isValidData = false;
+      }
+      return;
+    }
+
+    /* ================= DATA VALIDATION ================= */
     if (e.rowType !== 'data') return;
+
     const colInfo = this.columnData.find(
       (c: any) => c.dataField === e.column.dataField
     );
     if (!colInfo) return;
 
-    const value = e.value;
+    // 🚫 Skip entire column if mismatch exists
+    if (this.mismatchedColumn?.[colInfo.dataField]) {
+      return;
+    }
 
-    // Skip empty/null values
+    const value = e.value;
     if (value === null || value === '') return;
 
     let isInvalid = false;
     let reason = '';
 
-    // DATETIME validation (strict dd/MM/yyyy)
+    // DATETIME validation
     if (colInfo.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
       isInvalid = true;
-      this.isValidData = false;
       reason = 'Invalid Date format';
     }
 
     // DECIMAL validation
     if (colInfo.type === 'DECIMAL') {
       const rawVal = value?.toString().trim();
-      // Allow empty or dash
-      if (rawVal === '' || rawVal === '-') {
-        return; // valid
-      }
-      // Remove commas for numeric check
+      if (rawVal === '' || rawVal === '-') return;
+
       const normalizedVal = rawVal.replace(/,/g, '');
-      // Validate number
       if (isNaN(Number(normalizedVal))) {
         isInvalid = true;
         reason = 'Invalid Decimal number';
-        this.isValidData = false;
       }
     }
 
     if (isInvalid) {
-      // Highlight the cell with tooltip showing reason and current value
       this.highlightInvalidCell(e, `${reason}: "${value}"`);
-
       this.invalidColumns.add(colInfo.dataField);
       this.highlightColumnHeader(colInfo.dataField);
+      this.isValidData = false;
     }
   }
 
@@ -324,13 +342,18 @@ export class ImportHISDataFormComponent implements OnInit {
       const headerCells = document.querySelectorAll(
         `.dx-header-row .dx-datagrid-text-content`
       );
+
       headerCells.forEach((headerCell: any) => {
         if (
           headerCell.innerText === dataField ||
           this.getCaptionByField(dataField) === headerCell.innerText
         ) {
+          // 🚫 do not override mismatch tooltip
+          if (!headerCell.title) {
+            headerCell.title = 'Contains invalid data';
+          }
           headerCell.style.color = '#ff9999';
-          headerCell.title = 'Contains invalid data';
+          this.isValidData = false;
         }
       });
     }, 0);
@@ -342,60 +365,50 @@ export class ImportHISDataFormComponent implements OnInit {
     return col ? col.caption : '';
   }
 
+  // =========== Row-level validation (prevent save) ==========
   onRowValidating(e: any) {
     const row = e.newData || e.oldData;
 
-    // default valid
     e.isValid = true;
     e.errorText = '';
 
     this.columnData.forEach((col: any) => {
-      // 🚫 1) mismatch column → validation COMPLETELY skip
-      if (this.mismatchedColumns.has(col.dataField)) {
+      // 🚫 Skip mismatched columns completely — ALWAYS
+      if (this.mismatchedColumns?.[col.dataField]) {
         return;
       }
 
       const value = row[col.dataField];
-
-      // 🚫 2) empty value skip
       if (value === null || value === '') return;
 
       let isInvalid = false;
 
-      // ✅ DATETIME validation
       if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
         isInvalid = true;
       }
 
-      // ✅ DECIMAL validation
       if (col.type === 'DECIMAL' && isNaN(Number(value))) {
         isInvalid = true;
       }
+
       if (isInvalid) {
         e.isValid = false;
         e.errorText = `${col.caption} has invalid value: ${value}`;
-
         this.invalidColumns.add(col.dataField);
-
-        // ✅ runs ONLY for matched columns
-        // ✅ ONLY if this column is NOT mismatched
-
         this.highlightColumnHeader(col.dataField);
       }
     });
   }
 
   onHeaderCellPrepared(e: any) {
-    if (e.rowType !== 'header') return;
+    if (e.rowType !== 'header' || !e.column?.dataField) return;
 
-    const field = e.column?.dataField;
-    if (!field) return;
-
-    if (this.mismatchedColumns.has(field)) {
+    if (this.mismatchedColumns?.[e.column.dataField]) {
       this.mismathedTrue = true;
       e.cellElement.style.color = '#d32f2f';
       e.cellElement.style.fontWeight = '600';
-      e.cellElement.title = 'Column mismatch: Not found in HIS column list';
+
+      // Tooltip already set in onCellPrepared → do NOT override
     }
   }
 
