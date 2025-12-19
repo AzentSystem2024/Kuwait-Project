@@ -117,6 +117,13 @@ export class ImportHISDataComponent implements OnInit {
           dataField: col.ColumnName,
           caption: col.ColumnTitle,
           type: col.Type,
+          format:
+            col.Type === 'DECIMAL'
+              ? {
+                  type: 'fixedPoint',
+                  precision: 3,
+                }
+              : undefined,
         }));
         console.log('Column DAta :>', this.columnData);
         this.isColumnsLoaded = true;

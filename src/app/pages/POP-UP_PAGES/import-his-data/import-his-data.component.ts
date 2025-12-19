@@ -199,6 +199,21 @@ export class ImportHISDataFormComponent implements OnInit {
           type: col.Type,
           width: 150,
           wordWrapEnabled: true,
+          dataType:
+            col.Type === 'DECIMAL'
+              ? 'number'
+              : col.Type === 'DATETIME'
+              ? 'date'
+              : 'string',
+
+          // 3-digit decimal formatting
+          format:
+            col.Type === 'DECIMAL'
+              ? {
+                  type: 'fixedPoint',
+                  precision: 3,
+                }
+              : undefined,
         }));
         this.isColumnsLoaded = true;
         this.detectMismatchedColumns();
