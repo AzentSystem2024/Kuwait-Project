@@ -192,7 +192,7 @@ export class InsuranceNewFormComponent implements OnInit {
     // Step 1: Fetch all columns
     await this.get_All_Column_data();
 
-    const defaultColumns = ['Payment Date', 'Paymant Reference'];
+    const defaultColumns = ['PAYMENT_DATE', 'REFERENCE_NO'];
 
     // Step 2: Already selected column names (saved order)
     const savedSelectedOrder = (this.raFileColumns || []).map(
@@ -308,7 +308,7 @@ export class InsuranceNewFormComponent implements OnInit {
   };
 
   onReorder = (e: any) => {
-    const locked = ['Payment Date', 'Paymant Reference'];
+    const locked = ['PAYMENT_DATE', 'REFERENCE_NO'];
 
     const draggedKey = e.itemData.ColumnName;
 
@@ -408,7 +408,7 @@ export class InsuranceNewFormComponent implements OnInit {
       this.selectedGrid?.instance.refresh();
     });
   }
-  
+
   // ============= save insurance template ==========
   saveInsurance() {
     if (!this.isValid()) return;
@@ -486,11 +486,6 @@ export class InsuranceNewFormComponent implements OnInit {
       Remarks: this.insuranceCompany.remarks,
       Inactive: this.insuranceCompany.inactive,
     };
-    console.log(this.selectedKeys, 'selectedKeys');
-
-    console.log('raFileColumns', this.raFileColumns);
-
-    console.log('Update Payload:', payload);
 
     this.masterService.update_Insurance_data(payload).subscribe({
       next: (response: any) => {
@@ -571,7 +566,6 @@ export class InsuranceNewFormComponent implements OnInit {
       console.log('Final RA Objects:', this.finalRAObjects);
     });
   }
-
 
   HISDropdownOnchangeValue(e: any) {
     const ds = e.component.getDataSource();
