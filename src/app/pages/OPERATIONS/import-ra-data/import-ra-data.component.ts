@@ -465,8 +465,8 @@ export class ImportRADataComponent implements OnInit {
   private normalizeCaption(value: string): string {
     return value
       ?.toString()
-      .replace(/\u00A0/g, ' ') // non-breaking space
-      .replace(/\s+/g, ' ') // collapse multiple spaces
+      .replace(/\u00A0/g, ' ') 
+      .replace(/\s+/g, ' ')
       .trim()
       .toLowerCase();
   }
