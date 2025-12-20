@@ -39,6 +39,7 @@ import { PayerWiseReportModule } from './pages/REPORT PAGES/payer-wise-report/pa
 import { BalanceAmountToBeReceivedModule } from './pages/REPORT PAGES/balance-amount-to-be-received/balance-amount-to-be-received.component';
 import { AgedReportModule } from './pages/REPORT PAGES/aged-report/aged-report.component';
 import { InsuranceMasterEditComponent, InsuranceMasterEditModule } from './pages/POP-UP_PAGES/insurance-master-edit/insurance-master-edit.component';
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 @NgModule({
   declarations: [AppComponent],
@@ -80,6 +81,7 @@ import { InsuranceMasterEditComponent, InsuranceMasterEditModule } from './pages
     AppInfoService,
     ThemeService,
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
+      { provide: LocationStrategy, useClass: HashLocationStrategy }
     // { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],
