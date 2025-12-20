@@ -306,7 +306,7 @@ export class ImportHISDataComponent implements OnInit {
             displayTime: 7000,
             position: { my: 'right top', at: 'right top', of: window },
           });
-        }, 0);
+        },2500);
       }
 
       this.resetFileInput();
