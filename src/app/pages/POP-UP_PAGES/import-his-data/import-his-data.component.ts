@@ -248,7 +248,6 @@ export class ImportHISDataFormComponent implements OnInit {
 
   // ========== onCellPrepared validator ==========
   onCellPrepared(e: any) {
-    console.log('content ready loaded :', e.row);
     /* ================= HEADER (MISMATCH) ================= */
     if (e.rowType === 'header' && e.column?.dataField) {
       const mismatch = this.mismatchedColumn?.[e.column.dataField];
@@ -311,6 +310,70 @@ export class ImportHISDataFormComponent implements OnInit {
       this.isValidData = false;
     }
   }
+  
+  // =========== Row-level validation (prevent save) ==========
+  onRowValidating(e: any) {
+    const row = e.newData || e.oldData;
+
+    e.isValid = true;
+    e.errorText = '';
+
+    this.columnDatasss.forEach((col: any) => {
+      // Skip mismatched columns completely — ALWAYS
+      if (this.mismatchedColumns?.[col.dataField]) {
+        return;
+      }
+
+      const value = row[col.dataField];
+      if (value === null || value === '') return;
+
+      let isInvalid = false;
+
+      if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
+        isInvalid = true;
+      }
+
+      if (col.type === 'DECIMAL' && isNaN(Number(value))) {
+        isInvalid = true;
+      }
+
+      if (isInvalid) {
+        e.isValid = false;
+        e.errorText = `${col.caption} has invalid value: ${value}`;
+        this.invalidColumns.add(col.dataField);
+        this.highlightColumnHeader(col.dataField);
+      }
+    });
+  }
+
+  //========================= find the duplicated rows===============================
+  onRowPrepared(e: any) {
+    if (e.rowType !== 'data') return;
+    const itemCode = (e.data.ITEM_CODE1 ?? '').toString().trim();
+    const invoiceNo = (e.data.INVOICE_NO1 ?? '').toString().trim();
+    const invoiceDate = e.data.TRANSACTION_DATE1;
+    const duplicateColumns: string[] = [];
+
+    // Compare grid cell values with duplicateKeys (from backend)
+    if (this.duplicateKeys.ITEM_CODE.has(itemCode))
+      duplicateColumns.push('ITEM_CODE');
+    if (this.duplicateKeys.INVOICE_NO.has(invoiceNo))
+      duplicateColumns.push('INVOICE_NO');
+    if (this.duplicateKeys.INVOICE_DATE.has(invoiceDate))
+      duplicateColumns.push('INVOICE_DATE');
+
+    // Highlight row and add tooltip if any matches
+    if (duplicateColumns.length > 0) {
+      e.rowElement.style.color = '#be3f3fff'; // light red
+
+      // e.rowElement.title = `Duplicate in: ${duplicateColumns.join(', ')}`;
+      e.rowElement.title = 'Duplication Found';
+    } else {
+      e.rowElement.style.backgroundColor = ''; // reset
+      e.rowElement.style.border = '';
+      e.rowElement.title = '';
+    }
+  }
 
   // ========== Strict dd/MM/yyyy format validator ==========
   isValidDDMMYYYY(value: any): boolean {
@@ -353,41 +416,6 @@ export class ImportHISDataFormComponent implements OnInit {
   getCaptionByField(field: string) {
     const col = this.columnDatasss.find((c: any) => c.dataField === field);
     return col ? col.caption : '';
-  }
-
-  // =========== Row-level validation (prevent save) ==========
-  onRowValidating(e: any) {
-    const row = e.newData || e.oldData;
-
-    e.isValid = true;
-    e.errorText = '';
-
-    this.columnDatasss.forEach((col: any) => {
-      // Skip mismatched columns completely — ALWAYS
-      if (this.mismatchedColumns?.[col.dataField]) {
-        return;
-      }
-
-      const value = row[col.dataField];
-      if (value === null || value === '') return;
-
-      let isInvalid = false;
-
-      if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
-        isInvalid = true;
-      }
-
-      if (col.type === 'DECIMAL' && isNaN(Number(value))) {
-        isInvalid = true;
-      }
-
-      if (isInvalid) {
-        e.isValid = false;
-        e.errorText = `${col.caption} has invalid value: ${value}`;
-        this.invalidColumns.add(col.dataField);
-        this.highlightColumnHeader(col.dataField);
-      }
-    });
   }
 
   onHeaderCellPrepared(e: any) {
@@ -452,35 +480,6 @@ export class ImportHISDataFormComponent implements OnInit {
     };
 
     this.dataGrid.instance.refresh(); // Refresh to trigger onRowPrepared again
-  }
-
-  //========================= find the duplicated rows===============================
-  onRowPrepared(e: any) {
-    if (e.rowType !== 'data') return;
-    const itemCode = (e.data.ITEM_CODE1 ?? '').toString().trim();
-    const invoiceNo = (e.data.INVOICE_NO1 ?? '').toString().trim();
-    const invoiceDate = e.data.TRANSACTION_DATE1;
-    const duplicateColumns: string[] = [];
-
-    // Compare grid cell values with duplicateKeys (from backend)
-    if (this.duplicateKeys.ITEM_CODE.has(itemCode))
-      duplicateColumns.push('ITEM_CODE');
-    if (this.duplicateKeys.INVOICE_NO.has(invoiceNo))
-      duplicateColumns.push('INVOICE_NO');
-    if (this.duplicateKeys.INVOICE_DATE.has(invoiceDate))
-      duplicateColumns.push('INVOICE_DATE');
-
-    // Highlight row and add tooltip if any matches
-    if (duplicateColumns.length > 0) {
-      e.rowElement.style.color = '#be3f3fff'; // light red
-
-      // e.rowElement.title = `Duplicate in: ${duplicateColumns.join(', ')}`;
-      e.rowElement.title = 'Duplication Found';
-    } else {
-      e.rowElement.style.backgroundColor = ''; // reset
-      e.rowElement.style.border = '';
-      e.rowElement.title = '';
-    }
   }
 
   getTitleToNameMap() {

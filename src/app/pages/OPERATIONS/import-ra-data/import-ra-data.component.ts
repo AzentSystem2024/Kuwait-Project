@@ -377,7 +377,7 @@ export class ImportRADataComponent implements OnInit {
             displayTime: 7000,
             position: { my: 'right top', at: 'right top', of: window },
           });
-        }, 0);
+        }, 2500);
       }
 
       this.resetFileInput();
@@ -414,7 +414,7 @@ export class ImportRADataComponent implements OnInit {
             value.getDate()
           );
         }
-        
+
         // Case 3: String-based date (ALL formats)
         else if (typeof value === 'string') {
           let cleaned = value.trim();
