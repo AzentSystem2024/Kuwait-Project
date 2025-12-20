@@ -310,7 +310,7 @@ export class ImportHISDataFormComponent implements OnInit {
       this.isValidData = false;
     }
   }
-  
+
   // =========== Row-level validation (prevent save) ==========
   onRowValidating(e: any) {
     const row = e.newData || e.oldData;
@@ -484,8 +484,8 @@ export class ImportHISDataFormComponent implements OnInit {
 
   getTitleToNameMap() {
     const map: any = {};
-    this.columnData.forEach((col) => {
-      map[col.dataField] = col.caption;
+    this.columnDatasss.forEach((col) => {
+      map[col.dataField] = col.dataField;
     });
     return map;
   }
@@ -534,7 +534,7 @@ export class ImportHISDataFormComponent implements OnInit {
           displayTime: 4000,
           position: { at: 'top right', my: 'top right', of: window },
         });
-        return; // ❌ stop saving
+        return;
       }
 
       this.isSaving = true;
