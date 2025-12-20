@@ -338,19 +338,20 @@ export class ImportRADataComponent implements OnInit {
       // ========================================================================
 
       // ================= MAP EXCEL DATA (caption → dataField) =================
-      const captionToField: Record<string, string> = {};
-      this.columnData.forEach((col) => {
-        captionToField[this.normalizeCaption(col.caption)] = col.dataField;
-      });
-
       let mappedData = rawData.map((row: any) => {
-        const newRow: any = {};
-        Object.keys(row).forEach((caption) => {
-          const field = captionToField[this.normalizeCaption(caption)];
-          if (field) newRow[field] = row[caption];
-        });
-        return newRow;
-      });
+      const newRow: any = {};
+
+      excelCaptions.forEach((excelCaption, excelIndex) => {
+      const colDef = this.columnData[excelIndex];
+        if (!colDef) return;
+
+    const backendField = colDef.dataField;
+    newRow[backendField] = row[excelCaption];
+  });
+
+  return newRow;
+});
+
 
       // ================= FORMAT FIELDS =================
       const dateFields = this.columnData
@@ -377,7 +378,7 @@ export class ImportRADataComponent implements OnInit {
             displayTime: 7000,
             position: { my: 'right top', at: 'right top', of: window },
           });
-        }, 2500);
+        }, 0);
       }
 
       this.resetFileInput();
@@ -414,7 +415,7 @@ export class ImportRADataComponent implements OnInit {
             value.getDate()
           );
         }
-
+        
         // Case 3: String-based date (ALL formats)
         else if (typeof value === 'string') {
           let cleaned = value.trim();
