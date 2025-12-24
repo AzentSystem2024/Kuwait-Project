@@ -68,6 +68,7 @@
           text: 'Refresh',
           icon: 'refresh',
           stylingMode: 'text',
+          onClick: refresh,
           hint: 'refresh'
         }"
       ></dxi-item>
@@ -102,7 +103,7 @@
     class="formPopupClass"
     [(visible)]="isAddFormPopupOpened"
     titleText="New User"
-    [height]="'100vh'"
+    [height]="'70vh'"
     [width]="popupwidth"
     (save)="onClickSaveNewData()"
     (clear)="onClearData()"
@@ -112,7 +113,7 @@
   <dx-popup
     [(visible)]="isEditPopupOpened"
     title="Edit User"
-    [height]="'100vh'"
+    [height]="'70vh'"
     [width]="popupwidth"
   >
     <app-user-edit-form

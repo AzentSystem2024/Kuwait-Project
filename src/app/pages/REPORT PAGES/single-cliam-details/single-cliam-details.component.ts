@@ -122,7 +122,6 @@ export class SingleCliamDetailsComponent implements OnInit {
       visible: (e: any) => e.row.data.hasAttachment,
       onClick: (e: any) => {
         e.event.stopPropagation();
-        console.log('Attachment clicked', e.row.data);
       },
     },
   ];
@@ -416,7 +415,6 @@ export class SingleCliamDetailsComponent implements OnInit {
         item.ClaimActivityUID === claimActivityUID &&
         item.ClaimRemittanceUID === claimremittanceUID
     );
-    // console.log('Activity row expanded:', expandedRowData);
   }
 }
 

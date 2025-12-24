@@ -222,7 +222,6 @@ export class PostOfficeCredentialsComponent implements OnInit {
           event.component.cancelEditData();
         },
         (error: any) => {
-          console.error('Error:', error);
           notify(
             {
               message: `Error: ${error.message}`,

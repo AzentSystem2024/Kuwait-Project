@@ -99,14 +99,13 @@ export class InsuranceNewFormComponent implements OnInit {
   //==================get his columns for unique key=================
   getHisColumnsForUniqueKey() {
     this.dataservice.His_Columns_For_UniqueKey(name).subscribe((res: any) => {
-      console.log(res, 'his columns for unique key');
+    
       this.hisColumns = res || [];
     });
   }
   // ============== load data when edit is available ==========
   loadInsuranceData(data: any) {
     this.insurance_id = data.ID;
-    console.log(data, 'insurance edit data');
     this.already_seleted_Ra_column = data.columns;
     this.insuranceCompany = {
       shortName: data.InsuranceShortName || '',
@@ -146,7 +145,7 @@ export class InsuranceNewFormComponent implements OnInit {
       .filter((item) => item.IsHisColumn === false)
       .map((item) => item.ColumnID);
 
-    // console.log(this.selectedKeys,'==============')
+ 
   }
 
   //================get RA columns data==================
@@ -157,7 +156,6 @@ export class InsuranceNewFormComponent implements OnInit {
     };
 
     this.dataservice.RA_Columns_For_UniqueKey(payload).subscribe((res: any) => {
-      console.log(res, 'RA columns for unique key');
       // Convert to TagBox expected structure
       this.RA_columns = (res || []).map((item: any) => ({
         ColumnID: item.ID,
@@ -172,7 +170,6 @@ export class InsuranceNewFormComponent implements OnInit {
       // 3) Preselect those IDs in TagBox
       this.selecteRAuniqueKeys = Ra_column;
 
-      console.log('Preselected RA keys:', this.selecteRAuniqueKeys);
     });
     // this.RA_columns = res|| [];
   }
@@ -184,8 +181,7 @@ export class InsuranceNewFormComponent implements OnInit {
     // Extract only the column names (dataField)
     this.selectedFieldNames = this.selectedColumns.map((col) => col.ColumnName);
 
-    console.log('Selected Columns:', this.selectedColumns);
-    console.log('Selected Field Names:', this.selectedFieldNames);
+ 
   }
 
   async manageColumns() {
@@ -298,7 +294,7 @@ export class InsuranceNewFormComponent implements OnInit {
       e.cancel = true;
       return;
     }
-    console.log(e);
+   
     const status = e.toData;
     const updatedItem = { ...e.itemData, Status: status };
     this.fullcolumnsData = this.fullcolumnsData.filter(
@@ -372,7 +368,7 @@ export class InsuranceNewFormComponent implements OnInit {
     this.raFileColumns = this.fullcolumnsData.filter(
       (item) => item.Status === 'selected'
     );
-    console.log('ra file columns :', this.raFileColumns);
+ 
     this.ColumnpopupVisible = false;
     this.RA_columns = this.raFileColumns;
     // this.selecteRAuniqueKeys = this.raFileColumns.map(col => col.ColumnID);
@@ -383,7 +379,7 @@ export class InsuranceNewFormComponent implements OnInit {
   manageUniqueKey() {
     if (this.selectedKeys && this.selectedKeys.length > 0) {
       this.UniqueColumnData = this.selectedKeys;
-      console.log(this.selectedKeys, 'selected keys');
+    
       const columnNames = this.selectedKeys.map((col: any) => col.ColumnName);
       this.insuranceCompany.uniqueKey = columnNames.join(', ');
     } else {
@@ -437,7 +433,7 @@ export class InsuranceNewFormComponent implements OnInit {
       Inactive: this.insuranceCompany.inactive,
     };
 
-    console.log('Payload:', payload);
+  
 
     this.masterService.Insert_Insurance_Data(payload).subscribe({
       next: (response: any) => {
@@ -542,7 +538,6 @@ export class InsuranceNewFormComponent implements OnInit {
 
   RADropdownOnchangeValue(e: any) {
     const ds = e.component.getDataSource();
-    console.log('RA file columns:', this.raFileColumns);
     ds.load().then((items: any[]) => {
       const selected = items.filter((item: any) =>
         e.value.includes(item.ColumnID)
@@ -563,7 +558,7 @@ export class InsuranceNewFormComponent implements OnInit {
         };
       });
 
-      console.log('Final RA Objects:', this.finalRAObjects);
+   
     });
   }
 
@@ -590,8 +585,6 @@ export class InsuranceNewFormComponent implements OnInit {
           IsHisColumn: true,
         };
       });
-
-      console.log('Updated HIS Objects:', this.finalHISObjects);
     });
   }
 

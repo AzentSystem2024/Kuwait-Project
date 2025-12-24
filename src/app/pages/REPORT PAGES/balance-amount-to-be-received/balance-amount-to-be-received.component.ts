@@ -192,9 +192,9 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
 
     ngOnInit(): void {
       if (this.dataGrid && this.dataGrid.instance) {
-        console.log('DataGrid instance is available');
+       
       } else {
-        console.error('DataGrid instance is not available at ngOnInit');
+        
       }
     }
   
@@ -234,7 +234,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
   
     closePopup1(popup: any): void {
       popup.isOpened = false; // Hide the popup
-      // console.log('Popup manually closed:', popup);
+    
       this.closedPopupsSet.add(popup.id);
       // Additional logic for closing the popup can go here
     }
@@ -343,7 +343,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
   
     //===================Function to handle selection change and sort the data==========
     onSelectionChanged(event: any, jsonData: any[], dataSourceKey: string): void {
-      console.log('Original JSON Data:', jsonData);
+  
       const selectedRows = event.selectedRowsData;
       const selectedRowIds = selectedRows.map((row) => row.ID);
       const unselectedRows = jsonData.filter(
@@ -351,7 +351,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
       );
       const reorderedData = [...selectedRows, ...unselectedRows];
       this[dataSourceKey] = this.makeAsyncDataSourceFromJson(reorderedData);
-      console.log('Updated DataSource:', this[dataSourceKey]);
+   
       this.dataGrid.instance.refresh();
     }
   
@@ -400,7 +400,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
           }
         },
         (error) => {
-          console.error('Error fetching data:', error);
+         
         }
       );
     }
@@ -419,7 +419,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
         BasedOnInitialNetAmount : this.BasedOnInitialNetAmount
       };
 
-      console.log(formData,"------------------")
+    
       this.isContentVisible = false;
       // this.dataGrid.instance.beginCustomLoading('Loading...');
   
@@ -436,20 +436,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
           this.summaryColumnsData = this.generateSummaryColumns(
             response.BalanceAmt.ReportColumns
           );
-          // this.columnsConfig = this.generateColumnsConfig(
-          //   response.payerwise.ReportColumns,
-          //   userLocale
-          // );
 
-          // this.payercolumnsConfig = this.generateColumnsConfig(
-          //   response.payerwise.ReportColumns,
-          //   userLocale
-          // );
-
-          // this.receivercolumnsConfig = this.generateColumnsConfig(
-          //   response.receiverwise.ReportColumns,
-          //   userLocale
-          // );
           this.BalanceAmtcolumnsConfig = this.generateColumnsConfig(
             response.BalanceAmt.ReportColumns,
             userLocale
@@ -542,7 +529,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
         (col) => col.Type === 'Decimal' && col.Summary
       );
 
-      console.log(decimalColumns,"decimal columns")
+   
     
       const intColumns = uniqueColumns.filter(
         (col) => col.Type === 'Int32' && col.Summary
@@ -627,7 +614,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
   
     import_Advance_Filter() {
       const filterData = this.reportengine.getData();
-      // console.log('advance filter imported data', filterData);
+   
       this.ClaimNumber_Value = filterData.ClaimNumber;
   
       this.ReceiverID_Value = this.RecieverID_DataSource.filter((item) =>
@@ -690,7 +677,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
     //================Month value change ===================
     onMonthValueChanged(e: any) {
       this.selectedmonth = e.value ?? '';
-      // console.log('selected month', this.selectedmonth);
+    
       if (this.selectedmonth === '') {
         this.From_Date_Value = new Date(this.selectedYear, 0, 1); // January 1 of the selected year
         this.To_Date_Value = new Date(this.selectedYear, 11, 31); // December 31 of the selected year
@@ -760,20 +747,20 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
     };
     //==========fetch custome memorise report name==========
     onMemoriseReportNameChanged(e) {
-      console.log(e,"event")
+    
       this.MemoriseReportName = e.value;
     }
     //================Save Memorize Reports=================
     save_Memorise_Report() {
-      console.log('column data are :=>', this.columndata);
+     
       const memoriseName = this.MemoriseReportName;
       const filterParameters = JSON.parse(sessionStorage.getItem('reportData'));
-      console.log(filterParameters,"filterparameters")
+    
       const reportColumns = this.columndata;
       const allColumns = this.AfterResubmissionNotRemittedBalanceColumnNames;
-      console.log(allColumns,"allcolumns")
+   
       const columns = this.dataGrid.instance.getVisibleColumns();
-      console.log(columns,"columns")
+    
       const VisiblecolumnNames = columns
         .map((col) => col.caption || col.dataField)
         .filter((name) => name !== undefined);
@@ -781,14 +768,14 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
         (colName) => !VisiblecolumnNames.includes(colName)
       );
 
-      console.log(hiddenColumns,"hiddencolumns")
+   
       const memoriseReportColumns = reportColumns.map((column) => {
         return {
           ...column,
           Visibility: hiddenColumns.includes(column.Name) ? false : true,
         };
       });
-      console.log('memorise report columns =>:', memoriseReportColumns);
+   
       this.reportengine
         .save_Memorise_report(
           memoriseName,
@@ -820,7 +807,7 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
     }
     //====================Find the column location from the datagrid================
     findColumnLocation = (e: any) => {
-      console.log(e,"column location e")
+   
       const columnName = e.itemData;
       if (columnName != '' && columnName != null) {
         this.refresh;
@@ -831,11 +818,11 @@ export class BalanceAmountToBeReceivedComponent implements OnInit {
   
     //=============DataGrid Refreshing=====================
     refresh = () => {
-      console.log('refreshing')
+    
       if (this.dataGrid) {
         this.dataGrid.instance.refresh();
       } else {
-        console.error('DataGrid instance is not available');
+      
       }
     };
   

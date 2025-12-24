@@ -72,7 +72,7 @@ export class DownloadLogViewComponent {
   };
 
   fetch_download_log_data() {
-    console.log('calling fetcg function');
+   
     this.dataSource = new DataSource<any>({
       load: () =>
         new Promise((resolve, reject) => {
@@ -101,7 +101,7 @@ export class DownloadLogViewComponent {
                 }
               },
               error: (error) => {
-                console.error('Error loading data:', error);
+            
                 reject(error.message);
               },
             });

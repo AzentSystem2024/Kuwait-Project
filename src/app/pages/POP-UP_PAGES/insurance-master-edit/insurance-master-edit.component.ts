@@ -82,7 +82,7 @@ async ngOnInit() {
   }
         ngOnChanges(changes: SimpleChanges) {
     if (changes['insuranceData'] && changes['insuranceData'].currentValue) {
-      console.log('Received insuranceData:', changes['insuranceData'].currentValue);
+    
       this.insuranceData = {
         ...this.insuranceData,
         ...changes['insuranceData'].currentValue,
@@ -97,7 +97,6 @@ async ngOnInit() {
     this.selecteRAuniqueKeys = this.hisColumns
       .filter((item) => item.IsHisColumn === false)
       .map((item) => item.ColumnID);
-    console.log('Default HIS selected keys:', this.selecteHISuniqueKeys);
 
       this.get_RA_Columns_Data()
 
@@ -125,7 +124,6 @@ async ngOnInit() {
     };
 
     this.dataservice.RA_Columns_For_UniqueKey(payload).subscribe((res: any) => {
-      console.log(res, 'RA columns for unique key');
       // Convert to TagBox expected structure
       this.RA_columns = (res || []).map((item: any) => ({
         ColumnID: item.ID,
@@ -140,14 +138,13 @@ async ngOnInit() {
       // 3) Preselect those IDs in TagBox
       this.selecteRAuniqueKeys = Ra_column;
 
-      console.log('Preselected RA keys:', this.selecteRAuniqueKeys);
+      
     });
     // this.RA_columns = res|| [];
   }
     //==================get his columns for unique key=================
   getHisColumnsForUniqueKey() {
     this.dataservice.His_Columns_For_UniqueKey(name).subscribe((res: any) => {
-      console.log(res, 'his columns for unique key');
       this.hisColumns = res || [];
     });
   }
@@ -206,57 +203,7 @@ onAdd = (e: any) => {
   this.fullcolumnsData = [...this.fullcolumnsData];
 };
 
-// REORDER items inside Selected grid
-// onReorder = (e: any) => {
-//    const locked = ['PAYMENT_DATE', 'REFERENCE_NO'];
 
-//   const draggedKey = e.itemData.ColumnName;
-
-//   // ❌ 1. BLOCK drag if the dragged column is locked
-//   if (locked.includes(draggedKey)) {
-//     e.cancel = true;
-//     return;
-//   }
-
-//   // Get ONLY selected rows
-//   const selectedList = this.fullcolumnsData.filter(x => x.Status === "selected");
-//   const availableList = this.fullcolumnsData.filter(x => x.Status === "available");
-
-//   // Identify item dragged
-//   // const draggedKey = e.itemData.ColumnName;
-  
-
-//   // FROM index (actual index in selectedList)
-//   const fromIndex = selectedList.findIndex(x => x.ColumnName === draggedKey);
-
-//   // TO index inside visible order of selected grid
-//   const visibleRows = e.component.getVisibleRows();
-//   const toRow = visibleRows[e.toIndex];
-  
-//   //  2. BLOCK dropping on top of a locked column
-//   if (locked.includes(toRow.data.ColumnName)) {
-//     e.cancel = true;
-//     return;
-//   }
-
-//   let toIndex = selectedList.findIndex(x => x.ColumnName === toRow.data.ColumnName);
-
-//   if (fromIndex === -1 || toIndex === -1) return;
-
-//   // Remove item safely
-//   const [movedItem] = selectedList.splice(fromIndex, 1);
-
-//   // Adjust index if moving downward
-//   if (fromIndex < toIndex) {
-//     toIndex -= 1;
-//   }
-
-//   // Insert at new location
-//   selectedList.splice(toIndex, 0, movedItem);
-
-//   // Merge back full list
-//   this.fullcolumnsData = [...selectedList, ...availableList];
-// };
 onReorder = (e: any) => {
   const locked = ["Payment Date", "Paymant Reference"];
 
@@ -310,14 +257,6 @@ onReorder = (e: any) => {
 };
 
 
-
-saveInsurance(){
-
-}
-
-clear(){
-
-}
 manageColumns() {
   this.ColumnpopupVisible = true;
 
@@ -364,7 +303,6 @@ manageColumns() {
     this.raFileColumns = this.fullcolumnsData.filter(
       (item) => item.Status === 'selected'
     );
-    console.log('ra file columns :', this.raFileColumns);
     this.ColumnpopupVisible = false;
     this.RA_columns = this.raFileColumns;
     // this.selecteRAuniqueKeys = this.raFileColumns.map(col => col.ColumnID);
@@ -375,7 +313,6 @@ manageColumns() {
   manageUniqueKey() {
     if (this.selectedKeys && this.selectedKeys.length > 0) {
       this.UniqueColumnData = this.selectedKeys;
-      console.log(this.selectedKeys, 'selected keys');
       const columnNames = this.selectedKeys.map((col: any) => col.ColumnName);
       this.insuranceCompany.uniqueKey = columnNames.join(', ');
     } else {
@@ -426,11 +363,6 @@ RADropdownOnchangeValue(e:any){
       Remarks: this.insuranceCompany.remarks,
       Inactive: this.insuranceCompany.inactive,
     };
-    console.log(this.selectedKeys, 'selectedKeys');
-
-    console.log('raFileColumns', this.raFileColumns);
-
-    console.log('Update Payload:', payload);
 
     this.masterService.update_Insurance_data(payload).subscribe({
       next: (response: any) => {

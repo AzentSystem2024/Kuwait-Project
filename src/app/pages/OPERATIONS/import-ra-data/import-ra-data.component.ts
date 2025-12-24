@@ -76,12 +76,20 @@ export class ImportRADataComponent implements OnInit {
   LogID: any;
   selectedInsuranceName: any;
   RaSummaryColumns: any;
+  precision: any;
   // ================= CLASS LEVEL =================
   private excelColumnMismatchMessage: string | null = null;
   excelColumnMismatchMap: {};
 
   constructor(private service: DataService) {
     this.UserID = sessionStorage.getItem('UserID');
+
+    const systemInfo = JSON.parse(
+      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+    );
+    console.log(systemInfo);
+    this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
+    console.log(this.precision);
   }
 
   ngOnInit(): void {
@@ -138,17 +146,14 @@ export class ImportRADataComponent implements OnInit {
           this.columnData = res.data.map((col: any) => ({
             dataField: col.ColumnName,
             caption: col.ColumnTitle,
-
-            // IMPORTANT FIX
+            width: 150,
             dataType: col.Type === 'DECIMAL' ? 'number' : 'string',
-
             type: col.Type,
-
             format:
               col.Type === 'DECIMAL'
                 ? {
                     type: 'fixedPoint',
-                    precision: 3,
+                    precision: this.precision,
                   }
                 : undefined,
           }));
@@ -197,8 +202,8 @@ export class ImportRADataComponent implements OnInit {
         formatType === 'decimal'
           ? {
               style: 'decimal',
-              minimumFractionDigits: 3,
-              maximumFractionDigits: 3,
+              minimumFractionDigits: this.precision,
+              maximumFractionDigits: this.precision,
             }
           : null,
       alignByColumn: isGroupItem,
@@ -294,6 +299,28 @@ export class ImportRADataComponent implements OnInit {
         this.isLoading = false;
         return;
       }
+      // ================= COLUMN COUNT VALIDATION =================
+      const excelColumnCount = Object.keys(rawData[0] || {}).length;
+      const expectedColumnCount = this.columnData.length;
+
+      if (excelColumnCount !== expectedColumnCount) {
+        this.isLoading = false;
+
+        const msg =
+          excelColumnCount > expectedColumnCount
+            ? `Excel has ${excelColumnCount} columns, but expected ${expectedColumnCount}. Extra columns detected.`
+            : `Excel has ${excelColumnCount} columns, but expected ${expectedColumnCount}. Missing columns detected.`;
+
+        notify({
+          message: msg,
+          type: 'error',
+          displayTime: 6000,
+          position: { my: 'right top', at: 'right top', of: window },
+        });
+
+        this.resetFileInput();
+        return;
+      }
 
       const excelCaptions = Object.keys(rawData[0] || {});
       const normalizedExcelCaptions = excelCaptions.map((c) =>
@@ -339,19 +366,18 @@ export class ImportRADataComponent implements OnInit {
 
       // ================= MAP EXCEL DATA (caption → dataField) =================
       let mappedData = rawData.map((row: any) => {
-      const newRow: any = {};
+        const newRow: any = {};
 
-      excelCaptions.forEach((excelCaption, excelIndex) => {
-      const colDef = this.columnData[excelIndex];
-        if (!colDef) return;
+        excelCaptions.forEach((excelCaption, excelIndex) => {
+          const colDef = this.columnData[excelIndex];
+          if (!colDef) return;
 
-    const backendField = colDef.dataField;
-    newRow[backendField] = row[excelCaption];
-  });
+          const backendField = colDef.dataField;
+          newRow[backendField] = row[excelCaption];
+        });
 
-  return newRow;
-});
-
+        return newRow;
+      });
 
       // ================= FORMAT FIELDS =================
       const dateFields = this.columnData
@@ -415,7 +441,7 @@ export class ImportRADataComponent implements OnInit {
             value.getDate()
           );
         }
-        
+
         // Case 3: String-based date (ALL formats)
         else if (typeof value === 'string') {
           let cleaned = value.trim();
@@ -466,7 +492,7 @@ export class ImportRADataComponent implements OnInit {
   private normalizeCaption(value: string): string {
     return value
       ?.toString()
-      .replace(/\u00A0/g, ' ') 
+      .replace(/\u00A0/g, ' ')
       .replace(/\s+/g, ' ')
       .trim()
       .toLowerCase();

@@ -138,7 +138,6 @@ export class AllocationLookUpComponent {
 
   //=============== enable delete row popup ===============
   onRowRemoving(event) {
-    console.log('removing data ', event);
     event.cancel = true;
     this.rowToDelete = event.data;
     this.deleteReason = ''; // Reset input field
@@ -176,7 +175,6 @@ export class AllocationLookUpComponent {
       .get_selected_rowData_List(event.data.AllocationID)
       .subscribe((response: any) => {
         if (response) {
-          console.log('selected row data :', response);
           this.editRowData = response;
           this.iseditPopupOpened = true;
         } else {

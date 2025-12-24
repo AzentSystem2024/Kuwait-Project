@@ -203,7 +203,6 @@ export class AllocationPageComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.editRowData) {
-      console.log('edit row data fetched', this.editRowData);
       this.setFormValues();
     }
   }
@@ -449,7 +448,6 @@ export class AllocationPageComponent implements OnInit {
         'Template_Columns.xlsx'
       );
     } catch (error) {
-      console.error('Export Error:', error);
     }
   }
   //==================MAking cutom datasource for facility datagrid and dropdown loADING=======
@@ -657,7 +655,6 @@ export class AllocationPageComponent implements OnInit {
         this.loadingVisible = false;
       },
       (error) => {
-        console.error('Error fetching data:', error);
         this.loadingVisible = false;
       }
     );
@@ -677,7 +674,6 @@ export class AllocationPageComponent implements OnInit {
   //==============================save function for both tab ==========================
   save_data_From_TreeView() {
     if (!this.treeList?.instance) {
-      console.warn('TreeList instance not found!');
       return;
     }
 
@@ -691,7 +687,6 @@ export class AllocationPageComponent implements OnInit {
     // Fetch selected rows
     const selectedRows = this.treeList.instance.getSelectedRowsData('all');
     if (selectedRows.length === 0) {
-      console.warn('No rows selected!');
       return;
     }
 
@@ -743,7 +738,6 @@ export class AllocationPageComponent implements OnInit {
 
     let finalObject = this.transformData(dataObject);
 
-    console.log('Final Data:', finalObject);
 
     if (this.editRowData) {
       // **Call Update API**
@@ -776,7 +770,6 @@ export class AllocationPageComponent implements OnInit {
     const selectedRowsData = this.dataGrid.instance.getSelectedRowsData();
 
     if (selectedRowsData.length === 0) {
-      console.warn('No rows selected!');
       return;
     }
 
@@ -814,7 +807,6 @@ export class AllocationPageComponent implements OnInit {
     };
 
     const finalObject = this.transformData(dataObject);
-    console.log('Final Object:', finalObject);
 
     if (this.editRowData) {
       // **Call Update API**
@@ -836,7 +828,6 @@ export class AllocationPageComponent implements OnInit {
   // **Reusable API Response Handler**
   handleApiResponse(response: any, action: string) {
     if (response.flag == '1') {
-      console.log(response);
       notify(
         {
           message: `Data successfully ${action}!`,

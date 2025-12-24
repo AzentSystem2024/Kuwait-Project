@@ -134,9 +134,6 @@ export class ClaimSummaryPayerWiseDrillDownComponent implements OnInit {
     this.FacilityID = this.clickedRowData.FacilityID;
     this.PayerID = this.clickedRowData.PayerID;
     this.ReceiverID= this.clickedRowData.ReceiverID;
-    console.log('clicked row data =>', this.clickedRowData);
-    console.log('detailed data =>', this.DetailData);
-    console.log(this.Year,this.Month,this.FacilityID, "year month facility id")
 
     if (this.PayerID || this.ReceiverID && this.FacilityID) {
       this.get_Datagrid_DataSource();
@@ -178,9 +175,9 @@ export class ClaimSummaryPayerWiseDrillDownComponent implements OnInit {
 
     try {
       const response = this.DetailData;
-      console.log('try portion working');
+    
       if (response.ReportID !== '') {
-        console.log('if condition satisfied');
+    
         this.isEmptyDatagrid = false;
         this.columndata = response.ReportColumns;
 
@@ -200,8 +197,7 @@ export class ClaimSummaryPayerWiseDrillDownComponent implements OnInit {
               item.FacilityID == this.FacilityID;
         });
 
-        console.log(this.ReportData,"reportdata")
-
+    
         const isClaimedCount = this.ReportData.filter(
           (item: any) => item.IsClaimed === 1
         ).length;
@@ -250,8 +246,7 @@ export class ClaimSummaryPayerWiseDrillDownComponent implements OnInit {
           }
           
         );
-        console.log(this.TabViewDataSource,"tabviewdatasource");
-
+      
         this.selectedTab = this.TabViewDataSource[0].text.replace(
           /\s\(\d+\)$/,
           ''

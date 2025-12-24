@@ -167,10 +167,7 @@ export class NotificationSettingsComponent implements OnInit {
         currentMessage = `${currentMessage} ${selectedValue}`;
       }
       this.clickedEditRowData.EmailMessage = currentMessage;
-      console.log(
-        'Updated EmailMessage:',
-        this.clickedEditRowData.EmailMessage
-      );
+   
     }
   }
 
@@ -227,7 +224,6 @@ export class NotificationSettingsComponent implements OnInit {
   onTabClick(e: any) {
     this.clickedTabName = e.itemData.text;
     this.updateVisibility();
-    console.log('clicked tab is :', this.clickedTabName);
   }
   updateVisibility() {
     this.isEmailVisible = this.clickedTabName === 'E-mail';
@@ -318,7 +314,6 @@ export class NotificationSettingsComponent implements OnInit {
   onClickSave() {
     const validationResult = this.validator.instance.validate();
     if (validationResult.isValid) {
-      console.log('Form Data:', this.formData);
       this.service
         .saveNotificationSettings(this.formData)
         .subscribe((response: any) => {
@@ -333,7 +328,6 @@ export class NotificationSettingsComponent implements OnInit {
           }
         });
     } else {
-      console.log('Form is invalid');
     }
   }
 

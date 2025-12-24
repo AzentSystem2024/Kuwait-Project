@@ -150,7 +150,7 @@ export class TwoStepVerificationComponent implements OnInit, AfterViewInit {
   // ==================== closing the page ====================
   closePage() {
     this.router.navigate(['/auth/login']);
-    console.log('Close button clicked');
+   
   }
   // ============== filling otp to the textbox ================
   onOtpKeyUp(

@@ -302,7 +302,6 @@ export class ResubmissionSummaryComponent implements OnInit {
 
   closePopup1(popup: any): void {
     popup.isOpened = false; // Hide the popup
-    // console.log('Popup manually closed:', popup);
     this.closedPopupsSet.add(popup.id);
     // Additional logic for closing the popup can go here
   }
@@ -371,7 +370,6 @@ export class ResubmissionSummaryComponent implements OnInit {
 
   //===========Function to handle selection change and sort the data==========
   onSelectionChanged(event: any, jsonData: any[], dataSourceKey: string): void {
-    console.log('Original JSON Data:', jsonData);
     const selectedRows = event.selectedRowsData;
     const selectedRowIds = selectedRows.map((row) => row.ID);
     const unselectedRows = jsonData.filter(
@@ -379,7 +377,6 @@ export class ResubmissionSummaryComponent implements OnInit {
     );
     const reorderedData = [...selectedRows, ...unselectedRows];
     this[dataSourceKey] = this.makeAsyncDataSourceFromJson(reorderedData);
-    console.log('Updated DataSource:', this[dataSourceKey]);
     this.dataGrid.instance.refresh();
   }
 
@@ -422,16 +419,11 @@ export class ResubmissionSummaryComponent implements OnInit {
           this.paymentStatus_DataSource = response.PaymentStatus;
           this.advanceFilterGridColumns = response.AdvanceFilter;
           this.RemittanceBasedOn = response.RemittanceBasedOn;
-          console.log(this.RemittanceBasedOn, 'REMITTANCE BASED ON');
-          console.log(
-            this.advanceFilterGridColumns,
-            'advanceFilterGridColumns'
-          );
+      
           this.loadingVisible = false;
         }
       },
       (error) => {
-        console.error('Error fetching data:', error);
       }
     );
   }
@@ -660,7 +652,6 @@ export class ResubmissionSummaryComponent implements OnInit {
 
   import_Advance_Filter() {
     const filterData = this.reportengine.getData();
-    console.log('advance filter imported data', filterData);
     this.ClaimNumber_Value = filterData.ClaimNumber;
 
     // this.Facility_Value = this.Facility_DataSource.filter((item) =>

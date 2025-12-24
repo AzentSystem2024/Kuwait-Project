@@ -101,7 +101,6 @@ export class EmailLogDataComponent {
       ...rowData,
       DatePeriod: parseInt(rowData.DatePeriod, 10),
     };
-    console.log('edit row data:>>', this.selectedRowData);
     this.is_EditFormVisible = true;
   }
   //======================

@@ -54,7 +54,6 @@ export class UserLevelEditFormComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['editValue'] && this.editValue) {
-      console.log('selected edit data value is ', this.editValue);
       this.allSelectedRows = [];
       this.UserLevelValue = this.editValue.UserRoles;
       // Process the editData to match the new format
@@ -122,7 +121,7 @@ export class UserLevelEditFormComponent implements OnInit, OnChanges {
         }
       }
     });
-    console.log('all selected row data :', this.allSelectedRows);
+  
   }
 
   getNewUSerLevelEditedData = () => ({ ...this.allSelectedRows });

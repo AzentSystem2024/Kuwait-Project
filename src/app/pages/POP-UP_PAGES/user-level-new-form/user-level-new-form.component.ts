@@ -72,7 +72,7 @@ export class UserLevelNewFormComponent implements OnInit, OnChanges {
       });
       //==========Set the data for the initial tab========
       this.selectedTabData = this.MenuDatasource[this.selectedTab].Menus;
-      // console.log('selected tab is :', this.selectedTabData);
+    
     }
   }
 
@@ -83,7 +83,7 @@ export class UserLevelNewFormComponent implements OnInit, OnChanges {
       this.userRoles = this.UserListdataSource.map(
         (user: any) => user.UserRoles
       );
-      // console.log('user roles list :', this.userRoles);
+   
     });
   }
 
@@ -110,10 +110,6 @@ export class UserLevelNewFormComponent implements OnInit, OnChanges {
         this.selectedTabData = this.MenuDatasource[this.selectedTab].Menus;
       }
       this.combineSelectedRows();
-      console.log(
-        'Copied user menu list with full menu objects:',
-        this.selectedRows
-      );
     } else {
       this.selectedRows = [];
     }
@@ -161,7 +157,7 @@ export class UserLevelNewFormComponent implements OnInit, OnChanges {
           });
         }
       });
-    console.log('all selected row data :', this.allSelectedRows);
+   
   }
 
   getNewUSerLevelData = () => ({ ...this.allSelectedRows });

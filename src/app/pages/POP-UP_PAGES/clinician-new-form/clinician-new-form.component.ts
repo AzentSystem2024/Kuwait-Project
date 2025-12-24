@@ -92,9 +92,9 @@ export class ClinicianNewFormComponent {
 
   checkClinicianLicenseExists= (e: any): boolean => {
     const clinicianLicense = e.value;
-    console.log(clinicianLicense,"clinician license")
+ 
     const exists = this.cliniciansList.some(clinician => clinician.ClinicianLicense === clinicianLicense);
-    console.log(exists,"exists");
+  
   
     // If it exists, mark as invalid and set the error message
     if (exists) {
@@ -132,7 +132,7 @@ onFacilityLicenseInput(event: Event): void {
   getCliniciansData(){
     this.masterService.get_Clinian_Table_Data().subscribe((res:any)=>{
       this.cliniciansList=res.data;
-      console.log('datasource',this.cliniciansList);
+    
     })
   }
 }

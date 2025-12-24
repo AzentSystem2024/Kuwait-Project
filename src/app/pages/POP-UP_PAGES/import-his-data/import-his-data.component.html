@@ -16,6 +16,7 @@
     (onRowPrepared)="onRowPrepared($event)"
     (onCellPrepared)="onCellPrepared($event)"
     [summary]="summaryColumnsData"
+    
   >
     <dxo-paging [pageSize]="100"></dxo-paging>
     <dxo-pager
@@ -59,7 +60,39 @@
           </dx-validator>
         </dx-select-box>
       </dxi-item>
+<dxi-item location="after">
+    <dx-button
+      icon="columnchooser"
+      hint="Column Chooser"
+      (onClick)="dataGrid.instance.showColumnChooser()"
+    ></dx-button>
+  </dxi-item>
+       <dxi-item
+          class="columnfinderclass"
+          widget="dxDropDownButton"
+          [options]="{
+            dataSource: ColumnNames,
+            onItemClick: findColumnLocation,
+            placeholder: 'Search Column',
+            noDataText: 'Load data and try again',
+            hint: 'Column location finder',
+            icon:'columnproperties',
+            dropDownOptions: {
+              width: 'auto',
+              height: '60vh'
+            },
+
+          }"
+        ></dxi-item>
+       
     </dxo-toolbar>
+     <dxo-column-chooser
+      [enabled]="true"
+      [height]="500"
+      mode="select"
+      [allowSearch]="true"
+    >
+    </dxo-column-chooser>
   </dx-data-grid>
   <div
     *ngIf="!viewData && Duplication_data"

@@ -234,7 +234,7 @@ export class ClaimSummaryMonthWiseComponent {
 
   closePopup1(popup: any): void {
     popup.isOpened = false; // Hide the popup
-    // console.log('Popup manually closed:', popup);
+  
     this.closedPopupsSet.add(popup.id);
     // Additional logic for closing the popup can go here
   }
@@ -354,7 +354,7 @@ export class ClaimSummaryMonthWiseComponent {
 
   //===================Function to handle selection change and sort the data==========
   onSelectionChanged(event: any, jsonData: any[], dataSourceKey: string): void {
-    console.log('Original JSON Data:', jsonData);
+ 
     const selectedRows = event.selectedRowsData;
     const selectedRowIds = selectedRows.map((row) => row.ID);
     const unselectedRows = jsonData.filter(
@@ -362,7 +362,7 @@ export class ClaimSummaryMonthWiseComponent {
     );
     const reorderedData = [...selectedRows, ...unselectedRows];
     this[dataSourceKey] = this.makeAsyncDataSourceFromJson(reorderedData);
-    console.log('Updated DataSource:', this[dataSourceKey]);
+   
     this.dataGrid.instance.refresh();
   }
 
@@ -411,7 +411,7 @@ export class ClaimSummaryMonthWiseComponent {
         }
       },
       (error) => {
-        console.error('Error fetching data:', error);
+       
       }
     );
   }
@@ -588,7 +588,7 @@ export class ClaimSummaryMonthWiseComponent {
 
   import_Advance_Filter() {
     const filterData = this.reportengine.getData();
-    // console.log('advance filter imported data', filterData);
+  
     this.ClaimNumber_Value = filterData.ClaimNumber;
 
     this.ReceiverID_Value = this.RecieverID_DataSource.filter((item) =>
@@ -650,7 +650,7 @@ export class ClaimSummaryMonthWiseComponent {
   //================Month value change ===================
   onMonthValueChanged(e: any) {
     this.selectedmonth = e.value ?? '';
-    // console.log('selected month', this.selectedmonth);
+  
     if (this.selectedmonth === '') {
       this.From_Date_Value = new Date(this.selectedYear, 0, 1); // January 1 of the selected year
       this.To_Date_Value = new Date(this.selectedYear, 11, 31); // December 31 of the selected year
@@ -724,7 +724,7 @@ export class ClaimSummaryMonthWiseComponent {
   }
   //================Save Memorize Reports=================
   save_Memorise_Report() {
-    console.log('column data are :=>', this.columndata);
+  
     const memoriseName = this.MemoriseReportName;
     const filterParameters = JSON.parse(sessionStorage.getItem('reportData'));
     const reportColumns = this.columndata;
@@ -742,7 +742,7 @@ export class ClaimSummaryMonthWiseComponent {
         Visibility: hiddenColumns.includes(column.Name) ? false : true,
       };
     });
-    console.log('memorise report columns =>:', memoriseReportColumns);
+   
     this.reportengine
       .save_Memorise_report(
         memoriseName,

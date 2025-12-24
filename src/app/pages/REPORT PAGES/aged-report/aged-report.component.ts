@@ -134,6 +134,8 @@ export class AgedReportComponent {
 
   DetailsColumns;
   summaryColumnsData: { totalItems: any[]; groupItems: any[] };
+  precision:any
+  expandedRowKey: any = null;
   constructor(
     private dataservice: DataService,
     private reportengine: ReportEngineService
@@ -141,6 +143,14 @@ export class AgedReportComponent {
     this.get_searchParameters_Dropdown_Values();
     this.minDate = new Date(2000, 1, 1); // Set the minimum date
     this.maxDate = new Date(); // Set the maximum date
+
+      const systemInfo = JSON.parse(
+      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+    );
+    console.log(systemInfo);
+    this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
+    console.log(this.precision);
+  
     //============Year field dataSource===============
     const currentYear = new Date().getFullYear();
     for (let year = currentYear; year >= 1950; year--) {
@@ -212,7 +222,7 @@ export class AgedReportComponent {
   findColumnLocation = (e: any) => {
     const columnName = e.itemData;
     if (columnName != '' && columnName != null) {
-      // this.reportengine.makeColumnVisible(this.dataGrid, columnName);
+      this.reportengine.makeColumnVisible(this.dataGrid, columnName);
     }
   };
 
@@ -234,12 +244,11 @@ export class AgedReportComponent {
       AsOnDate: this.formatDate(this.As_on_date),
       Summary: 0,
     };
-    console.log(formData);
+
     this.isContentVisible = false;
     // this.isEmptyDatagrid=false
     // this.dataGrid.instance.beginCustomLoading('Loading...');
     this.dataservice.get_Aged_Summary(formData).subscribe((res: any) => {
-      console.log(res);
       this.dataGrid_DataSource = res.header.SummaryData;
       this.isEmptyDatagrid = false;
       this.summaryColumnsData = this.generateSummaryColumns(
@@ -259,7 +268,7 @@ export class AgedReportComponent {
   }
   onCellClick(e: any) {
     this.dataGrid.instance.beginCustomLoading('');
-    console.log(e, '==========detailed=============');
+
     const formData = {
       InsuranceID: e.data.InsuranceID,
       DateFrom: this.formatDate(this.From_Date_Value),
@@ -269,11 +278,9 @@ export class AgedReportComponent {
     };
 
     this.dataservice.get_aged_details(formData).subscribe((res: any) => {
-      console.log(res);
       this.dataGrid.instance.endCustomLoading();
       this.DetailsColumns = res.header.DetailData;
 
-      console.log(this.DetailsColumns);
       this.FilteredDetailData = res.header.DetailData;
     });
     this.DetailsummaryColumns = {
@@ -282,7 +289,7 @@ export class AgedReportComponent {
           column: 'Days_0_30',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'Days_0_30',
           alignment: 'right',
         },
@@ -290,7 +297,7 @@ export class AgedReportComponent {
           column: 'Days_31_60',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'Days_31_60',
           alignment: 'right',
         },
@@ -298,7 +305,7 @@ export class AgedReportComponent {
           column: 'Days_61_90',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'Days_61_90',
           alignment: 'right',
         },
@@ -306,7 +313,7 @@ export class AgedReportComponent {
           column: 'Days_91_120',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'Days_91_120',
           alignment: 'right',
         },
@@ -314,7 +321,7 @@ export class AgedReportComponent {
           column: 'Days_Above_120',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'Days_Above_120',
           alignment: 'right',
         },
@@ -322,7 +329,7 @@ export class AgedReportComponent {
           column: 'TotalAmount',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'TotalAmount',
           alignment: 'right',
         },
@@ -330,7 +337,7 @@ export class AgedReportComponent {
           column: 'GROSS_CLAIM',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'GROSS_CLAIM',
           alignment: 'right',
         },
@@ -338,7 +345,7 @@ export class AgedReportComponent {
           column: 'DISCOUNT_CLAIM',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'DISCOUNT_CLAIM',
           alignment: 'right',
         },
@@ -346,7 +353,7 @@ export class AgedReportComponent {
           column: 'NET_CLAIM',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'NET_CLAIM',
           alignment: 'right',
         },
@@ -354,7 +361,7 @@ export class AgedReportComponent {
           column: 'DISCOUNT_RA',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'DISCOUNT_RA',
           alignment: 'right',
         },
@@ -362,7 +369,7 @@ export class AgedReportComponent {
           column: 'EXCEEDING_LIMITED',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'EXCEEDING_LIMITED',
           alignment: 'right',
         },
@@ -371,7 +378,7 @@ export class AgedReportComponent {
           column: 'REJECTED_AMOUNT',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: 3 },
+          valueFormat: { type: 'fixedPoint', precision: this.precision },
           showInColumn: 'REJECTED_AMOUNT',
           alignment: 'right',
         },
@@ -379,6 +386,23 @@ export class AgedReportComponent {
       groupItems: [],
     };
   }
+
+  
+onRowExpanding(e: any) {
+  // Close previously opened detail row
+  if (this.expandedRowKey !== null && this.expandedRowKey !== e.key) {
+    this.dataGrid.instance.collapseRow(this.expandedRowKey);
+  }
+
+  // Save current expanded row key
+  this.expandedRowKey = e.key;
+}
+
+onRowCollapsed(e: any) {
+  if (this.expandedRowKey === e.key) {
+    this.expandedRowKey = null;
+  }
+}
   // =========== Custom summary item with same smart decimal logic ==========
   createSummaryItem(col, isGroupItem = false, summaryType = 'sum', formatType) {
     return {
@@ -435,7 +459,7 @@ export class AgedReportComponent {
         displayFormat: '{0}',
         valueFormat: {
           type: 'fixedPoint',
-          precision: 3,
+          precision: this.precision,
         },
         showInColumn: col,
         alignment: 'right',

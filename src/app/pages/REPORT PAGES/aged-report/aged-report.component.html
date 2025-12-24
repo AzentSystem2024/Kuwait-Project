@@ -13,53 +13,7 @@
         [colCount]="5"
 
       >
-              <!-- [colCount]="3"
-        [colCountByScreen]="{ xs: 3, sm: 3, md: 3, lg: 3 }" -->
-       <!-- <dxi-item location="before">
-          <div class="grid-header">Ageing Report</div>
-        </dxi-item> -->
 
-        <!-- <dxi-item [colSpan]="1">
-          <dx-select-box
-            labelMode="floating"
-            labelLocation="left"
-            label="Year"
-            [(value)]="selectedYear"
-            [dataSource]="years"
-            (onValueChanged)="onYearChanged($event)"
-            placeholder="Year"
-            [width]="'auto'"
-          ></dx-select-box>
-        </dxi-item> -->
-
-        <dxi-item [colSpan]="1">
-          <div>
-                      <dx-date-box
-            labelMode="floating"
-            labelLocation="left"
-            label="AsonDate"
-            type="date"
-            displayFormat="dd/MM/yyyy"
-            valueFormat="yyyy/MM/dd"
-            [(value)]="As_on_date"
-            [min]="minDate"
-            [max]="maxDate"
-          >
-          </dx-date-box>
-            <!-- <dx-select-box
-              labelMode="floating"
-              labelLocation="left"
-              label="month"
-              [dataSource]="monthDataSource"
-              displayExpr="name"
-              valueExpr="value"
-              [(value)]="selectedmonth"
-              (onValueChanged)="onMonthValueChanged($event)"
-              [dropDownOptions]="{ width: 'auto' }"
-            >
-            </dx-select-box> -->
-          </div>
-        </dxi-item>
 
         <dxi-item [colSpan]="1">
           <dx-date-box
@@ -89,6 +43,23 @@
             [max]="maxDate"
           >
           </dx-date-box>
+        </dxi-item>
+                <dxi-item [colSpan]="1">
+          <div>
+                      <dx-date-box
+            labelMode="floating"
+            labelLocation="left"
+            label="As on Date"
+            type="date"
+            displayFormat="dd/MM/yyyy"
+            valueFormat="yyyy/MM/dd"
+            [(value)]="As_on_date"
+            [min]="minDate"
+            [max]="maxDate"
+          >
+          </dx-date-box>
+
+          </div>
         </dxi-item>
 
         <dxi-item [colSpan]="1" class="mt-1">
@@ -126,7 +97,7 @@
       #dataGrid
       class="grid reportGrid reportGridFooter theme-dependent"
       [height]="isContentVisible ? '80vh' : '80vh'"
-      [noDataText]="!isContentVisible ? ' ' : ' '"
+      [noDataText]="!isContentVisible ? ' ' : 'No data '"
       [dataSource]="dataGrid_DataSource"
       [showBorders]="true"
       [allowColumnResizing]="false"
@@ -143,31 +114,22 @@
       }"
       (onExporting)="onExporting($event)"
       [summary]="summaryColumnsData"
+        (onRowExpanding)="onRowExpanding($event)"
+  (onRowCollapsed)="onRowCollapsed($event)"
     >
-      <!-- <dxi-column
-        *ngIf="!isEmptyDatagrid"
-        type="buttons"
-        [width]="40"
-        [fixed]="true"
-        fixedPosition="left"
-        [allowFixing]="false"
-        [allowHiding]="false"
-        [allowResizing]="false"
-        [allowReordering]="false"
-      >
-        <dxi-button
-          icon="detailslayout"
-          text="Details"
-          hint="View Details"
-          [onClick]="handleRowDrillDownClick"
-        ></dxi-button>
-      </dxi-column> -->
-
+    
+<dxi-column dataField="InsuranceCode" caption="InsuranceCode"></dxi-column>
+<dxi-column dataField="InsuranceName" caption="InsuranceName"></dxi-column>
+<!-- <dxi-column dataField="AgeDays" caption="AgeDays"></dxi-column> -->
+<dxi-column dataField="Days_0_30"   [format]="{ type: 'fixedPoint', precision: precision  }" caption=" 0–30"></dxi-column>
+<dxi-column dataField="Days_31_60"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 31–60"></dxi-column>
+<dxi-column dataField="Days_61_90"   [format]="{ type: 'fixedPoint', precision: precision  }" caption=" 61–90"></dxi-column>
+<dxi-column dataField="Days_91_120"  [format]="{ type: 'fixedPoint', precision: precision  }" caption=" 91–120"></dxi-column>
+<dxi-column dataField="Days_Above_120"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" Above 120"></dxi-column>
+<dxi-column dataField="TotalAmount"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Total Amount"></dxi-column>
+<!-- 
      <ng-container *ngFor="let column of columnsConfig">
   
-       <!-- <ng-container *ngIf="subColumn.dataField !== 'InsuranceID'"> -->
-  <!-- Skip InsuranceID column -->
-<ng-container *ngIf="column.dataField !== 'InsuranceID'">
 
     <dxi-column
       *ngIf="column.isBand"
@@ -179,7 +141,7 @@
         [dataField]="subColumn.dataField"
         [caption]="subColumn.caption"
         [format]="subColumn.format"
-        [visible]="subColumn.visible"
+     
         [width]="150"
       ></dxi-column>
     </dxi-column>
@@ -189,12 +151,11 @@
       [dataField]="column.dataField"
       [caption]="column.caption"
       [format]="column.format"
-      [visible]="column.visible"
       [width]="150"
     ></dxi-column>
   
-</ng-container>
-</ng-container>
+</ng-container> -->
+<!-- </ng-container> -->
       <dxo-search-panel [visible]="true"></dxo-search-panel>
       <dxo-paging [pageSize]="20"></dxo-paging>
       <dxo-pager
@@ -287,56 +248,7 @@
 
         <dxi-item name="exportButton" [disabled]="isEmptyDatagrid"></dxi-item>
 
-        <!-- <dxi-item
-          widget="dxButton"
-          [options]="{
-            text: '',
-            icon: 'newfolder',
-            onClick: show_Memorise_popup,
-            hint: 'Save Memorize Report',
-            disabled: isEmptyDatagrid
-          }"
-        ></dxi-item>
 
-        <dxi-item
-          widget="dxDropDownButton"
-          [options]="{
-            text: '',
-            dataSource:memorise_Dropdown_DataList,
-            displayExpr:'name',
-            valueExpr:'name',
-            icon: 'datafield',
-            hint: 'Show Memorise Report',
-            noDataText: 'load data and try again',
-            selectable: true,
-            disabled: isEmptyDatagrid,
-            placeholder:'memorise report',
-            onItemClick:ShowMemoriseTable,
-            showClearButton: true,
-            dropDownOptions:{
-              width: 'auto',
-            }
-          }"
-        ></dxi-item> -->
-
-        <dxi-item
-          class="columnfinderclass"
-          widget="dxDropDownButton"
-          [options]="{
-            dataSource: ColumnNames,
-            onItemClick: findColumnLocation,
-            placeholder: 'Search Column',
-            noDataText: 'Load data and try again',
-            disabled: isEmptyDatagrid,
-            hint: 'Column location finder',
-            icon:'columnproperties',
-            dropDownOptions: {
-              width: 'auto',
-              height: '60vh'
-            },
-
-          }"
-        ></dxi-item>
       </dxo-toolbar>
 
       <dxo-grouping
@@ -357,6 +269,7 @@
           [noDataText]=""
           (onCellClick)="onCellClick($event)"
         >
+         <dxo-header-filter [visible]="true" highlight="true"></dxo-header-filter>
           <dxo-scrolling 
       mode="standard" 
       direction="both" 
@@ -372,26 +285,24 @@
 
           >
           </dxo-pager>
-            <!-- <dxi-column dataField="InsuranceID" caption="InsuranceID"></dxi-column> -->
-             <!-- <dxi-column dataField="InsuranceID" caption="InsuranceID"></dxi-column> -->
 <dxi-column dataField="InsuranceCode" caption="InsuranceCode"></dxi-column>
 <dxi-column dataField="InsuranceName" caption="InsuranceName"></dxi-column>
-<dxi-column dataField="AgeDays" caption="AgeDays"></dxi-column>
-<dxi-column dataField="Days_0_30" caption="Days 0–30"></dxi-column>
-<dxi-column dataField="Days_31_60" caption="Days 31–60"></dxi-column>
-<dxi-column dataField="Days_61_90" caption="Days 61–90"></dxi-column>
-<dxi-column dataField="Days_91_120" caption="Days 91–120"></dxi-column>
-<dxi-column dataField="Days_Above_120" caption="Days Above 120"></dxi-column>
-<dxi-column dataField="TotalAmount" caption="Total Amount"></dxi-column>
+<!-- <dxi-column dataField="AgeDays" caption="AgeDays"></dxi-column> -->
+<dxi-column dataField="Days_0_30"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 0–30"></dxi-column>
+<dxi-column dataField="Days_31_60"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 31–60"></dxi-column>
+<dxi-column dataField="Days_61_90"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 61–90"></dxi-column>
+<dxi-column dataField="Days_91_120"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 91–120"></dxi-column>
+<dxi-column dataField="Days_Above_120"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" Above 120"></dxi-column>
+<dxi-column dataField="TotalAmount"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Total Amount"></dxi-column>
 <dxi-column dataField="TRANSACTION_DATE" caption="Transaction Date" dataType="date"   format="dd-MM-yyyy"></dxi-column>
 <dxi-column dataField="INVOICE_NO" caption="Invoice No"></dxi-column>
 <dxi-column dataField="PREINVOICENO" caption="PreInvoice No"></dxi-column>
-<dxi-column dataField="GROSS_CLAIM" caption="Gross Claim"></dxi-column>
-<dxi-column dataField="DISCOUNT_CLAIM" caption="Discount Claim"></dxi-column>
-<dxi-column dataField="NET_CLAIM" caption="Net Claim"></dxi-column>
-<dxi-column dataField="DISCOUNT_RA" caption="Discount RA"></dxi-column>
-<dxi-column dataField="EXCEEDING_LIMITED" caption="Exceeding Limited"></dxi-column>
-<dxi-column dataField="REJECTED_AMOUNT" caption="Rejected Amount"></dxi-column>
+<dxi-column dataField="GROSS_CLAIM"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Gross Claim"></dxi-column>
+<dxi-column dataField="DISCOUNT_CLAIM"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Discount Claim"></dxi-column>
+<dxi-column dataField="NET_RA"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Net Payable"></dxi-column>
+<dxi-column dataField="DISCOUNT_RA"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Discount RA"></dxi-column>
+<dxi-column dataField="EXCEEDING_LIMITED"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Exceeding Limited"></dxi-column>
+<dxi-column dataField="REJECTED_AMOUNT"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Rejected Amount"></dxi-column>
 <dxi-column dataField="PATIENT_ID" caption="Patient ID"></dxi-column>
 <dxi-column dataField="CIVIL_ID" caption="Civil ID"></dxi-column>
 <dxi-column dataField="IPOP" caption="IP/OP"></dxi-column>
@@ -404,29 +315,7 @@
 <dxi-column dataField="BATCH_NO" caption="Batch No"></dxi-column>
 <dxi-column dataField="PAYER" caption="Payer"></dxi-column>
 
-          <!-- <ng-container *ngFor="let column of DetailsColumns">
-            <dxi-column
-              *ngIf="column.isBand"
-              [caption]="column.caption"
-              [isBand]="true"
-            >
-              <dxi-column
-                *ngFor="let subColumn of column.columns"
-                [dataField]="subColumn.dataField"
-                [caption]="subColumn.caption"
-                [format]="subColumn.format"
-                [visible]="subColumn.visible"
-              ></dxi-column>
-            </dxi-column>
-
-            <dxi-column
-              *ngIf="!column.isBand"
-              [dataField]="column.dataField"
-              [caption]="column.caption"
-              [format]="column.format"
-              [visible]="column.visible"
-            ></dxi-column>
-          </ng-container> -->
+       
           <dxo-scrolling mode="virtual"></dxo-scrolling>
           <dxo-header-filter [visible]="isFilterOpened">
             <dxo-search [enabled]="true"></dxo-search>
@@ -435,131 +324,15 @@
             [visible]="isFilterOpened"
             [applyFilter]="applyFilter"
           ></dxo-filter-row>
-          <!-- <dxo-filter-panel [visible]="isFilterOpened"></dxo-filter-panel>
-          <dxo-filter-builder [allowHierarchicalFields]="true">
-          </dxo-filter-builder> -->
+    
         </dx-data-grid>
       </div>
-           <!-- <div class="ms-3" *dxTemplate="let data of 'detail'"> -->
-        <!-- <dx-data-grid
-          #detailsdatagrid
-          [dataSource]="FilteredDetailData"
-          [showBorders]="true"
-          [columnAutoWidth]="true"
-          [rowAlternationEnabled]="true"
-          [summary]="DetailsummaryColumns"
-          [height]="'50vh'"
-        > <dxo-pager
-            [visible]="false"
-            [allowedPageSizes]="allowedPageSizes"
-            [displayMode]="displayMode"
-            [showPageSizeSelector]="showPageSizeSelector"
-            [showInfo]="showInfo"
-            [showNavigationButtons]="showNavButtons"
-          >
-          </dxo-pager>
-          <ng-container *ngFor="let column of DetailsColumns">
-            <dxi-column
-              *ngIf="column.isBand"
-              [caption]="column.caption"
-              [isBand]="true"
-            >
-              <dxi-column
-                *ngFor="let subColumn of column.columns"
-                [dataField]="subColumn.dataField"
-                [caption]="subColumn.caption"
-                [format]="subColumn.format"
-                [visible]="subColumn.visible"
-              ></dxi-column>
-            </dxi-column>
-
-            <dxi-column
-              *ngIf="!column.isBand"
-              [dataField]="column.dataField"
-              [caption]="column.caption"
-              [format]="column.format"
-              [visible]="column.visible"
-            ></dxi-column>
-          </ng-container>
-          <dxo-scrolling mode="virtual"></dxo-scrolling>
-          <dxo-header-filter [visible]="isFilterOpened">
-            <dxo-search [enabled]="true"></dxo-search>
-          </dxo-header-filter>
-          <dxo-filter-row
-            [visible]="isFilterOpened"
-            [applyFilter]="applyFilter"
-          ></dxo-filter-row></dx-data-grid> -->
-           <!-- </div> -->
-      <!-- <dxo-selection mode="multiple"></dxo-selection> -->
+   
       <dxo-header-filter [visible]="true">
         <dxo-search [enabled]="true"></dxo-search>
       </dxo-header-filter>
     </dx-data-grid>
   </ng-container>
-
-  <!-- <dx-popup
-    class="m-0 p-0"
-    [(visible)]="isSaveMemorisedOpened"
-    [title]="'Memorise Report'"
-    [width]="350"
-    height="60vh"
-  >
-    <dx-form id="form">
-      <dxi-item itemType="group" cssClass="form-group" [colCount]="1">
-        <dxi-item itemType="group">
-          <dxi-item
-            dataField="MemoriseReportName"
-            caption="Memorise Report Name"
-            [editorOptions]="{
-              placeholder: 'Enter Memorise Name',
-              value: MemoriseReportName,
-              onValueChanged: onMemoriseReportNameChanged.bind(this)
-            }"
-            [label]="{
-              text: 'Memorise Report Name',
-              visible: true,
-              location: 'top',
-              alignment: 'left',
-              showColon: false,
-              showRequiredMark: false,
-              textStyle: { fontWeight: 'bold' }
-            }"
-          >
-          </dxi-item>
-        </dxi-item>
-      </dxi-item>
-    </dx-form>
-    <dx-button
-      text="Save"
-      type="default"
-      (onClick)="save_Memorise_Report()"
-      class="save-button"
-    ></dx-button>
-  </dx-popup> -->
-
-  <!--  -->
-
-  <!-- <div *ngIf="isDrillDownPopupOpened">
-    <dx-popup
-      [(visible)]="isDrillDownPopupOpened"
-      title="Claim Details"
-      [height]="popupHeight"
-      [width]="popupWidth"
-      [resizeEnabled]="true"
-      [dragEnabled]="true"
-      [shading]="false"
-      [showCloseButton]="false"
-      [closeOnOutsideClick]="false"
-      [showCloseButton]="false"
-      (onResizeEnd)="onResizeEnd($event)"
-      [toolbarItems]="toolbarItems"
-      [position]="popupPosition"
-    >
-      <app-claim-detail-activity-drill-down
-        [clickedRowData]="clickedRowData"
-      ></app-claim-detail-activity-drill-down>
-    </dx-popup>
-  </div> -->
 </div>
 <dx-load-panel
   #loadPanel

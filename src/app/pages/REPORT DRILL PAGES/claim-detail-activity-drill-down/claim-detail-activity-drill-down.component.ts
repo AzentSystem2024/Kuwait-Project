@@ -157,7 +157,7 @@ export class ClaimDetailActivityDrillDownComponent implements OnInit {
       visible: (e: any) => e.row.data.hasAttachment,
       onClick: (e: any) => {
         e.event.stopPropagation();
-        console.log('Attachment clicked', e.row.data);
+   
       },
     },
   ];

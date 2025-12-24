@@ -32,6 +32,7 @@ import { DataSource } from 'devextreme/common/data';
 import { exportDataGrid } from 'devextreme/excel_exporter';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { ReportEngineService } from '../../REPORT PAGES/report-engine.service';
 @Component({
   selector: 'app-import-ra-data-popup',
   templateUrl: './import-ra-data-popup.component.html',
@@ -87,7 +88,7 @@ export class ImportRADataPopupComponent implements OnInit {
   finalRAObjects: any;
   insurance_id: any;
   editColumns: any;
-
+  ColumnNames: any;
   statusOptions = [
     { DESCRIPTION: 'Processed', ID: 'Processed' },
     { DESCRIPTION: 'Not Processed', ID: 'Not Processed' },
@@ -132,8 +133,10 @@ export class ImportRADataPopupComponent implements OnInit {
   invalidColumns: Set<string> = new Set();
   selected_Insurance_id: any;
   invalidData: boolean = false;
-
+  showGrossMismatchPopup: boolean = false;
+  confirmDistribute: boolean = false;
   // Header mismatch tracker (child-component only)
+  precision:any
   private headerMismatchMap = new Map<
     string,
     { expected: string; actual: string }
@@ -141,14 +144,22 @@ export class ImportRADataPopupComponent implements OnInit {
 
   constructor(
     private dataservice: DataService,
-    private mastersrvce: MasterReportService
+    private mastersrvce: MasterReportService,
+    private reportengine: ReportEngineService
   ) {
     this.getHisColumnsForUniqueKey();
+    this.get_RA_Columns_Data();
+     const systemInfo = JSON.parse(
+      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+    );
+    console.log(systemInfo);
+    this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
+    console.log(this.precision);  
   }
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-    console.log('column fetched:', this.dataSource);
+   
 
     try {
       await this.fetch_insurance_dropdown_data();
@@ -158,7 +169,7 @@ export class ImportRADataPopupComponent implements OnInit {
       } else {
         this.applyFetchedData(this.fetchedData);
       }
-
+   this.ColumnNames = this.columnData.map((column) => column.caption);
       this.fetch_all_column_and_uniqueKey_data();
     } catch (error) {
       notify({
@@ -221,8 +232,15 @@ export class ImportRADataPopupComponent implements OnInit {
     this.columnData = res.columns.map((col: any) => ({
       dataField: col.ColumnName,
       caption: col.ColumnTitle,
-    }));
+      width: 150,
+          dataType: 'DECIMAL',
+    format: {
+      type: 'fixedPoint',
+      precision: this.precision
+    }
 
+    }));
+    this.ColumnNames = this.columnData.map((column) => column.caption);
     this.initDataSource(res);
 
     this.selected_Insurance_id = res.InsuranceID;
@@ -252,6 +270,7 @@ export class ImportRADataPopupComponent implements OnInit {
           }
         }),
     });
+    
   }
 
   // ========== onCellPrepared validator ==========
@@ -397,7 +416,11 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // ============= hide popup ===========
   handlePopupHidden(): void {
-    this.viewDetails();
+    if (this.fetchedData) {
+      this.viewDetails();
+    } else {
+      this.close();
+    }
   }
 
   // ========= fetch ra columns and unique key of selected data ========
@@ -472,6 +495,7 @@ export class ImportRADataPopupComponent implements OnInit {
   async onSaveClick() {
     const userId = Number(sessionStorage.getItem('UserID')) || 0;
     const insuranceId = this.selectedInsuranceId || 0;
+    this.selected_Insurance_id = insuranceId;
 
     if (!insuranceId || insuranceId === 0) {
       notify({
@@ -532,7 +556,7 @@ export class ImportRADataPopupComponent implements OnInit {
         const payload = {
           USerID: userId,
           InsuranceID: insuranceId,
-          IsAutoProcessed: this.autoProcess,
+          IsAutoProcessed: false,
           BatchNo: commonBatchId,
           import_ra_data: currentBatch,
         };
@@ -542,6 +566,7 @@ export class ImportRADataPopupComponent implements OnInit {
           .toPromise()
           .then((res: any) => {
             if (res.flag === '1') {
+              this.LogID = res.LogID;
               notify({
                 message: `Batch ${
                   i + 1
@@ -550,12 +575,6 @@ export class ImportRADataPopupComponent implements OnInit {
                 displayTime: 2000,
                 position: { at: 'top right', my: 'top right', of: window },
               });
-
-              // if (this.autoProcess) {
-              //   this.autoProcessPopup = true;
-              // } else {
-              //   this.autoProcessPopup = false;
-              // }
             } else {
               throw new Error(res.message || `Batch ${i + 1} import failed.`);
             }
@@ -578,8 +597,15 @@ export class ImportRADataPopupComponent implements OnInit {
         displayTime: 4000,
         position: { at: 'top right', my: 'top right', of: window },
       });
+      if (this.autoProcess) {
+        this.get_RA_Columns_Data();
+        this.totalRaItems = this.dataSource.length;
+        this.autoProcessPopup = true;
+      } else {
+        this.close();
+      }
 
-      this.close();
+      // this.close();
     } catch (error) {
       this.handleError(error);
     } finally {
@@ -591,12 +617,6 @@ export class ImportRADataPopupComponent implements OnInit {
   //==================porcessing popup autoprocess is checked
   onAutoProcessChanged(e: any) {
     this.autoProcess = e.value;
-
-    // if (this.autoProcess === true) {
-    //   this.autoProcessPopup = true;
-    // } else {
-    //   this.autoProcessPopup = false;
-    // }
   }
 
   convertToYYYYMMDD(value: any): string | null {
@@ -726,9 +746,9 @@ export class ImportRADataPopupComponent implements OnInit {
   // ======== change unique key and process data =============
   onChangeAndProcess(): Promise<void> {
     return new Promise((resolve) => {
+    
       const insurance = this.selectedInsuranceId;
-      const logId = this.fetchedData.ID;
-
+      const logId = this.fetchedData?.ID || this.LogID;
       const payload = {
         InsuranceID: insurance,
         LogID: logId,
@@ -767,7 +787,7 @@ export class ImportRADataPopupComponent implements OnInit {
     }
 
     const insurance = this.selectedInsuranceId;
-    const logId = this.fetchedData.ID;
+    const logId = this.fetchedData?.ID || this.LogID;
 
     const payload = {
       InsuranceID: insurance,
@@ -784,7 +804,13 @@ export class ImportRADataPopupComponent implements OnInit {
             caption: col.ColumnTitle,
             minWidth: 100,
             maxWidth: 250,
+              dataType: 'DECIMAL',
+               format: {
+      type: 'fixedPoint',
+      precision: this.precision}
           }));
+            
+   
           this.RAGridData = response.data;
 
           if (this.raGrid?.instance) {
@@ -828,6 +854,7 @@ export class ImportRADataPopupComponent implements OnInit {
 
     const payload = {
       UniqueKey: selectedRow.UNIQUE_KEY,
+      InsuranceID: this.selectedInsuranceId,
     };
     this.HISGridData = [];
 
@@ -841,6 +868,10 @@ export class ImportRADataPopupComponent implements OnInit {
             caption: col.ColumnTitle,
             minWidth: 100,
             maxWidth: 150,
+               dataType: 'DECIMAL',
+               format: {
+      type: 'fixedPoint',
+      precision: this.precision}
           }));
 
           setTimeout(() => {
@@ -970,6 +1001,13 @@ export class ImportRADataPopupComponent implements OnInit {
     e.component.refresh(true);
   }
 
+  //====================Find the column location from the datagrid================
+  findColumnLocation = (e: any) => {
+    const columnName = e.itemData;
+    if (columnName != '' && columnName != null) {
+      this.reportengine.makeColumnVisible(this.dataGrid, columnName);
+    }
+  };
   // ====== Calculate totals using only selected rows ======
   getSelectedTotal(field: string): string {
     if (!this.selectedDistributeRows?.length) return '0.00';
@@ -1050,13 +1088,23 @@ export class ImportRADataPopupComponent implements OnInit {
       this.selectedDistributeRows
     );
     const totalGrossClaimed = this.getSelectedTotal('GROSS_CLAIMED');
-    const RaGrossAmount = this.selectedRARow.GROSS_CLAIMED;
-
+    const HisgrossAmount = Number(totalGrossClaimed).toFixed(3);
+    const RaGrossAmount = this.selectedRARow.GROSS_CLAIMED.toFixed(3);
+  
     this.isLoadingManualProcess = true;
     const payload = {
       RaID: this.selectedRARow.ID,
       distributed_data: this.transformPayload(this.selectedDistributeRows),
     };
+    if (HisgrossAmount !== RaGrossAmount && !this.confirmDistribute) {
+      this.showGrossMismatchPopup = true;
+      this.isLoadingManualProcess = false;
+      return;
+    }
+
+    this.confirmDistribute = false;
+    this.showGrossMismatchPopup = false;
+    this.isLoadingManualProcess = true;
 
     this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
       next: (res: any) => {
@@ -1282,7 +1330,7 @@ export class ImportRADataPopupComponent implements OnInit {
       ColumnTitle: item.DESCRIPTION,
       IsHisColumn: true,
     }));
-    console.log('Selected HIS Full Objects:', this.finalHISObjects);
+  
   }
 
   displayColumn(item: any) {
@@ -1295,6 +1343,19 @@ export class ImportRADataPopupComponent implements OnInit {
     this.dataservice.His_Columns_For_UniqueKey(name).subscribe((res: any) => {
       this.hisColumns = res || [];
     });
+  }
+
+  //======================= confirmation for mismatched gross amount processing====================
+  onConfirmGrossMismatch() {
+    this.confirmDistribute = true;
+    this.onSubmitDistributeRA();
+  }
+
+  //======================= cancel for mismatched gross amount processing====================
+
+  onCancelGrossMismatch() {
+    this.confirmDistribute = false;
+    this.showGrossMismatchPopup = false;
   }
 }
 

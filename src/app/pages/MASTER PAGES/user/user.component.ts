@@ -114,7 +114,7 @@ export class UserComponent {
 
   onClickSaveNewData() {
     const data = this.userNewForm.getNewUserData();
-    console.log(data, 'PAYLOAD IN SAVE');
+
     this.service.insert_User_Data(data).subscribe((res: any) => {
       try {
         if (res.message === 'Success') {
@@ -195,6 +195,11 @@ export class UserComponent {
     // this.getUSerData();
     this.dataGrid.instance.refresh();
   }
+
+  //=================== Page refreshing==========================
+  refresh = () => {
+    this.dataGrid.instance.refresh();
+  };
 }
 @NgModule({
   imports: [

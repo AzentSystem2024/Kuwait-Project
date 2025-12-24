@@ -48,7 +48,7 @@ export class ChangePasswordComponent implements OnInit {
     private reuseStrategy: CustomReuseStrategy
   ) {
     this.UserID = sessionStorage.getItem('UserID');
-    console.log(this.dummyId, 'dummy');
+   
   }
 
   // isValid() {
@@ -99,7 +99,7 @@ export class ChangePasswordComponent implements OnInit {
       ChangePasswordOnLogin: false,
       ModifiedFrom: this.UserID,
     };
-    console.log(PasswordData, 'password form data');
+   
 
     this.service.reset_Password(PasswordData).subscribe((res) => {
       try {
@@ -199,16 +199,14 @@ export class ChangePasswordComponent implements OnInit {
   getUserPassword() {
     this.service.get_User_Data_By_Id(this.UserID).subscribe((res: any) => {
       this.getOldPassword = res.Password;
-      console.log(this.oldPassword, 'old password');
+    
     });
   }
 
   getSecurityPolicyData() {
     this.service.getUserSecurityPolicityData().subscribe((res: any) => {
       this.securityPolicyData = res.data[0];
-      console.log(res, 'secpolicy');
-      console.log('hhh');
-      console.log('user security policy data', this.securityPolicyData);
+     
     });
   }
   onPasswordInput(event: Event): void {

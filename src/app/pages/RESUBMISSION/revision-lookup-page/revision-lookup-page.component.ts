@@ -114,7 +114,6 @@ export class RevisionLookupPageComponent {
 
   //=============== enable delete row popup ===============
   onRowRemoving(event) {
-    console.log('removing data ', event);
     event.cancel = true;
     this.rowToDelete = event.data;
     this.deleteReason = ''; // Reset input field

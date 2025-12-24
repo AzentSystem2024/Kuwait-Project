@@ -127,7 +127,7 @@ export class ImportHISDataComponent implements OnInit {
                 }
               : undefined,
         }));
-        console.log('Column DAta :>', this.columnData);
+    
         this.isColumnsLoaded = true;
       }
     });
@@ -217,6 +217,24 @@ export class ImportHISDataComponent implements OnInit {
         this.isLoading = false;
         return;
       }
+      // ================= COLUMN COUNT VALIDATION =================
+const excelColumnCount = Object.keys(rawData[0] || {}).length;
+const expectedColumnCount = this.columnData.length;
+
+if (excelColumnCount > expectedColumnCount) {
+  this.isLoading = false;
+
+  notify({
+    message: `Excel has ${excelColumnCount} columns, but expected only ${expectedColumnCount}. Please check the template.`,
+    type: 'error',
+    displayTime: 6000,
+    position: { my: 'right top', at: 'right top', of: window },
+  });
+
+  this.resetFileInput();
+  return; 
+}
+
 
       const excelHeaders = Object.keys(rawData[0] || {});
       const normalizedExcelHeaders = excelHeaders.map((h) =>
@@ -247,7 +265,7 @@ export class ImportHISDataComponent implements OnInit {
           normalizedExcelHeaders.includes(fieldKey);
 
         if (!exists) {
-          // 👉 Show current Excel column name (index-based fallback)
+          //  Show current Excel column name (index-based fallback)
           const actualExcelColumn = excelHeaders[index] || 'Unknown Column';
 
           this.excelColumnMismatchMap[col.dataField] = {
@@ -297,7 +315,7 @@ export class ImportHISDataComponent implements OnInit {
       this.isLoading = false;
       this.isNewFormPopupOpened = true;
 
-      // 🔔 SHOW ERROR AFTER POPUP OPENS
+      //  SHOW ERROR AFTER POPUP OPENS
       if (this.excelColumnMismatchMessage) {
         setTimeout(() => {
           notify({

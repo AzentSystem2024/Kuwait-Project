@@ -9,7 +9,7 @@
     [width]="'100%'"
     [rowAlternationEnabled]="true"
     rowAlternationInterval="2"
-    [columnAutoWidth]="true"
+    [columnAutoWidth]="false"
     [allowColumnResizing]="true"
     [allowColumnReordering]="true"
     [columnFixing]="{ enabled: true }"
@@ -96,6 +96,23 @@
           (onClick)="autoProcessPopup = true"
         ></dx-button>
       </dxi-item>
+        <dxi-item
+          class="columnfinderclass"
+          widget="dxDropDownButton"
+          [options]="{
+            dataSource: ColumnNames,
+            onItemClick: findColumnLocation,
+            placeholder: 'Search Column',
+            noDataText: 'Load data and try again',
+            hint: 'Column location finder',
+            icon:'columnproperties',
+            dropDownOptions: {
+              width: 'auto',
+              height: '60vh'
+            },
+
+          }"
+        ></dxi-item>
     </dxo-toolbar>
 
     <!-- Column chooser (optional) -->
@@ -565,3 +582,32 @@
   [closeOnOutsideClick]="false"
 >
 </dx-load-panel>
+
+<!-- mismatched Gross amount distribute Ra processing Popup -->
+ <dx-popup
+  [(visible)]="showGrossMismatchPopup"
+  title="Gross Amount Mismatch"
+  [width]="400"
+  [height]="200"
+  [closeOnOutsideClick]="false"
+>
+  <p>
+    Gross amounts are different from RA Gross Amount.
+    <br />
+    Do you want to continue?
+  </p>
+
+  <div class="d-flex justify-content-end gap-2 mt-4">
+    <dx-button
+      text="Cancel"
+      type="normal"
+      (onClick)="onCancelGrossMismatch()"
+    ></dx-button>
+
+    <dx-button
+      text="Save"
+      type="default"
+      (onClick)="onConfirmGrossMismatch()"
+    ></dx-button>
+  </div>
+</dx-popup>

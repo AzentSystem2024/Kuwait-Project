@@ -127,7 +127,6 @@ export class AutoDownloadSettingsComponent {
               : null,
           })
         );
-        console.log('data source :>>', this.dataSource);
       });
   }
 
@@ -170,10 +169,7 @@ export class AutoDownloadSettingsComponent {
         e.event.preventDefault(); // Prevent invalid reordering
       }
     }
-    console.log(
-      'datasource after instance row dragging eneded ==>>',
-      this.dataSource
-    );
+
     e.component.refresh();
   };
 
@@ -277,7 +273,6 @@ export class AutoDownloadSettingsComponent {
     if (validationResult.isValid) {
       const newFacilities = this.Update_Facility_Value; // Facilities to add
       const parentId = this.updatenodeId; // Parent node ID
-      console.log('new facility values are :>', newFacilities);
       // Update parent node
       const parentNode = this.dataSource.find((node) => node.id === parentId);
       if (parentNode) {
@@ -323,7 +318,6 @@ export class AutoDownloadSettingsComponent {
 
   //==================facility dropdown selection change event=================
   onFacilitySelectionChange(event: any): void {
-    // console.log('Facilities changed:', event.value);
     this.Update_Facility_Value = event.value;
   }
   //=====unique id making for insering data==================
@@ -333,7 +327,6 @@ export class AutoDownloadSettingsComponent {
       .filter((id) => id !== null && id !== undefined);
     const nextId = allIds.length > 0 ? Math.max(...allIds) + 1 : 1;
 
-    // console.log('Generated unique ID:', nextId, 'from IDs:', allIds);
     return nextId;
   }
 
@@ -373,7 +366,6 @@ export class AutoDownloadSettingsComponent {
   //======================on click event of save button =======================
   on_Click_Save_Settings = () => {
     const userId = parseInt(sessionStorage.getItem('UserID') || '0', 10);
-    console.log('Final data to insert:', this.dataSource);
     let formatDate = (date: Date | null) => {
       if (!date) return null;
 

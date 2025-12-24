@@ -356,14 +356,14 @@ export class ClaimAnalysisComponent implements OnInit {
 
   closePopup1(popup: any): void {
     popup.isOpened = false; // Hide the popup
-    // console.log('Popup manually closed:', popup);
+  
     this.closedPopupsSet.add(popup.id);
     // Additional logic for closing the popup can go here
   }
 
   //===========Function to handle selection change and sort the data==========
   onSelectionChanged(event: any, jsonData: any[], dataSourceKey: string): void {
-    console.log('Original JSON Data:', jsonData);
+  
     const selectedRows = event.selectedRowsData;
     const selectedRowIds = selectedRows.map((row) => row.ID);
     const unselectedRows = jsonData.filter(
@@ -371,7 +371,7 @@ export class ClaimAnalysisComponent implements OnInit {
     );
     const reorderedData = [...selectedRows, ...unselectedRows];
     this[dataSourceKey] = this.makeAsyncDataSourceFromJson(reorderedData);
-    console.log('Updated DataSource:', this[dataSourceKey]);
+  
     this.dataGrid.instance.refresh();
   }
 
@@ -423,7 +423,7 @@ export class ClaimAnalysisComponent implements OnInit {
         }
       },
       (error) => {
-        console.error('Error fetching data:', error);
+      
       }
     );
   }
@@ -660,7 +660,7 @@ export class ClaimAnalysisComponent implements OnInit {
         let borderColor = getComputedStyle(
           document.documentElement
         ).getPropertyValue('--text-color');
-        console.log('border color fetched >>', borderColor);
+      
         e.cellElement.style.backgroundColor = bandColor;
         // e.cellElement.style.color = borderColor;
       }
@@ -671,9 +671,7 @@ export class ClaimAnalysisComponent implements OnInit {
   import_Advance_Filter() {
     const filterData = this.reportengine.getData();
 
-    // this.Facility_Value = this.Facility_DataSource.filter((item) =>
-    //   filterData.ReceiverID.split(',').includes(item.Name)
-    // ).map((item) => item.ID);
+
 
     this.ReceiverID_Value = this.RecieverID_DataSource.filter((item) =>
       filterData.ReceiverID.split(',').includes(item.Name)

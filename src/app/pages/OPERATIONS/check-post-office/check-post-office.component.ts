@@ -167,7 +167,7 @@ export class CheckPostOfficeComponent implements OnInit {
       ClaimNumber: this.ClaimNumberValue ? String(this.ClaimNumberValue) : '',
       Mode: this.modeValue,
     };
-    console.log('input data :>>', inputData);
+  
 
     this.dataservice.get_facility_download_Data(inputData).subscribe({
       next: (res: any) => {
@@ -184,7 +184,7 @@ export class CheckPostOfficeComponent implements OnInit {
         this.gridDataSource = [];
         this.loadingVisible = false;
         notify('An error occurred while loading data.', 'error', 3000);
-        console.error('API error:', err);
+      
       },
     });
   }
@@ -234,7 +234,7 @@ export class CheckPostOfficeComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('API error:', err);
+    
         notify(
           'API error occurred. Please check your connection.',
           'error',

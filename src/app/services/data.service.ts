@@ -170,7 +170,6 @@ export class DataService {
   }
 
   getServiceSynchStatus(): Observable<{ Flag: number; Message: string }> {
-    console.trace('getServiceSynchStatus called');
     const url = `${BASE_URL}downloadsettings/ServiceSynch`;
     return this.http.post<{ Flag: number; Message: string }>(url, {}); // Empty object for POST body
   }
@@ -353,6 +352,8 @@ export class DataService {
     return this.http.post(Url, reqbody);
   }
   
+  //===============RA column for set unique key=================
+
   RA_Columns_For_UniqueKey(payload:any) {
     const Url = `${BASE_URL}DropDown`;
    const reqbody =payload 
@@ -364,17 +365,27 @@ export class DataService {
   getMonths(): { name: string; value: number }[] {
     return this.months;
   }
-
+//======================ageing deport details=================
   get_aged_details(item:any){
   const Url = `${BASE_URL}reports/InsuranceAgeing/getDetail`;
    const reqbody =item 
     return this.http.post(Url, reqbody);
   }
-  
+  //==================Ageing summary report summary
     get_Aged_Summary(item:any){
   const Url = `${BASE_URL}reports/InsuranceAgeing/getSummary`;
    const reqbody =item 
     return this.http.post(Url, reqbody);
 
 }
+
+//================system information api===================
+
+  get_System_info_data() {
+    const url = `${BASE_URL}system/info`;
+    const reqBody = {};
+    return this.http.post(url, reqBody);
+  }
+
+
 }

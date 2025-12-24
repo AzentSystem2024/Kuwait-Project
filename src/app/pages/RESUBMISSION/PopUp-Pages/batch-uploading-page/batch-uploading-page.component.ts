@@ -235,7 +235,6 @@ export class BatchUploadingPageComponent implements OnInit {
           }
         },
         error: (err) => {
-          console.error('API Error:', err);
           this.pendingGridList?.instance?.endCustomLoading();
         },
         complete: () => {
@@ -690,7 +689,6 @@ export class BatchUploadingPageComponent implements OnInit {
   get_activity_diagnosis_dataSource(e: any) {
     if (e.row && e.row.key) {
       this.isLoading = true;
-      console.log('selected row data :', e.row);
       const resubmissionType = e.row.data?.ResubmissionType;
 
       if (!resubmissionType) {
@@ -721,10 +719,7 @@ export class BatchUploadingPageComponent implements OnInit {
               Observation: [...this.ObservationDataSource],
               Diagnosis: [...this.DiagnosisDataSource],
             };
-            console.log(
-              'latest main datagrid data list- already selected',
-              this.FilteredRevisionDataSource
-            );
+         
           }
         }
       }
@@ -783,10 +778,7 @@ export class BatchUploadingPageComponent implements OnInit {
               Observation: [...this.ObservationDataSource],
               Diagnosis: [...this.DiagnosisDataSource],
             };
-            console.log(
-              'latest main datagrid data list- newly selected',
-              this.FilteredRevisionDataSource
-            );
+      
           }
 
           this.SubmissionActivityColumns = response.ActivityColumns;
@@ -887,7 +879,6 @@ export class BatchUploadingPageComponent implements OnInit {
     if (confirmClear && this.selectedRowData) {
       this.selectedRowData.Attachment = null;
       this.popupVisible = false;
-      console.log('Attachment cleared');
     }
   }
   //=============== attachgment file popup operations ===============
@@ -913,7 +904,6 @@ export class BatchUploadingPageComponent implements OnInit {
         this.pdfFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
           'data:application/pdf;base64,' + base64
         );
-        console.log('File updated in Base64');
       };
       reader.readAsDataURL(file);
     };
@@ -934,7 +924,6 @@ export class BatchUploadingPageComponent implements OnInit {
     if (confirmClear && this.selectedRowData) {
       this.selectedRowData.ObservationValue = null;
       this.ObservationpopupVisible = false;
-      console.log('Attachment cleared');
     }
   }
   //============= obdervation cell value updation event ==========
@@ -960,7 +949,6 @@ export class BatchUploadingPageComponent implements OnInit {
         this.pdfFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
           'data:application/pdf;base64,' + base64
         );
-        console.log('File updated in Base64');
       };
       reader.readAsDataURL(file);
     };
@@ -1030,7 +1018,6 @@ export class BatchUploadingPageComponent implements OnInit {
   update_revision_Batch_data() {
     const rowId = this.EditRowData.ResubmissionRevisionBatchUID;
     const selectedRowsData = this.mainGrid.instance.getSelectedRowsData();
-    console.log('selected rows data ::', selectedRowsData);
     const userid = sessionStorage.getItem('UserID');
     const finalObject = {
       ResubmissionRevisionBatchUID: rowId,

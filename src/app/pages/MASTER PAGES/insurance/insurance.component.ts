@@ -133,7 +133,7 @@ export class InsuranceComponent {
           }
         },
         error: (err) => {
-          console.error('Error fetching row data:', err);
+       
           notify('Something went wrong while fetching row data', 'error', 3000);
         },
       });

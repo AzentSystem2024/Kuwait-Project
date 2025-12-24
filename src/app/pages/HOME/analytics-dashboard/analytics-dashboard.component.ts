@@ -50,7 +50,9 @@ export class AnalyticsDashboardComponent {
 
   isFilterRowVisible: boolean = false;
 
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService) {
+    this.get_system_informations()
+  }
 
   refresh = () => {
     this.dataGrid.instance.refresh();
@@ -59,6 +61,13 @@ export class AnalyticsDashboardComponent {
   toggleFilterRow = () => {
     this.isFilterRowVisible = !this.isFilterRowVisible;
   };
+
+
+  get_system_informations(){
+    this.dataService.get_System_info_data().subscribe((res:any)=>{
+      sessionStorage.setItem('SYSTEM_INFO', JSON.stringify(res));
+    })
+  }
 }
 
 @NgModule({

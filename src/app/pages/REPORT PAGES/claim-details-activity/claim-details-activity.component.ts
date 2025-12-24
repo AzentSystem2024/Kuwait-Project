@@ -291,7 +291,7 @@ export class ClaimDetailsActivityComponent {
 
   closePopup1(popup: any): void {
     popup.isOpened = false; // Hide the popup
-    // console.log('Popup manually closed:', popup);
+  
     this.closedPopupsSet.add(popup.id);
     // Additional logic for closing the popup can go here
   }
@@ -366,7 +366,7 @@ export class ClaimDetailsActivityComponent {
 
   //===================Function to handle selection change and sort the data==========
   onSelectionChanged(event: any, jsonData: any[], dataSourceKey: string): void {
-    console.log('Original JSON Data:', jsonData);
+   
     const selectedRows = event.selectedRowsData;
     const selectedRowIds = selectedRows.map((row) => row.ID);
     const unselectedRows = jsonData.filter(
@@ -374,7 +374,7 @@ export class ClaimDetailsActivityComponent {
     );
     const reorderedData = [...selectedRows, ...unselectedRows];
     this[dataSourceKey] = this.makeAsyncDataSourceFromJson(reorderedData);
-    console.log('Updated DataSource:', this[dataSourceKey]);
+   
     this.dataGrid.instance.refresh();
   }
   //============Get search parameters dropdown values=======
@@ -420,7 +420,7 @@ export class ClaimDetailsActivityComponent {
         }
       },
       (error) => {
-        console.error('Error fetching data:', error);
+      
       }
     );
   }
@@ -458,12 +458,12 @@ export class ClaimDetailsActivityComponent {
         this.columndata = response.ReportColumns;
 
         const userLocale = navigator.language || 'en-US';
-        console.log('user locale settings:', userLocale);
+       
 
         this.summaryColumnsData = this.generateSummaryColumns(
           response.ReportColumns
         );
-        // console.log('Summary columns are:', this.summaryColumnsData);
+       
 
         this.columnsConfig = this.generateColumnsConfig(
           response.ReportColumns,
@@ -642,12 +642,9 @@ export class ClaimDetailsActivityComponent {
 
   import_Advance_Filter() {
     const filterData = this.reportengine.getData();
-    // console.log('advance filter imported data', filterData);
+ 
     this.ClaimNumber_Value = filterData.ClaimNumber;
 
-    // this.Facility_Value = this.Facility_DataSource.filter((item) =>
-    //   filterData.ReceiverID.split(',').includes(item.Name)
-    // ).map((item) => item.ID);
 
     this.ReceiverID_Value = this.RecieverID_DataSource.filter((item) =>
       filterData.ReceiverID.split(',').includes(item.Name)
@@ -657,9 +654,6 @@ export class ClaimDetailsActivityComponent {
       filterData.PayerID.split(',').includes(item.Name)
     ).map((item) => item.ID);
 
-    // this.Payer_Value = this.Payer_DataSource.filter((item) =>
-    //   filterData.ReceiverID.split(',').includes(item.Name)
-    // ).map((item) => item.ID);
 
     this.Clinician_Value = this.Clinician_DataSource.filter((item) =>
       filterData.Clinician.split(',').includes(item.Name)
@@ -711,7 +705,7 @@ export class ClaimDetailsActivityComponent {
   //================Month value change ===================
   onMonthValueChanged(e: any) {
     this.selectedmonth = e.value ?? '';
-    console.log('selected month', this.selectedmonth);
+  
     if (this.selectedmonth === '') {
       this.From_Date_Value = new Date(this.selectedYear, 0, 1); // January 1 of the selected year
       this.To_Date_Value = new Date(this.selectedYear, 11, 31); // December 31 of the selected year

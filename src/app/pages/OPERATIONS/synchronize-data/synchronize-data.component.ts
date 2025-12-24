@@ -108,14 +108,14 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
     this.routerSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         // Stop notifications when leaving the page
-        console.log('NavigationStart detected, stopping notifications');
+       
         this.clearNotificationInterval();
       } else if (
         event instanceof NavigationEnd &&
         this.isCurrentPage(event.urlAfterRedirects)
       ) {
         // Restore notifications when returning to this page
-        console.log('NavigationEnd detected, restoring notifications');
+     
         this.restoreNotificationOnNavigation();
       }
     });
@@ -235,7 +235,8 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
 
   //==========Handle file selection event for loading datagrid========
   handleFileSelection(event: any): void {
-    console.log('Loaded Data:>>', event.target);
+  
+    
     const selectedFiles = event.target.files;
     if (!selectedFiles || selectedFiles.length === 0) return;
     let fileList: any[] = [];
@@ -268,8 +269,7 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
       this.xmlFile_DataSource = [...this.xmlFile_DataSource, ...filesWithData];
       if (this.xmlFile_DataSource.length > 0) {
         this.selectedRowKeys = this.xmlFile_DataSource.map((item) => item.ID);
-        console.log('Updated DataGrid:', this.xmlFile_DataSource);
-        console.log('Selected Rows:', this.selectedRowKeys);
+    
       }
     });
     event.target.value = '';
@@ -280,7 +280,7 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     let type = this.importType;
     const selectedData = this.dataGrid.instance.getSelectedRowsData();
-    console.log('selected row data only :>>', selectedData);
+  
 
     from(selectedData)
       .pipe(
@@ -310,8 +310,8 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response) =>
-          console.log('File uploaded successfully:', response),
-        error: (error) => console.error('Error uploading file:', error),
+        {},
+        error: (error) => ( error),
       });
   }
 
@@ -321,7 +321,7 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
     const validationResult = this.facilityValidator.instance.validate();
     if (validationResult.isValid) {
       let isfacilityExpired = this.onFacilityExpiryCheck();
-      console.log('facility expired>>', isfacilityExpired);
+  
       if (isfacilityExpired === true) {
         this.facilityButtonVisibility = false;
         this.facilityDownloadedCount = 0;
@@ -366,11 +366,11 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
                     callApiForDate(nextDate);
                   }
                 } else {
-                  console.error(`Error syncing data for ${formattedDate}`);
+                
                 }
               },
               (error) => {
-                console.error(`Error on ${formattedDate}:`, error);
+               
               }
             );
         };
@@ -444,11 +444,11 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
                     callApiForDate(nextDate);
                   }
                 } else {
-                  console.error(`Error syncing data for ${formattedDate}`);
+                 
                 }
               },
               (error) => {
-                console.error(`Error on ${formattedDate}:`, error);
+               
               }
             );
         };
@@ -534,7 +534,7 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
     this.serviceSubscription = this.dataService
       .getServiceSynchStatus()
       .subscribe((response: any) => {
-        console.log(response, 'SERVICESTATUS');
+     
         // If Flag is 1, enable notifications for this page
         if (response.Flag === 1) {
           this.disableButtons = true;
@@ -575,32 +575,32 @@ export class SynchronizeDataComponent implements OnInit, OnDestroy {
   }
 
   restoreNotificationOnNavigation(): void {
-    console.log('Restoring notifications for SpecificPageComponent');
+  
     this.fetchServiceStatus();
   }
 
   clearNotificationInterval(): void {
     // Clear the interval if it exists
     if (this.intervalId) {
-      console.log('Clearing interval:', this.intervalId);
+    
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
   }
   ngOnDestroy(): void {
-    console.log('ngOnDestroy called for SpecificPageComponent');
+  
 
     // Clear the interval and unsubscribe from all subscriptions
     this.clearNotificationInterval();
 
     if (this.serviceSubscription) {
       this.serviceSubscription.unsubscribe();
-      console.log('Unsubscribed from serviceSubscription');
+   
     }
 
     if (this.routerSubscription) {
       this.routerSubscription.unsubscribe();
-      console.log('Unsubscribed from routerSubscription');
+
     }
   }
 }

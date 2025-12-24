@@ -200,21 +200,18 @@ export class ResetPasswordFormComponent implements OnInit, OnDestroy {
 
     this.formData.email = ''; // Clear the email/phone field
     this.validationGroup.instance.reset(); // Reset validation
-    // // Generate a 6-digit OTP
-    // this.generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    // console.log('Generated OTP:', this.generatedOtp);
-
+ 
     const data = {
       MobileNo: '',
       EmailID: emailorphone,
     };
 
     this.userservice.getOtp(data).subscribe((res) => {
-      // console.log(res,"result");
+    
       if (res.Flag === 1) {
         this.UserID = res.UserID;
         const maskedContact = this.maskEmailOrPhone(res.EmailID);
-        // console.log(maskedContact,"maskedcontact")
+    
         notify(
           {
             message: `OTP has been sent to ${maskedContact}`,
@@ -225,7 +222,7 @@ export class ResetPasswordFormComponent implements OnInit, OnDestroy {
         );
         this.otpMessage = `OTP has been sent to ${maskedContact}`;
         this.generatedOtp = res.EmailOTP;
-        // console.log(this.generatedOtp, 'generated otp');
+      
         // // Hide email/phone input and show OTP input
         this.loading = false;
         this.otpSent = true;
@@ -279,8 +276,7 @@ export class ResetPasswordFormComponent implements OnInit, OnDestroy {
   verifyOtp() {
     this.Verifyloading = true;
     const otp = this.otpDigits.join('');
-    // console.log('Entered OTP:', otp);
-    // console.log('Generated OTP:', this.generatedOtp);
+  
     if (otp === this.generatedOtp) {
       this.isVerifyOtpButtonDisabled = true;
       clearInterval(this.interval);
@@ -340,7 +336,7 @@ export class ResetPasswordFormComponent implements OnInit, OnDestroy {
       ModifiedFrom: this.UserID,
     };
 
-    // console.log(data, 'postdata');
+    
 
     this.userservice.reset_Password(data).subscribe((res) => {
       if (res.flag === '1') {
@@ -373,7 +369,7 @@ export class ResetPasswordFormComponent implements OnInit, OnDestroy {
   getSecurityPolicyData() {
     this.userservice.getUserSecurityPolicityData().subscribe((res: any) => {
       this.securityPolicyData = res.data[0];
-      // console.log('user security policy data', this.securityPolicyData);
+   
     });
   }
   checkNumbers(): boolean {

@@ -157,7 +157,6 @@ export class UserNewFormComponent implements OnInit, AfterViewChecked {
 
   // Method to handle tab click and set selected index
   onTabClick(event: any) {
-    console.log(event);
     this.selectedIndex = event.itemIndex;
   }
   ngAfterViewChecked() {
@@ -199,25 +198,23 @@ export class UserNewFormComponent implements OnInit, AfterViewChecked {
 
   onCurrencySymbolChange(event: any) {
     const selectedValue = event.value;
-console.log(selectedValue,"SELECTED")
     if (selectedValue) {
       // Check if the selected value is from the dropdown or entered by the user
       const existingItem = this.currencySymbol.find(item => item.DESCRIPTION === selectedValue);
 
       if (!existingItem) {
         // If it's a custom value (not from the dropdown)
-        console.log('Custom value entered:', selectedValue);
+     
         this.newUserData.Currency_Symbol = selectedValue; // Store the custom value
       } else {
         // If it's a valid value from the dropdown
-        console.log('Selected value from dropdown:', selectedValue);
+    
         this.newUserData.Currency_Symbol = selectedValue; // Store the dropdown value
       }
     }
   }
   onCurrencySymbolInput(event: any) {
     const typedValue = event.target.value;
-    console.log('Typed value in input field:', typedValue);
 
     // Update the value as the user types, if necessary
     this.newUserData.Currency_Symbol = typedValue;
@@ -225,7 +222,6 @@ console.log(selectedValue,"SELECTED")
   
   onCurrencySymbolBlur() {
     const enteredValue = this.newUserData.Currency_Symbol;
-    console.log('Field lost focus, entered value:', enteredValue);
 
     // If the value is not part of the dropdown options, treat it as a custom value
     if (enteredValue) {
@@ -233,7 +229,7 @@ console.log(selectedValue,"SELECTED")
 
       if (!existingItem) {
         // If it's a custom value (not in dropdown), save it
-        console.log('Custom value entered:', enteredValue);
+      
         this.newUserData.Currency_Symbol = enteredValue;  // Keep the custom value
       }
     }
@@ -241,7 +237,7 @@ console.log(selectedValue,"SELECTED")
 
   onCurrencySymbolListSelect(event: any) {
     const selectedValue = event.itemData.DESCRIPTION;
-    console.log('Dropdown item selected:', selectedValue);
+
     this.newUserData.Currency_Symbol = selectedValue;
   }
 
@@ -296,7 +292,7 @@ console.log(selectedValue,"SELECTED")
   getUSerData() {
     this.service.get_User_data().subscribe((data) => {
       this.userList = data;
-      console.log('datasource', this.userList);
+     
     });
   }
 
@@ -397,35 +393,12 @@ console.log(selectedValue,"SELECTED")
       // Generate an ID for each entry starting from 1
       FacilityID: key, // Assign the selected FacilityID
     }));
-    console.log('User Facility:', this.userData.user_facility);
     this.selectedRowCount = e.selectedRowKeys.length;
   }
 
-  // checkLoginNameAvailability = (params: any) => {
-  //   return new Promise((resolve) => {
-  //     // Call your API to check if the login name exists
-  //     this.service.getUserSecurityPolicityData()
-  //       .subscribe(
-  //         (response: any) => {
-
-  //           // If the API returns true (exists), reject the validation
-  //           if (response.exists) {
-  //             resolve({ isValid: false, message: 'Login Name already exists' });
-  //           } else {
-  //             // If the login name does not exist, resolve the validation
-  //             resolve({ isValid: true });
-  //           }
-  //         },
-  //         (error) => {
-  //           console.error('Error checking login name availability', error);
-  //           resolve({ isValid: false, message: 'Error checking login name' });
-  //         }
-  //       );
-  //   });
-  // };
-
+ 
   onSubmit() {
-    console.log('userform data', this.userForm);
+ 
   }
 
   toggleUserDetails(): void {
@@ -488,25 +461,6 @@ console.log(selectedValue,"SELECTED")
     };
     reader.readAsDataURL(file);
   }
-  // readFile(file: File) {
-  //   const reader = new FileReader();
-  //   reader.onload = () => {
-  //     // Read the file as an ArrayBuffer (binary format)
-  //     const arrayBuffer = reader.result as ArrayBuffer;
-
-  //     // Directly store the ArrayBuffer or its binary representation into the newUserData object
-  //     this.newUserData.PhotoFile = arrayBuffer; // Storing as ArrayBuffer for binary data
-
-  //     console.log(this.newUserData.PhotoFile, "Binary Data Ready to be Sent to DB");
-
-  //     // Optionally, display the image using URL.createObjectURL for gallery purposes
-  //     const imageUrl = URL.createObjectURL(new Blob([arrayBuffer]));
-  //     this.images.push(imageUrl); // Add the image URL to the gallery for display
-  //   };
-
-  //   // Read the file as an ArrayBuffer to get binary data
-  //   reader.readAsArrayBuffer(file);
-  // }
 
   previewFile(file: File) {
     const reader = new FileReader();
@@ -529,7 +483,7 @@ console.log(selectedValue,"SELECTED")
     this.countryCodes = codes.map((country: any) => ({
       data: country.data,
     }));
-    console.log(this.countryCodes, 'country code'); // Optional: For debugging
+ 
   }
 
   // Use this function to display based on dropdown state
@@ -551,21 +505,13 @@ console.log(selectedValue,"SELECTED")
     this.isDropdownOpen = false; // Mark dropdown as closed
   }
 
-  // clearData() {
-  //   this.selectedRows = [];
-  //   this.newUserData.GenderID = '';
-  //   this.newUserData = '';
-  //   this.newUserData.Currency_Symbol = null;
-  //   this.cdr.detectChanges();
-  //   console.log(this.newUserData);
-  // }
+
 
   clearData() {
     this.selectedRows = []; // Clear any selected rows
     this.newUserData = { Currency_Symbol: null, GenderID: '' }; // Reset to a valid object with initial values
     this.currencySymbol = [...this.currencySymbol]; // Trigger refresh by creating a new reference
     this.cdr.detectChanges(); // Ensure Angular detects changes
-    console.log('Form data cleared:', this.newUserData);
   }
   
 
@@ -606,40 +552,40 @@ console.log(selectedValue,"SELECTED")
 
   getDropDownData(data: any) {
     this.service.Get_GropDown(data).subscribe((res) => {
-      console.log(res, 'res');
+  
       if (data === 'GENDER_DATA') {
         this.gender = res;
-        console.log('gender', this.gender);
+     
       }
       if (data === 'USER_ROLE') {
         this.userRole = res;
-        console.log(this.userRole, 'userRole');
+      
       }
       if(data == 'DATE_FORMAT') {
         this.dateFormat = res;
-        console.log(this.dateFormat,"DATEFORMAT")
+      
       }
       if(data == 'TIME_FORMAT') {
         this.timeFormat = res;
-        console.log(this.timeFormat,"TIMEFORMAT")
+     
       }
       if(data == 'CURRENCY_SYMBOL') {
         this.currencySymbol = res;
-        console.log(this.currencySymbol,"currencySymbol")
+      
       }
     });
   }
   getUserSecurityPolicyData() {
     this.service.getUserSecurityPolicityData().subscribe((res: any) => {
       this.securityPolicyData = res.data[0];
-      console.log('user security policy data', this.securityPolicyData);
+     
       this.generatedPassword = this.generateRandomPassword();
     });
   }
   getFacilityData() {
     this.service.Get_Facility_List_Data().subscribe((res: any) => {
       this.facilityList = res.data;
-      console.log('facility data', this.facilityList);
+     
     });
   }
   generateRandomPassword(): string {
@@ -737,7 +683,7 @@ console.log(selectedValue,"SELECTED")
       // Update the mobile field with valid country code and mobile number
       this.newUserData.Mobile = `${dialCode} ${validMobileNumber}`;
 
-      console.log('Updated Mobile:', this.newUserData.Mobile); // For debugging
+   
     }
   }
 
@@ -846,13 +792,10 @@ console.log(selectedValue,"SELECTED")
   }
 
   autoBindWhatsapp() {
-    console.log('WhatsApp field focused.');
+   
     setTimeout(() => {
       if (!this.newUserData.Whatsapp && this.newUserData.Mobile) {
-        console.log(
-          'Populating WhatsApp with Mobile:',
-          this.newUserData.Mobile
-        );
+      
         this.newUserData.Whatsapp = this.newUserData.Mobile;
       }
     }, 0);
@@ -860,9 +803,7 @@ console.log(selectedValue,"SELECTED")
 
   copyToClipboard(): void {
     if (!navigator.clipboard) {
-      console.warn(
-        'Clipboard API not available. Make sure you are running the application over HTTPS.'
-      );
+    
       // Optionally show a user-friendly message or fallback logic
       this.tooltipVisible = false;
       return;
@@ -872,10 +813,9 @@ console.log(selectedValue,"SELECTED")
       .writeText(this.generatedPassword)
       .then(() => {
         this.tooltipVisible = true;
-        console.log('Password copied to clipboard');
+    
       })
       .catch((err) => {
-        console.error('Error copying password to clipboard', err);
         // You can show an error message to the user here
       });
   }

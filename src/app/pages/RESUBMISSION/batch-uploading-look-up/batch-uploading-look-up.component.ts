@@ -113,7 +113,6 @@ export class BatchUploadingLookUpComponent {
 
   //=============== enable delete row popup ===============
   onRowRemoving(event) {
-    console.log('removing data ', event);
     event.cancel = true;
     this.rowToDelete = event.data;
     this.deleteReason = ''; // Reset input field
@@ -150,7 +149,6 @@ export class BatchUploadingLookUpComponent {
   // ================ row data updating event ==============
   onRowUpdating(event: any) {
     event.cancel = true;
-    console.log('selected row data :', event.data);
     this.resubServ
       .get_select_revision_Batch_data(event.data.ResubmissionRevisionBatchUID)
       .subscribe((response: any) => {

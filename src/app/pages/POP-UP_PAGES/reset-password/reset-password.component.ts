@@ -24,11 +24,11 @@ export class ResetPasswordComponent implements OnChanges {
 
   constructor(private service:MasterReportService){
       this.loginuserId=sessionStorage.getItem('UserID');
-      console.log(this.loginuserId,"userid")
+  
 
       this.service.getUserSecurityPolicityData().subscribe((res:any)=>{
         this.securityPolicyData = res.data[0];
-        console.log('user security policy data',this.securityPolicyData)
+     
         this.generatedPassword = this.generateRandomPassword();
       })
 
@@ -108,7 +108,6 @@ export class ResetPasswordComponent implements OnChanges {
 
   copyToClipboard(): void {
     if (!navigator.clipboard) {
-      console.warn('Clipboard API not available. Make sure you are running the application over HTTPS.');
       // Optionally show a user-friendly message or fallback logic
       this.tooltipVisible = false;
       return;
@@ -116,15 +115,15 @@ export class ResetPasswordComponent implements OnChanges {
 
     navigator.clipboard.writeText(this.generatedPassword).then(() => {
       this.tooltipVisible = true;
-      console.log('Password copied to clipboard');
+    
     }).catch(err => {
-      console.error('Error copying password to clipboard', err);
+    
       // You can show an error message to the user here
     });
   }
 
   ResetPassword(){
-    console.log(this.newFormData,"formdata");
+ 
     this.service.reset_Password(this.newFormData).subscribe(data=>{
       try {
         if(data.message==='Success')
@@ -154,7 +153,7 @@ export class ResetPasswordComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.formdata && changes.formdata.currentValue) {
-      console.log(this.formdata, "..............");
+    
       this.formData.UserID=this.formdata;
     }
   }

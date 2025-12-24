@@ -25,6 +25,7 @@ import { DataService } from 'src/app/services';
 import * as XLSX from 'xlsx';
 import notify from 'devextreme/ui/notify';
 import { MasterReportService } from '../../MASTER PAGES/master-report.service';
+import { ReportEngineService } from '../../REPORT PAGES/report-engine.service';
 
 @Component({
   selector: 'app-import-his-data-import',
@@ -33,7 +34,7 @@ import { MasterReportService } from '../../MASTER PAGES/master-report.service';
   providers: [DataService],
 })
 export class ImportHISDataFormComponent implements OnInit {
-  @ViewChild(DxDataGridComponent, { static: true })
+  @ViewChild(DxDataGridComponent, { static: false })
   dataGrid: DxDataGridComponent;
 
   @ViewChild('fileInput', { static: false }) fileInput: ElementRef;
@@ -42,6 +43,7 @@ export class ImportHISDataFormComponent implements OnInit {
 
   @Input() viewData: any = null;
   @Input() dataSource: any = null;
+
   @Input() selectedInsurance: any = null;
   @Input() mismatchedColumn: Record<
     string,
@@ -85,11 +87,21 @@ export class ImportHISDataFormComponent implements OnInit {
   UniqueKeys: any[];
   mismathedTrue: boolean;
   columnDatasss: any;
+  ColumnNames: any;
+  precision: any;
 
   constructor(
     private dataservice: DataService,
-    private masterService: MasterReportService
-  ) {}
+    private masterService: MasterReportService,
+    private reportengine: ReportEngineService
+  ) {
+    const systemInfo = JSON.parse(
+      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+    );
+    console.log(systemInfo);
+    this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
+    console.log(this.precision);
+  }
 
   ngOnInit(): void {
     if (this.viewData) {
@@ -103,7 +115,7 @@ export class ImportHISDataFormComponent implements OnInit {
         this.dataSource = rawData;
       });
     }
-    console.log('fetched datasource :>', this.dataSource);
+
     this.fetch_insurance_dropdown_data();
     this.fetch_His_Column_List();
     this.find_Unique_key();
@@ -135,7 +147,7 @@ export class ImportHISDataFormComponent implements OnInit {
         displayFormat: '{0}',
         valueFormat: {
           type: 'fixedPoint',
-          precision: 3,
+          precision: this.precision,
         },
       })),
     };
@@ -189,6 +201,15 @@ export class ImportHISDataFormComponent implements OnInit {
           dataField: col.ColumnTitle,
           caption: col.ColumnName,
           type: col.Type,
+          dataType: col.Type === 'DECIMAL' ? 'number' : 'string',
+
+          format:
+            col.Type === 'DECIMAL'
+              ? {
+                  type: 'fixedPoint',
+                  precision: this.precision,
+                }
+              : undefined,
         }));
         this.columnDatasss = res.data.map((col: any) => ({
           dataField: col.ColumnName,
@@ -202,10 +223,11 @@ export class ImportHISDataFormComponent implements OnInit {
             col.Type === 'DECIMAL'
               ? {
                   type: 'fixedPoint',
-                  precision: 3,
+                  precision: this.precision,
                 }
               : undefined,
         }));
+        this.ColumnNames = this.columnDatasss.map((column) => column.caption);
         this.isColumnsLoaded = true;
         this.detectMismatchedColumns();
         this.duplicated_Data();
@@ -274,7 +296,7 @@ export class ImportHISDataFormComponent implements OnInit {
     );
     if (!colInfo) return;
 
-    // 🚫 Skip entire column if mismatch exists
+    //  Skip entire column if mismatch exists
     if (this.mismatchedColumn?.[colInfo.dataField]) {
       return;
     }
@@ -349,9 +371,9 @@ export class ImportHISDataFormComponent implements OnInit {
   //========================= find the duplicated rows===============================
   onRowPrepared(e: any) {
     if (e.rowType !== 'data') return;
-    const itemCode = (e.data.ITEM_CODE1 ?? '').toString().trim();
-    const invoiceNo = (e.data.INVOICE_NO1 ?? '').toString().trim();
-    const invoiceDate = e.data.TRANSACTION_DATE1;
+    const itemCode = (e.data.ITEM_CODE ?? '').toString().trim();
+    const invoiceNo = (e.data.INVOICE_NO ?? '').toString().trim();
+    const invoiceDate = e.data.TRANSACTION_DATE;
     const duplicateColumns: string[] = [];
 
     // Compare grid cell values with duplicateKeys (from backend)
@@ -561,6 +583,37 @@ export class ImportHISDataFormComponent implements OnInit {
           return;
         }
 
+        //  CHECK EMPTY VALUE IN UNIQUE KEY COLUMN (INLINE)
+        const uniqueKeyColumns = (this.UniqueKeys || [])
+          .filter((k: any) => k.IsHisColumn === true)
+          .map((k: any) => k.ColumnName); // ONLY ColumnName
+
+        if (uniqueKeyColumns.length > 0) {
+          for (let i = 0; i < this.dataSource.length; i++) {
+            const row = this.dataSource[i];
+
+            for (const col of uniqueKeyColumns) {
+              const val = row[col];
+
+              if (
+                val === null ||
+                val === undefined ||
+                (typeof val === 'string' && val.trim() === '')
+              ) {
+                notify({
+                  message: `Cannot save Excel.
+Empty value found in UNIQUE column "${col}"
+at row ${i + 1}.`,
+                  type: 'error',
+                  displayTime: 5000,
+                  position: { at: 'top right', my: 'top right', of: window },
+                });
+                return;
+              }
+            }
+          }
+        }
+
         // Create one shared batch ID for all chunks
         const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
         const batchId = `${insuranceId}_${datetime}`;
@@ -631,6 +684,13 @@ export class ImportHISDataFormComponent implements OnInit {
     }
   }
 
+  //====================Find the column location from the datagrid================
+  findColumnLocation = (e: any) => {
+    const columnName = e.itemData;
+    if (columnName != '' && columnName != null) {
+      this.reportengine.makeColumnVisible(this.dataGrid, columnName);
+    }
+  };
   handleError(error: any) {
     if (error.status === 0) {
       notify(

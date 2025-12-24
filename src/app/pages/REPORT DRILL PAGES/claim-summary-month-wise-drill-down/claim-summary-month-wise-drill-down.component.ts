@@ -129,8 +129,7 @@ export class ClaimSummaryMonthWiseDrillDownComponent implements OnInit {
     this.Year = this.clickedRowData.ClaimYear;
     this.Month = this.clickedRowData.ClaimMonth;
     this.FacilityID = this.clickedRowData.FacilityID;
-    console.log('clicked row data =>', this.clickedRowData);
-    console.log('detailed data =>', this.DetailData);
+  
 
     if (this.Year && this.Month && this.FacilityID) {
       this.get_Datagrid_DataSource();
@@ -172,9 +171,9 @@ export class ClaimSummaryMonthWiseDrillDownComponent implements OnInit {
 
     try {
       const response = this.DetailData;
-      console.log('try portion working');
+    
       if (response.ReportID !== '') {
-        console.log('if condition satisfied');
+      
         this.isEmptyDatagrid = false;
         this.columndata = response.ReportColumns;
 

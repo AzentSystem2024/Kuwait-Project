@@ -91,7 +91,7 @@ export class ImportMasterDataFormComponent implements OnInit {
 
   // Your existing onCellPrepared method
   onCellPrepared(e: any) {
-    console.log(e);
+
     const column = this.columns.find(
       (col) => col.dataField === e.column.dataField
     );
@@ -106,7 +106,7 @@ export class ImportMasterDataFormComponent implements OnInit {
 
       // Check for mandatory field first
       if (column.IsMandatory && !value) {
-        console.log('mandatory');
+ 
         e.cellElement.style.border = '2px solid #FFC1C3'; // Style for mandatory error
         e.cellElement.style.color = 'red'; // Color for mandatory error
         this.hasError = true;
@@ -120,7 +120,7 @@ export class ImportMasterDataFormComponent implements OnInit {
 
       // Numeric Field Check
       if (column.IsNumeric) {
-        console.log('Non-numeric value in numeric field');
+    
         e.cellElement.style.border = '2px solid #FFC1C3'; // Style for numeric error
         e.cellElement.style.color = 'red'; // Color for numeric error
         this.hasError = true;
@@ -134,7 +134,7 @@ export class ImportMasterDataFormComponent implements OnInit {
 
       // Check if the value exceeds the maximum length
       if (value && value.length > column.MaxLength) {
-        console.log(value.length, 'length', column.MaxLength, 'maxlength');
+    
         e.cellElement.style.border = '2px solid #FFC1C3'; // Style for max length error
         this.hasError = true;
 
@@ -152,7 +152,7 @@ export class ImportMasterDataFormComponent implements OnInit {
 
   highlightColumnHeader(headerId: string) {
     const headerCell = document.getElementById(headerId);
-    console.log(headerCell, 'headercell');
+  
 
     if (headerCell) {
       headerCell.style.backgroundColor = '#FFC1C3'; // Highlight color for mandatory headers
@@ -243,17 +243,6 @@ export class ImportMasterDataFormComponent implements OnInit {
         // Convert the sheet to JSON if the template is correct
         const data = XLSX.utils.sheet_to_json(sheet);
 
-        //   // Check if the data exceeds 3000 records
-        //   if (data.length > 10000) {
-        //     notify({
-        //         message: 'Error: file contains more than 10000 records and cannot be imported.',
-        //         type: 'error',
-        //         displayTime: 2000,
-        //         position: 'top right'
-        //     });
-        //     this.resetFileInput();
-        //     return;
-        // }
 
         if (data.length === 0) {
           notify({
@@ -278,23 +267,11 @@ export class ImportMasterDataFormComponent implements OnInit {
             return mappedRow;
           });
 
-          //   // Map the data to match the grid's dataField structure
-          //   const mappedData = data.map(row => {
-          //     const mappedRow: any = {};
-          //     gridColumnsFields.forEach((field, index) => {
-          //         // Use the grid column captions to get the corresponding values from the row
-          //         const captionIndex = gridColumnsCaptions.indexOf(uploadedHeaders[index]);
-          //         // Replace null/undefined values with an empty string
-          //         const value = row[uploadedHeaders[captionIndex]] != null ? row[uploadedHeaders[captionIndex]] : "";
-          //         mappedRow[field] = value; // Assign the value to the correct dataField
-          //     });
-          //     return mappedRow;
-          // });
-          // Load the mapped data into the grid
+
           this.dataGrid.instance.refresh();
           this.gridData = mappedData;
           this.beforeLoading = false;
-          console.log('Grid data:', this.gridData);
+       
           this.validateMandatoryFields();
           // Validate mandatory fields after data is loaded
           //  this.validateMandatoryFields();
@@ -304,7 +281,7 @@ export class ImportMasterDataFormComponent implements OnInit {
       // Read the file as an ArrayBuffer
       reader.readAsArrayBuffer(file);
     } else {
-      console.error('No file selected');
+      
     }
   }
 
@@ -315,7 +292,7 @@ export class ImportMasterDataFormComponent implements OnInit {
       this.columns.forEach((col) => {
         if (col.validationRules?.some((rule) => rule.type === 'required')) {
           if (!row[col.dataField]) {
-            console.error(`Missing data for mandatory field: ${col.dataField}`);
+      
             isAnyFieldMissing = true; // Set flag to true if any mandatory field is missing
           }
         }
@@ -342,7 +319,7 @@ export class ImportMasterDataFormComponent implements OnInit {
 
   downloadTemplate() {
     if (!this.columns || this.columns.length === 0) {
-      console.error('No columns available to download');
+   
       return;
     }
 
@@ -418,7 +395,7 @@ export class ImportMasterDataFormComponent implements OnInit {
     }
     // Reassign the columns array with a new reference
     this.columns = [...this.gridColumns]; // Create a new array reference
-    console.log(this.columns, 'columns');
+  
 
     this.isColumnsLoaded = true;
 
@@ -497,13 +474,13 @@ export class ImportMasterDataFormComponent implements OnInit {
             return;
         }
 
-        console.log(`Sending chunk ${index}:`, data);
+      
 
         // Send chunk to the server
         this.service.Insert_Imported_Data(data).subscribe(
           (res: any) => {
             if (res.flag === 1) {
-              console.log(`Chunk ${index} uploaded successfully`);
+           
               if (gridData.length > 0) {
                 sendNextChunk(); // Continue with the next chunk
               } else {
@@ -630,7 +607,7 @@ export class ImportMasterDataFormComponent implements OnInit {
         'error'
       );
     }
-    console.error('Error during data import:', error);
+ 
     this.isSaving = false;
     this.isLoading = false;
   }

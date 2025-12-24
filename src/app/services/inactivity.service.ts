@@ -42,7 +42,6 @@ export class InactivityService {
   //==================Change the value of userLogin=========
   setUserlogginValue() {
     this.isUserLoggedIn = !this.isUserLoggedIn;
-    // console.log('user login values', this.isUserLoggedIn);
   }
   // Start watching for inactivity
   startWatching() {

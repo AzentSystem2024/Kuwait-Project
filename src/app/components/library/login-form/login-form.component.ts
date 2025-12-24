@@ -213,7 +213,7 @@ export class LoginFormComponent implements OnInit {
   };
 
   async ngOnInit(): Promise<void> {
-    console.log();
+ 
   }
 }
 @NgModule({

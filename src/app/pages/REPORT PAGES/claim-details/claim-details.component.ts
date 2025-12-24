@@ -138,7 +138,7 @@ export class ClaimDetailsComponent implements OnInit {
   drilldownPopups: any[];
   isCloseButtonClicked: boolean = false;
   closedPopupsSet: Set<string> = new Set();
-
+precision:any
   constructor(
     private service: ReportService,
     private router: Router,
@@ -148,13 +148,21 @@ export class ClaimDetailsComponent implements OnInit {
     private popupStateService: PopupStateService,
     private cdr: ChangeDetectorRef
   ) {
+
+      const systemInfo = JSON.parse(
+      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+    );
+    console.log(systemInfo);
+    this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
+    console.log(this.precision);
+  
     // this.loadingVisible = true;
 
     this.minDate = new Date(2000, 1, 1); // Set the minimum date
     this.maxDate = new Date(); // Set the maximum date
     //============Year field dataSource===============
     const currentYear = new Date().getFullYear();
-    for (let year = currentYear; year >= 1950; year--) {
+    for (let year = currentYear; year >= 2024; year--) {
       this.years.push(year);
     }
     //=============month field datasource============
@@ -329,14 +337,14 @@ export class ClaimDetailsComponent implements OnInit {
 
   closePopup1(popup: any): void {
     popup.isOpened = false; // Hide the popup
-    // console.log('Popup manually closed:', popup);
+ 
     this.closedPopupsSet.add(popup.id);
     // Additional logic for closing the popup can go here
   }
 
   //===========Function to handle selection change and sort the data==========
   onSelectionChanged(event: any, jsonData: any[], dataSourceKey: string): void {
-    console.log('Original JSON Data:', jsonData);
+   
     const selectedRows = event.selectedRowsData;
     const selectedRowIds = selectedRows.map((row) => row.ID);
     const unselectedRows = jsonData.filter(
@@ -344,7 +352,7 @@ export class ClaimDetailsComponent implements OnInit {
     );
     const reorderedData = [...selectedRows, ...unselectedRows];
     this[dataSourceKey] = this.makeAsyncDataSourceFromJson(reorderedData);
-    console.log('Updated DataSource:', this[dataSourceKey]);
+  
     this.dataGrid.instance.refresh();
   }
 
@@ -384,10 +392,11 @@ export class ClaimDetailsComponent implements OnInit {
           response.header.ReportColumns,
           userLocale
         );
+     
         this.ColumnNames = this.columnsConfig
           .filter((column) => column.visible)
           .map((column) => column.caption);
-
+       
         const formattedReportData = response.header.ReportData;
 
         // Initialize dataGrid_DataSource with the pre-loaded data
@@ -454,13 +463,13 @@ export class ClaimDetailsComponent implements OnInit {
     return {
       column: col.Name,
       summaryType: summaryType,
-      displayFormat: formatType === 'count' ? 'Count: {0} ' : 'Total: {0}',
+      displayFormat: formatType === 'count' ? ' {0} ' : '{0}',
       valueFormat:
         formatType === 'decimal'
           ? {
               style: 'decimal',
-              minimumFractionDigits: 3,
-              maximumFractionDigits: 3,
+              minimumFractionDigits: this.precision,
+              maximumFractionDigits: this.precision,
             }
           : null,
       alignByColumn: isGroupItem, // Align by column if it's a group item
@@ -486,11 +495,11 @@ export class ClaimDetailsComponent implements OnInit {
       if (column.Type === 'Decimal') {
         columnFormat = {
           type: 'fixedPoint',
-          precision: 3,
+          precision: this.precision,
           formatter: (value) =>
             new Intl.NumberFormat(userLocale, {
-              minimumFractionDigits: 3,
-              maximumFractionDigits: 3,
+              minimumFractionDigits: this.precision,
+              maximumFractionDigits: this.precision,
             }).format(value),
         };
       }

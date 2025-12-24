@@ -673,7 +673,6 @@ export class RevisionPageComponent implements OnInit {
     if (confirmClear && this.selectedRowData) {
       this.selectedRowData.Attachment = null;
       this.popupVisible = false;
-      console.log('Attachment cleared');
     }
   }
 
@@ -699,7 +698,6 @@ export class RevisionPageComponent implements OnInit {
         this.pdfFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
           'data:application/pdf;base64,' + base64
         );
-        console.log('File updated in Base64');
       };
       reader.readAsDataURL(file);
     };
@@ -720,7 +718,6 @@ export class RevisionPageComponent implements OnInit {
     if (confirmClear && this.selectedRowData) {
       this.selectedRowData.ObservationValue = null;
       this.ObservationpopupVisible = false;
-      console.log('Attachment cleared');
     }
   }
   //============= obdervation cell value updation event ==========
@@ -746,7 +743,6 @@ export class RevisionPageComponent implements OnInit {
         this.pdfFileUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
           'data:application/pdf;base64,' + base64
         );
-        console.log('File updated in Base64');
       };
       reader.readAsDataURL(file);
     };
@@ -788,7 +784,6 @@ export class RevisionPageComponent implements OnInit {
         });
       }
     }
-    console.log('updated claim data::>>', this.FilteredRevisionDataSource);
   }
 
   //-------------- make background to editable columns ------------
@@ -871,7 +866,6 @@ export class RevisionPageComponent implements OnInit {
 
   //================ filter list using receiver id ============
   filterByReceiver() {
-    console.log('filtered value is :>>', this.ReceiverID);
     if (this.ReceiverID) {
       this.FilteredRevisionDataSource = this.originalRevisionData.filter(
         (item) => item.ReceiverID === this.ReceiverID
@@ -1128,10 +1122,7 @@ export class RevisionPageComponent implements OnInit {
               Observation: [...this.ObservationDataSource],
               Diagnosis: [...this.DiagnosisDataSource],
             };
-            console.log(
-              'latest main datagrid data list - previous',
-              this.FilteredRevisionDataSource
-            );
+         
           }
         }
       }
@@ -1194,10 +1185,7 @@ export class RevisionPageComponent implements OnInit {
               Diagnosis: [...this.DiagnosisDataSource],
             };
 
-            console.log(
-              'latest main datagrid data list',
-              this.FilteredRevisionDataSource
-            );
+       
           }
 
           this.SubmissionActivityColumns = response.ActivityColumns;

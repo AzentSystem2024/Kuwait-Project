@@ -179,7 +179,7 @@ export class UserEditFormComponent implements OnInit, OnChanges {
   ) {}
 
   onTabClick(event: any) {
-    console.log(event);
+   
     this.selectedIndex = event.itemIndex;
   }
 
@@ -188,7 +188,7 @@ export class UserEditFormComponent implements OnInit, OnChanges {
   getUSerData() {
     this.service.get_User_data().subscribe((data) => {
       this.userList = data;
-      console.log('datasource', this.userList);
+    
     });
   }
 
@@ -234,7 +234,7 @@ export class UserEditFormComponent implements OnInit, OnChanges {
     // Optional: You can also provide feedback to the user here if needed
     if (!e.valid) {
       // Logic to show a message indicating the login name already exists
-      console.log('Login name already exists.');
+   
     }
 
     return e.valid;
@@ -276,7 +276,7 @@ export class UserEditFormComponent implements OnInit, OnChanges {
       // Generate an ID for each entry starting from 1
       FacilityID: key, // Assign the selected FacilityID
     }));
-    console.log('User Facility:', this.userData.user_facility);
+  
     this.selectedRowCount = e.selectedRowKeys.length;
 
     // Reorder facilityList based on selectedRows
@@ -295,7 +295,7 @@ export class UserEditFormComponent implements OnInit, OnChanges {
   }
 
   onSubmit() {
-    console.log('userform data');
+ 
   }
 
   toggleUserDetails(): void {
@@ -381,7 +381,7 @@ export class UserEditFormComponent implements OnInit, OnChanges {
     this.countryCodes = codes.map((country: any) => ({
       data: country.data,
     }));
-    console.log(this.countryCodes, 'country code'); // Optional: For debugging
+ 
   }
 
   // Use this function to display based on dropdown state
@@ -427,7 +427,7 @@ export class UserEditFormComponent implements OnInit, OnChanges {
       // Update the mobile field with valid country code and mobile number
       this.newUserData.Mobile = `${dialCode} ${validMobileNumber}`;
 
-      console.log('Updated Mobile:', this.newUserData.Mobile); // For debugging
+      // For debugging
     }
   }
 
@@ -446,7 +446,7 @@ export class UserEditFormComponent implements OnInit, OnChanges {
 
   onDecimalPointsChanged(event: any): void {
     this.newUserData.Decimal_Points = event.value; // Ensure the value is updated in newUserData
-    console.log('Updated Decimal_Points:', this.newUserData.Decimal_Points);
+   
   }
 
 
@@ -528,22 +528,16 @@ export class UserEditFormComponent implements OnInit, OnChanges {
   }
 
   autoBindWhatsapp() {
-    console.log('WhatsApp field focused.');
+  
     setTimeout(() => {
       if (!this.newUserData.Whatsapp && this.newUserData.Mobile) {
-        console.log(
-          'Populating WhatsApp with Mobile:',
-          this.newUserData.Mobile
-        );
+  
         this.newUserData.Whatsapp = this.newUserData.Mobile;
       }
     }, 0);
   }
 
-  // onDateFormatChange(event: any) {
-  //   this.newUserData.Date_Format = event.value;
-  //   console.log('Dropdown value changed:', event.value);
-  // }
+
 
   onDateFormatChange(event: any): void {
     // Directly set the value from the event
@@ -566,33 +560,29 @@ export class UserEditFormComponent implements OnInit, OnChanges {
     }
   }
 
-  // onCurrencySymbolChange(event:any){
-  //   this.newUserData.Currency_Symbol = event.value;
-  //   console.log('Dropdown Currency value changed:', event.value);
-  // }
 
 
   onCurrencySymbolChange(event: any) {
     const selectedValue = event.value;
-console.log(selectedValue,"SELECTED")
+
     if (selectedValue) {
       // Check if the selected value is from the dropdown or entered by the user
       const existingItem = this.currencySymbol.find(item => item.DESCRIPTION === selectedValue);
 
       if (!existingItem) {
         // If it's a custom value (not from the dropdown)
-        console.log('Custom value entered:', selectedValue);
+     
         this.newUserData.Currency_Symbol = selectedValue; // Store the custom value
       } else {
         // If it's a valid value from the dropdown
-        console.log('Selected value from dropdown:', selectedValue);
+      
         this.newUserData.Currency_Symbol = selectedValue; // Store the dropdown value
       }
     }
   }
   onCurrencySymbolInput(event: any) {
     const typedValue = event.target.value;
-    console.log('Typed value in input field:', typedValue);
+  
 
     // Update the value as the user types, if necessary
     this.newUserData.Currency_Symbol = typedValue;
@@ -600,15 +590,14 @@ console.log(selectedValue,"SELECTED")
 
   onCurrencySymbolBlur() {
     const enteredValue = this.newUserData.Currency_Symbol;
-    console.log('Field lost focus, entered value:', enteredValue);
-
+ 
     // If the value is not part of the dropdown options, treat it as a custom value
     if (enteredValue) {
       const existingItem = this.currencySymbol.find(item => item.DESCRIPTION === enteredValue);
 
       if (!existingItem) {
         // If it's a custom value (not in dropdown), save it
-        console.log('Custom value entered:', enteredValue);
+     
         this.newUserData.Currency_Symbol = enteredValue;  // Keep the custom value
       }
     }
@@ -616,7 +605,7 @@ console.log(selectedValue,"SELECTED")
 
   onCurrencySymbolListSelect(event: any) {
     const selectedValue = event.itemData.DESCRIPTION;
-    console.log('Dropdown item selected:', selectedValue);
+  
     this.newUserData.Currency_Symbol = selectedValue;
   }
 
@@ -687,40 +676,39 @@ console.log(selectedValue,"SELECTED")
 
   getDropDownData(data: any) {
     this.service.Get_GropDown(data).subscribe((res) => {
-      console.log(res, 'res');
+    
       if (data === 'GENDER_DATA') {
         this.gender = res;
-        console.log('gender', this.gender);
+       
       }
       if (data === 'USER_ROLE') {
         this.userRole = res;
-        console.log(this.userRole, 'userRole');
+     
       }
       if(data == 'DATE_FORMAT'){
         this.dateFormat = res;
-        console.log(this.dateFormat,"DATEFORMAT")
+      
       }
       if(data == 'TIME_FORMAT'){
         this.timeFormat = res;
-        console.log(this.timeFormat,"TIMEFORMAT")
+       
       }
       if(data == 'CURRENCY_SYMBOL'){
         this.currencySymbol = res;
-        console.log(this.currencySymbol,"currencySymbol")
+       
       }
     });
   }
   getUserSecurityPolicyData() {
     this.service.getUserSecurityPolicityData().subscribe((res: any) => {
       this.securityPolicyData = res.data[0];
-      console.log('user security policy data', this.securityPolicyData);
-      // this.generatedPassword = this.generateRandomPassword();
+    
     });
   }
   getFacilityData() {
     this.service.Get_Facility_List_Data().subscribe((res: any) => {
       this.facilityList = res.data;
-      console.log('facility data', this.facilityList);
+   
     });
   }
 
@@ -747,9 +735,6 @@ console.log(selectedValue,"SELECTED")
       return; // Stop execution if form is not valid; error messages will be shown next to the fields
     }
 
-    console.log(this.newUserData, 'edit form data');
-    console.log('Decimal_Points before saving:', this.newUserData.Decimal_Points);
-    console.log(this.userData.user_facility, 'userfacility');
     this.service.update_User_Data(this.newUserData).subscribe((res: any) => {
       try {
         if (res.message === 'Success') {
@@ -796,20 +781,20 @@ console.log(selectedValue,"SELECTED")
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.formdata && changes.formdata.currentValue) {
-      console.log(this.formdata, '..............');
+   
       this.UserID = this.formdata.UserID;
       this.currentLoginName = this.formdata.LoginName;
       this.currentEmail = this.formdata.Email;
-      console.log(this.UserID, 'userid');
+   
       this.newUserData = { ...this.formdata };
       if (this.newUserData.PhotoFile) {
         this.isImageUploaded = true;
         this.images = this.newUserData.PhotoFile;
-        console.log(this.images, 'photo');
+       
       } else {
         this.isImageUploaded = false;
         this.images = []; // Set images to empty if PhotoFile is not available
-        console.log('No photo available');
+      
       }
 
       const selectedFormat = this.dateFormat.find(format => format.DESCRIPTION === this.formdata.Date_Format)?.DESCRIPTION;
@@ -843,7 +828,7 @@ console.log(selectedValue,"SELECTED")
         )
         .map((column) => column.ID);
 
-      console.log(this.selectedRows, 'selected rows');
+ 
 
       // Reorder facilityList based on selectedRows
       this.facilityList = [

@@ -98,7 +98,7 @@ export class ViewImportedMasterDataFormComponent {
                 }
               },
               (error) => {
-                console.error('Error loading data', error);
+              
                 reject(error); // Reject in case of an error
               }
             );
