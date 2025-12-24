@@ -87,16 +87,7 @@
         location="after"
         name="columnChooserButton"
       ></dxi-item>
-
-      <dxi-item location="after" *ngIf="fetchedData">
-        <dx-button
-          text="Process"
-          type="default"
-          stylingMode="contained"
-          (onClick)="autoProcessPopup = true"
-        ></dx-button>
-      </dxi-item>
-        <dxi-item
+ <dxi-item
           class="columnfinderclass"
           widget="dxDropDownButton"
           [options]="{
@@ -113,6 +104,15 @@
 
           }"
         ></dxi-item>
+      <dxi-item location="after" *ngIf="fetchedData">
+        <dx-button
+          text="Process"
+          type="default"
+          stylingMode="contained"
+          (onClick)="autoProcessPopup = true"
+        ></dx-button>
+      </dxi-item>
+       
     </dxo-toolbar>
 
     <!-- Column chooser (optional) -->

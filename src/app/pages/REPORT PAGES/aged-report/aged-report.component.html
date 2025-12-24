@@ -116,6 +116,7 @@
       [summary]="summaryColumnsData"
         (onRowExpanding)="onRowExpanding($event)"
   (onRowCollapsed)="onRowCollapsed($event)"
+    (onContentReady)="onContentReady()"
     >
     
 <dxi-column dataField="InsuranceCode" caption="InsuranceCode"></dxi-column>
@@ -247,7 +248,24 @@
         ></dxi-item>
 
         <dxi-item name="exportButton" [disabled]="isEmptyDatagrid"></dxi-item>
+<dxi-item
+          class="columnfinderclass"
+          widget="dxDropDownButton"
+          [options]="{
+            dataSource: DetailColumnNames,
+            onItemClick: findColumnLocation,
+            placeholder: 'Search Column',
+            noDataText: 'Load data and try again',
+            disabled: isEmptyDatagrid,
+            hint: 'Column location finder',
+            icon:'columnproperties',
+            dropDownOptions: {
+              width: 'auto',
+              height: '60vh'
+            },
 
+          }"
+        ></dxi-item> 
 
       </dxo-toolbar>
 
@@ -268,6 +286,7 @@
           [height]="'40vh'"
           [noDataText]=""
           (onCellClick)="onCellClick($event)"
+           (onContentReady)="onDetailGridReady(detailsdatagrid)"
         >
          <dxo-header-filter [visible]="true" highlight="true"></dxo-header-filter>
           <dxo-scrolling 

@@ -55,12 +55,15 @@ import { DataService } from 'src/app/services';
 export class AgedReportComponent {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
+  @ViewChild(DxDataGridComponent, { static: true })
+  detailsdatagrid: DxDataGridComponent;
 
   @ViewChild(DxTreeViewComponent, { static: false })
   treeView: DxTreeViewComponent;
 
   @ViewChild('lookup', { static: false }) lookup: DxLookupComponent;
 
+  
   //=================DataSource for data Grid Table========
   dataGrid_DataSource: DataSource<any>;
 
@@ -136,6 +139,9 @@ export class AgedReportComponent {
   summaryColumnsData: { totalItems: any[]; groupItems: any[] };
   precision:any
   expandedRowKey: any = null;
+
+  activeDetailGrid: DxDataGridComponent | null = null;
+DetailColumnNames: string[] = [];
   constructor(
     private dataservice: DataService,
     private reportengine: ReportEngineService
@@ -220,11 +226,35 @@ export class AgedReportComponent {
 
   //====================Find the column location from the datagrid================
   findColumnLocation = (e: any) => {
-    const columnName = e.itemData;
-    if (columnName != '' && columnName != null) {
-      this.reportengine.makeColumnVisible(this.dataGrid, columnName);
-    }
+if (!this.activeDetailGrid) return;
+
+  const caption = e.itemData;
+  if (!caption) return;
+
+  // ensure column is visible
+  this.activeDetailGrid.instance.columnOption(
+    caption,
+    'visible',
+    true
+  );
+
+  this.reportengine.makeColumnVisible(this.activeDetailGrid, caption);
+    
   };
+
+  onContentReady() {
+  const columns = this.detailsdatagrid.instance.getVisibleColumns();
+  this.ColumnNames = columns.map(col => col.caption);
+}
+onDetailGridReady(grid: DxDataGridComponent) {
+  this.activeDetailGrid = grid;
+
+  const columns = grid.instance.getVisibleColumns();
+
+  this.DetailColumnNames = columns
+    .filter(col => col.caption)
+    .map(col => col.caption);
+}
 
   //=============DataGrid Refreshing=====================
   refresh = () => {
@@ -255,6 +285,8 @@ export class AgedReportComponent {
         res.header.SummaryData
       );
     });
+
+  
   }
 
   formatDate(date) {
