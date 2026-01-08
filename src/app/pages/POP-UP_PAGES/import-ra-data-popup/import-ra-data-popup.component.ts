@@ -137,6 +137,10 @@ export class ImportRADataPopupComponent implements OnInit {
   confirmDistribute: boolean = false;
   // Header mismatch tracker (child-component only)
   precision:any
+    invalidRows = new Set<number>();
+  focusedRowKey: any = null;
+  rowInvalidNumbers: number[] = [];
+
   private headerMismatchMap = new Map<
     string,
     { expected: string; actual: string }
@@ -171,6 +175,10 @@ export class ImportRADataPopupComponent implements OnInit {
       }
    this.ColumnNames = this.columnData.map((column) => column.caption);
       this.fetch_all_column_and_uniqueKey_data();
+      setTimeout(() => {
+      this.validateAndFocusFirstInvalidRow();
+    }, 0);
+
     } catch (error) {
       notify({
         message: 'Initialization failed.',
@@ -492,127 +500,273 @@ export class ImportRADataPopupComponent implements OnInit {
   }
 
   // =========== save excel Ra data ==========
-  async onSaveClick() {
-    const userId = Number(sessionStorage.getItem('UserID')) || 0;
-    const insuranceId = this.selectedInsuranceId || 0;
-    this.selected_Insurance_id = insuranceId;
+  // async onSaveClick() {
+  //   const userId = Number(sessionStorage.getItem('UserID')) || 0;
+  //   const insuranceId = this.selectedInsuranceId || 0;
+  //   this.selected_Insurance_id = insuranceId;
 
-    if (!insuranceId || insuranceId === 0) {
+  //   if (!insuranceId || insuranceId === 0) {
+  //     notify({
+  //       message: 'Please select an Insurance before saving.',
+  //       type: 'error',
+  //       displayTime: 3000,
+  //       position: { at: 'top right', my: 'top right', of: window },
+  //     });
+  //     return;
+  //   }
+
+  //   this.isLoading = true;
+  //   this.isSaving = true;
+
+  //   try {
+  //     const allData = (this.dataSource || []).map((item) => ({
+  //       ...item,
+  //     }));
+
+  //     const batchSize = 15000;
+  //     const totalRecords = allData.length;
+
+  //     if (totalRecords === 0) {
+  //       notify({
+  //         message: 'No data available to save.',
+  //         type: 'warning',
+  //         displayTime: 3000,
+  //         position: { at: 'top right', my: 'top right', of: window },
+  //       });
+  //       this.isLoading = false;
+  //       this.isSaving = false;
+  //       return;
+  //     }
+
+  //     if (this.invalidData) {
+  //       notify({
+  //         message:
+  //           'The Excel file contains invalid data. Please correct it before saving.',
+  //         type: 'error',
+  //         displayTime: 4000,
+  //         position: { at: 'top right', my: 'top right', of: window },
+  //       });
+  //       this.isLoading = false;
+  //       this.isSaving = false;
+  //       return;
+  //     }
+  //     // Generate one common BatchID for all payloads
+  //     const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
+  //     const commonBatchId = `${insuranceId}_${datetime}`;
+
+  //     const totalBatches = Math.ceil(totalRecords / batchSize);
+
+  //     for (let i = 0; i < totalBatches; i++) {
+  //       const start = i * batchSize;
+  //       const end = Math.min(start + batchSize, totalRecords);
+  //       const currentBatch = allData.slice(start, end);
+
+  //       const payload = {
+  //         USerID: userId,
+  //         InsuranceID: insuranceId,
+  //         IsAutoProcessed: false,
+  //         BatchNo: commonBatchId,
+  //         import_ra_data: currentBatch,
+  //       };
+
+  //       await this.dataservice
+  //         .Import_RA_Data(payload)
+  //         .toPromise()
+  //         .then((res: any) => {
+  //           if (res.flag === '1') {
+  //             this.LogID = res.LogID;
+  //             notify({
+  //               message: `Batch ${
+  //                 i + 1
+  //               }/${totalBatches} imported successfully!`,
+  //               type: 'success',
+  //               displayTime: 2000,
+  //               position: { at: 'top right', my: 'top right', of: window },
+  //             });
+  //           } else {
+  //             throw new Error(res.message || `Batch ${i + 1} import failed.`);
+  //           }
+  //         })
+  //         .catch((err) => {
+  //           notify({
+  //             message: `Error importing batch ${i + 1}: ${err.message}`,
+  //             type: 'error',
+  //             displayTime: 4000,
+  //             position: { at: 'top right', my: 'top right', of: window },
+  //           });
+  //           throw err;
+  //         });
+  //     }
+
+  //     // Final success notification
+  //     notify({
+  //       message: 'All batches imported successfully!',
+  //       type: 'success',
+  //       displayTime: 4000,
+  //       position: { at: 'top right', my: 'top right', of: window },
+  //     });
+  //     if (this.autoProcess) {
+  //       this.get_RA_Columns_Data();
+  //       this.totalRaItems = this.dataSource.length;
+  //       this.autoProcessPopup = true;
+  //     } else {
+  //       this.close();
+  //     }
+
+  //     // this.close();
+  //   } catch (error) {
+  //     this.handleError(error);
+  //   } finally {
+  //     this.isLoading = false;
+  //     this.isSaving = false;
+  //   }
+  // }
+  
+async onSaveClick() {
+  const userId = Number(sessionStorage.getItem('UserID')) || 0;
+  const insuranceId = this.selectedInsuranceId || 0;
+  this.selected_Insurance_id = insuranceId;
+
+  // -------- Insurance validation --------
+  if (!insuranceId || insuranceId === 0) {
+    notify({
+      message: 'Please select an Insurance before saving.',
+      type: 'error',
+      displayTime: 3000,
+      position: { at: 'top right', my: 'top right', of: window },
+    });
+    return;
+  }
+
+  this.isLoading = true;
+  this.isSaving = true;
+
+  try {
+    // -------- Read full datasource --------
+    const allData = (this.dataSource || []).map((item) => ({ ...item }));
+
+    // -------- No data check --------
+    if (allData.length === 0) {
       notify({
-        message: 'Please select an Insurance before saving.',
-        type: 'error',
+        message: 'No data available to save.',
+        type: 'warning',
         displayTime: 3000,
         position: { at: 'top right', my: 'top right', of: window },
       });
+      this.isLoading = false;
+      this.isSaving = false;
       return;
     }
 
-    this.isLoading = true;
-    this.isSaving = true;
+    // -------- SAVE-TIME VALIDATION --------
+    const invalidRows: number[] = [];
 
-    try {
-      const allData = (this.dataSource || []).map((item) => ({
-        ...item,
-      }));
+    allData.forEach((row, index) => {
+      // Excel row number (assumes header row exists)
+      const excelRowNo = row.__excelRowNo ?? index + 2;
 
-      const batchSize = 15000;
-      const totalRecords = allData.length;
+      this.columnData.forEach((col: any) => {
+        const value = row[col.dataField];
 
-      if (totalRecords === 0) {
-        notify({
-          message: 'No data available to save.',
-          type: 'warning',
-          displayTime: 3000,
-          position: { at: 'top right', my: 'top right', of: window },
-        });
-        this.isLoading = false;
-        this.isSaving = false;
-        return;
-      }
+        if (value === null || value === '') return;
 
-      if (this.invalidData) {
-        notify({
-          message:
-            'The Excel file contains invalid data. Please correct it before saving.',
-          type: 'error',
-          displayTime: 4000,
-          position: { at: 'top right', my: 'top right', of: window },
-        });
-        this.isLoading = false;
-        this.isSaving = false;
-        return;
-      }
-      // Generate one common BatchID for all payloads
-      const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
-      const commonBatchId = `${insuranceId}_${datetime}`;
+        // DATETIME validation
+        if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
+          invalidRows.push(excelRowNo);
+        }
 
-      const totalBatches = Math.ceil(totalRecords / batchSize);
+        // DECIMAL validation
+        if (
+          col.type === 'DECIMAL' &&
+          isNaN(Number(value.toString().replace(/,/g, '')))
+        ) {
+          invalidRows.push(excelRowNo);
+        }
+      });
+    });
 
-      for (let i = 0; i < totalBatches; i++) {
-        const start = i * batchSize;
-        const end = Math.min(start + batchSize, totalRecords);
-        const currentBatch = allData.slice(start, end);
+    // -------- If invalid rows found → STOP SAVE --------
+    const uniqueInvalidRows = [...new Set(invalidRows)].sort((a, b) => a - b);
 
-        const payload = {
-          USerID: userId,
-          InsuranceID: insuranceId,
-          IsAutoProcessed: false,
-          BatchNo: commonBatchId,
-          import_ra_data: currentBatch,
-        };
+    if (uniqueInvalidRows.length > 0) {
+      const rowText =
+        uniqueInvalidRows.length > 10
+          ? uniqueInvalidRows.slice(0, 10).join(', ') + '...'
+          : uniqueInvalidRows.join(', ');
+          
 
-        await this.dataservice
-          .Import_RA_Data(payload)
-          .toPromise()
-          .then((res: any) => {
-            if (res.flag === '1') {
-              this.LogID = res.LogID;
-              notify({
-                message: `Batch ${
-                  i + 1
-                }/${totalBatches} imported successfully!`,
-                type: 'success',
-                displayTime: 2000,
-                position: { at: 'top right', my: 'top right', of: window },
-              });
-            } else {
-              throw new Error(res.message || `Batch ${i + 1} import failed.`);
-            }
-          })
-          .catch((err) => {
-            notify({
-              message: `Error importing batch ${i + 1}: ${err.message}`,
-              type: 'error',
-              displayTime: 4000,
-              position: { at: 'top right', my: 'top right', of: window },
-            });
-            throw err;
-          });
-      }
-
-      // Final success notification
       notify({
-        message: 'All batches imported successfully!',
-        type: 'success',
-        displayTime: 4000,
+        message:
+          `Cannot save Excel.\n\n` +
+          `Invalid data found at row(s): ${rowText}`,
+        type: 'error',
+        displayTime: 6000,
         position: { at: 'top right', my: 'top right', of: window },
       });
-      if (this.autoProcess) {
-        this.get_RA_Columns_Data();
-        this.totalRaItems = this.dataSource.length;
-        this.autoProcessPopup = true;
-      } else {
-        this.close();
-      }
 
-      // this.close();
-    } catch (error) {
-      this.handleError(error);
-    } finally {
       this.isLoading = false;
       this.isSaving = false;
+      return; // STOP HERE
     }
+
+    // -------- Batch save logic --------
+    const batchSize = 15000;
+    const totalRecords = allData.length;
+    const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
+    const commonBatchId = `${insuranceId}_${datetime}`;
+    const totalBatches = Math.ceil(totalRecords / batchSize);
+
+    for (let i = 0; i < totalBatches; i++) {
+      const start = i * batchSize;
+      const end = Math.min(start + batchSize, totalRecords);
+      const currentBatch = allData.slice(start, end);
+
+      const payload = {
+        USerID: userId,
+        InsuranceID: insuranceId,
+        IsAutoProcessed: false,
+        BatchNo: commonBatchId,
+        import_ra_data: currentBatch,
+      };
+
+      const res: any = await this.dataservice.Import_RA_Data(payload).toPromise();
+
+      if (res?.flag === '1') {
+        this.LogID = res.LogID;
+        notify({
+          message: `Batch ${i + 1}/${totalBatches} imported successfully!`,
+          type: 'success',
+          displayTime: 2000,
+          position: { at: 'top right', my: 'top right', of: window },
+        });
+      } else {
+        throw new Error(res?.message || `Batch ${i + 1} import failed`);
+      }
+    }
+
+    // -------- Final success --------
+    notify({
+      message: 'All batches imported successfully!',
+      type: 'success',
+      displayTime: 4000,
+      position: { at: 'top right', my: 'top right', of: window },
+    });
+
+    if (this.autoProcess) {
+      this.get_RA_Columns_Data();
+      this.totalRaItems = this.dataSource.length;
+      this.autoProcessPopup = true;
+    } else {
+      this.close();
+    }
+  } catch (error) {
+    this.handleError(error);
+  } finally {
+    this.isLoading = false;
+    this.isSaving = false;
   }
+}
+
 
   //==================porcessing popup autoprocess is checked
   onAutoProcessChanged(e: any) {
@@ -1357,6 +1511,54 @@ export class ImportRADataPopupComponent implements OnInit {
     this.confirmDistribute = false;
     this.showGrossMismatchPopup = false;
   }
+
+
+  
+  //=========================validate data time==============
+  validateAndFocusFirstInvalidRow() {
+  const invalidRows: number[] = [];
+
+  this.dataSource.forEach((row: any, index: number) => {
+    const excelRowNo = row.__excelRowNo ?? index + 2;
+
+    this.columnData.forEach((col: any) => {
+      const value = row[col.dataField];
+      if (value === null || value === '') return;
+
+      if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
+        invalidRows.push(index); // 👉 GRID INDEX
+      }
+
+      if (
+        col.type === 'DECIMAL' &&
+        isNaN(Number(value.toString().replace(/,/g, '')))
+      ) {
+        invalidRows.push(index);
+      }
+    });
+  });
+
+  const uniqueInvalidIndexes = [...new Set(invalidRows)].sort((a, b) => a - b);
+
+  if (uniqueInvalidIndexes.length > 0) {
+    const firstInvalidIndex = uniqueInvalidIndexes[0];
+
+    // 👇 THIS is what grid needs
+    this.focusedRowKey = this.dataSource[firstInvalidIndex]?.ID ?? firstInvalidIndex;
+
+    this.rowInvalidNumbers = uniqueInvalidIndexes.map(
+      (i) => this.dataSource[i].__excelRowNo ?? i + 2
+    );
+
+    notify({
+      message:
+        `Invalid data found at row(s): ${this.rowInvalidNumbers.join(', ')}`,
+      type: 'error',
+      displayTime: 6000,
+      position: { at: 'top right', my: 'top right', of: window },
+    });
+  }
+}
 }
 
 @NgModule({

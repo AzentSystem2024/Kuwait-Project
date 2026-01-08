@@ -63,7 +63,6 @@ export class AgedReportComponent {
 
   @ViewChild('lookup', { static: false }) lookup: DxLookupComponent;
 
-  
   //=================DataSource for data Grid Table========
   dataGrid_DataSource: DataSource<any>;
 
@@ -137,11 +136,11 @@ export class AgedReportComponent {
 
   DetailsColumns;
   summaryColumnsData: { totalItems: any[]; groupItems: any[] };
-  precision:any
+  precision: any;
   expandedRowKey: any = null;
 
   activeDetailGrid: DxDataGridComponent | null = null;
-DetailColumnNames: string[] = [];
+  DetailColumnNames: string[] = [];
   constructor(
     private dataservice: DataService,
     private reportengine: ReportEngineService
@@ -150,13 +149,13 @@ DetailColumnNames: string[] = [];
     this.minDate = new Date(2000, 1, 1); // Set the minimum date
     this.maxDate = new Date(); // Set the maximum date
 
-      const systemInfo = JSON.parse(
+    const systemInfo = JSON.parse(
       sessionStorage.getItem('SYSTEM_INFO') || '{}'
     );
     console.log(systemInfo);
     this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
     console.log(this.precision);
-  
+
     //============Year field dataSource===============
     const currentYear = new Date().getFullYear();
     for (let year = currentYear; year >= 1950; year--) {
@@ -226,35 +225,30 @@ DetailColumnNames: string[] = [];
 
   //====================Find the column location from the datagrid================
   findColumnLocation = (e: any) => {
-if (!this.activeDetailGrid) return;
+    if (!this.activeDetailGrid) return;
 
-  const caption = e.itemData;
-  if (!caption) return;
+    const caption = e.itemData;
+    if (!caption) return;
 
-  // ensure column is visible
-  this.activeDetailGrid.instance.columnOption(
-    caption,
-    'visible',
-    true
-  );
+    // ensure column is visible
+    this.activeDetailGrid.instance.columnOption(caption, 'visible', true);
 
-  this.reportengine.makeColumnVisible(this.activeDetailGrid, caption);
-    
+    this.reportengine.makeColumnVisible(this.activeDetailGrid, caption);
   };
 
   onContentReady() {
-  const columns = this.detailsdatagrid.instance.getVisibleColumns();
-  this.ColumnNames = columns.map(col => col.caption);
-}
-onDetailGridReady(grid: DxDataGridComponent) {
-  this.activeDetailGrid = grid;
+    const columns = this.detailsdatagrid.instance.getVisibleColumns();
+    this.ColumnNames = columns.map((col) => col.caption);
+  }
+  onDetailGridReady(grid: DxDataGridComponent) {
+    this.activeDetailGrid = grid;
 
-  const columns = grid.instance.getVisibleColumns();
+    const columns = grid.instance.getVisibleColumns();
 
-  this.DetailColumnNames = columns
-    .filter(col => col.caption)
-    .map(col => col.caption);
-}
+    this.DetailColumnNames = columns
+      .filter((col) => col.caption)
+      .map((col) => col.caption);
+  }
 
   //=============DataGrid Refreshing=====================
   refresh = () => {
@@ -267,26 +261,26 @@ onDetailGridReady(grid: DxDataGridComponent) {
     // this.service.exportDataGrid(event, fileName);
   }
   async get_Datagrid_DataSource() {
+    this.loadingVisible = true;
     const formData = {
       InsuranceID: '',
       DateFrom: this.formatDate(this.From_Date_Value),
       DateTo: this.formatDate(this.To_Date_Value),
       AsOnDate: this.formatDate(this.As_on_date),
-      Summary: 0,
+      Summary: 1,
     };
 
     this.isContentVisible = false;
     // this.isEmptyDatagrid=false
     // this.dataGrid.instance.beginCustomLoading('Loading...');
     this.dataservice.get_Aged_Summary(formData).subscribe((res: any) => {
+      this.loadingVisible = false;
       this.dataGrid_DataSource = res.header.SummaryData;
       this.isEmptyDatagrid = false;
       this.summaryColumnsData = this.generateSummaryColumns(
         res.header.SummaryData
       );
     });
-
-  
   }
 
   formatDate(date) {
@@ -299,7 +293,7 @@ onDetailGridReady(grid: DxDataGridComponent) {
     return `${year}-${month}-${day}`;
   }
   onCellClick(e: any) {
-    this.dataGrid.instance.beginCustomLoading('');
+    // this.dataGrid.instance.beginCustomLoading('');
 
     const formData = {
       InsuranceID: e.data.InsuranceID,
@@ -310,10 +304,20 @@ onDetailGridReady(grid: DxDataGridComponent) {
     };
 
     this.dataservice.get_aged_details(formData).subscribe((res: any) => {
-      this.dataGrid.instance.endCustomLoading();
+      // this.dataGrid.instance.endCustomLoading();
       this.DetailsColumns = res.header.DetailData;
 
       this.FilteredDetailData = res.header.DetailData;
+      const balanceAmout = this.FilteredDetailData.filter(
+        (item) => item.BalanceAmount > 0
+      );
+
+      console.log(balanceAmout);
+      const totalAmount = balanceAmout.reduce(
+        (sum, item) => sum + item.BalanceAmount,
+        0
+      );
+      console.log(totalAmount);
     });
     this.DetailsummaryColumns = {
       totalItems: [
@@ -358,27 +362,11 @@ onDetailGridReady(grid: DxDataGridComponent) {
           alignment: 'right',
         },
         {
-          column: 'TotalAmount',
+          column: 'BalanceAmount',
           summaryType: 'sum',
           displayFormat: '{0}',
           valueFormat: { type: 'fixedPoint', precision: this.precision },
-          showInColumn: 'TotalAmount',
-          alignment: 'right',
-        },
-        {
-          column: 'GROSS_CLAIM',
-          summaryType: 'sum',
-          displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
-          showInColumn: 'GROSS_CLAIM',
-          alignment: 'right',
-        },
-        {
-          column: 'DISCOUNT_CLAIM',
-          summaryType: 'sum',
-          displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
-          showInColumn: 'DISCOUNT_CLAIM',
+          showInColumn: 'BalanceAmount',
           alignment: 'right',
         },
         {
@@ -390,23 +378,14 @@ onDetailGridReady(grid: DxDataGridComponent) {
           alignment: 'right',
         },
         {
-          column: 'DISCOUNT_RA',
+          column: 'NET_PAYABLE',
           summaryType: 'sum',
           displayFormat: '{0}',
           valueFormat: { type: 'fixedPoint', precision: this.precision },
-          showInColumn: 'DISCOUNT_RA',
+          showInColumn: 'NET_PAYABLE',
           alignment: 'right',
         },
         {
-          column: 'EXCEEDING_LIMITED',
-          summaryType: 'sum',
-          displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
-          showInColumn: 'EXCEEDING_LIMITED',
-          alignment: 'right',
-        },
-        {
-          name: 'totalAmountSum',
           column: 'REJECTED_AMOUNT',
           summaryType: 'sum',
           displayFormat: '{0}',
@@ -419,22 +398,21 @@ onDetailGridReady(grid: DxDataGridComponent) {
     };
   }
 
-  
-onRowExpanding(e: any) {
-  // Close previously opened detail row
-  if (this.expandedRowKey !== null && this.expandedRowKey !== e.key) {
-    this.dataGrid.instance.collapseRow(this.expandedRowKey);
+  onRowExpanding(e: any) {
+    // Close previously opened detail row
+    if (this.expandedRowKey !== null && this.expandedRowKey !== e.key) {
+      this.dataGrid.instance.collapseRow(this.expandedRowKey);
+    }
+
+    // Save current expanded row key
+    this.expandedRowKey = e.key;
   }
 
-  // Save current expanded row key
-  this.expandedRowKey = e.key;
-}
-
-onRowCollapsed(e: any) {
-  if (this.expandedRowKey === e.key) {
-    this.expandedRowKey = null;
+  onRowCollapsed(e: any) {
+    if (this.expandedRowKey === e.key) {
+      this.expandedRowKey = null;
+    }
   }
-}
   // =========== Custom summary item with same smart decimal logic ==========
   createSummaryItem(col, isGroupItem = false, summaryType = 'sum', formatType) {
     return {
