@@ -709,6 +709,20 @@ async onSaveClick() {
       return; // STOP HERE
     }
 
+    
+      if (this.invalidData) {
+        notify({
+          message:
+            'The Excel file contains invalid data. Please correct it before saving.',
+          type: 'error',
+          displayTime: 4000,
+          position: { at: 'top right', my: 'top right', of: window },
+        });
+        this.isLoading = false;
+        this.isSaving = false;
+        return;
+      }
+
     // -------- Batch save logic --------
     const batchSize = 15000;
     const totalRecords = allData.length;
