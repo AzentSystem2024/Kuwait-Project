@@ -77,6 +77,7 @@ export class ImportRADataComponent implements OnInit {
   selectedInsuranceName: any;
   RaSummaryColumns: any;
   precision: any;
+  FileName: string | null = null;
   // ================= CLASS LEVEL =================
   private excelColumnMismatchMessage: string | null = null;
   excelColumnMismatchMap: {};
@@ -153,7 +154,7 @@ export class ImportRADataComponent implements OnInit {
               col.Type === 'DECIMAL'
                 ? {
                     type: 'fixedPoint',
-                    precision: this.precision,
+                    precision: 3,
                   }
                 : undefined,
           }));
@@ -202,8 +203,8 @@ export class ImportRADataComponent implements OnInit {
         formatType === 'decimal'
           ? {
               style: 'decimal',
-              minimumFractionDigits: this.precision,
-              maximumFractionDigits: this.precision,
+              minimumFractionDigits: 3,
+              maximumFractionDigits: 3,
             }
           : null,
       alignByColumn: isGroupItem,
@@ -277,6 +278,8 @@ export class ImportRADataComponent implements OnInit {
 
     this.isLoading = true;
     const file = target.files[0];
+    this.FileName = file.name;
+    console.log(this.FileName,"FileName")
     const reader = new FileReader();
 
     reader.onload = (e: any) => {

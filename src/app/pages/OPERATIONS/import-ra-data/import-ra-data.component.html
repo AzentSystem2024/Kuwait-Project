@@ -118,7 +118,8 @@
       [alignment]="'left'"
     ></dxi-column>
     <dxi-column dataField="InsuranceName" caption="Insurance Name"></dxi-column>
-    <dxi-column dataField="ImportedUser" caption="User"></dxi-column>
+    <dxi-column dataField="FileName" caption="File Name"></dxi-column>
+    <dxi-column dataField="ImportedUser" caption="Imported User"></dxi-column>
     <dxi-column dataField="ImportedTime" caption="Imported Time"></dxi-column>
     <dxi-column dataField="Status" caption="Status"></dxi-column>
 
@@ -148,6 +149,7 @@
       [selectedInsuranceId]="selectedInsuranceId"
       [dataSource]="ImportedDataSource"
       [mismatchedColumns]="excelColumnMismatchMap"
+      [fileName]="FileName"
       (closeForm)="CloseEditForm()"
     ></app-import-ra-data-popup>
   </dx-popup>

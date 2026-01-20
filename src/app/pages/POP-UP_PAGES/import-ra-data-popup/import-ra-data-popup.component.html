@@ -87,23 +87,22 @@
         location="after"
         name="columnChooserButton"
       ></dxi-item>
- <dxi-item
-          class="columnfinderclass"
-          widget="dxDropDownButton"
-          [options]="{
-            dataSource: ColumnNames,
-            onItemClick: findColumnLocation,
-            placeholder: 'Search Column',
-            noDataText: 'Load data and try again',
-            hint: 'Column location finder',
-            icon:'columnproperties',
-            dropDownOptions: {
-              width: 'auto',
-              height: '60vh'
-            },
-
-          }"
-        ></dxi-item>
+      <dxi-item
+        class="columnfinderclass"
+        widget="dxDropDownButton"
+        [options]="{
+          dataSource: ColumnNames,
+          onItemClick: findColumnLocation,
+          placeholder: 'Search Column',
+          noDataText: 'Load data and try again',
+          hint: 'Column location finder',
+          icon: 'columnproperties',
+          dropDownOptions: {
+            width: 'auto',
+            height: '60vh',
+          },
+        }"
+      ></dxi-item>
       <dxi-item location="after" *ngIf="fetchedData">
         <dx-button
           text="Process"
@@ -112,7 +111,6 @@
           (onClick)="autoProcessPopup = true"
         ></dx-button>
       </dxi-item>
-       
     </dxo-toolbar>
 
     <!-- Column chooser (optional) -->
@@ -222,7 +220,7 @@
           Total Pending Process: <b>{{ totalPendingprocessed }}</b>
         </div> -->
         <div>
-          Records require manual processed: <b>{{ manualProcess }}</b>
+          Records require manual processing: <b>{{ manualProcess }}</b>
         </div>
         <div>
           Records not matched with Unique Key: <b>{{ notFound }}</b>
@@ -255,66 +253,7 @@
 >
   <div class="h-100 d-flex flex-column">
     <!-- Top Grid -->
-    <dx-data-grid
-      #raGrid
-      [dataSource]="RAGridData"
-      [columns]="RAProcessPopUpColumns"
-      [showBorders]="true"
-      class="mb-1"
-      [height]="'50%'"
-      [keyExpr]="'ID'"
-      [rowAlternationEnabled]="true"
-      [paging]="{ enabled: false }"
-      [selection]="{
-        mode: 'multiple',
-        showCheckBoxesMode: 'always',
-        allowSelectAll: false
-      }"
-      [focusedRowEnabled]="false"
-      [scrolling]="{ mode: 'virtual' }"
-      [allowColumnReordering]="true"
-      [allowColumnResizing]="true"
-      [columnFixing]="{
-        enabled: true,
-        texts: { fix: 'Freeze', unfix: 'Unfreeze' }
-      }"
-      (onSelectionChanged)="onRADataRowSelected($event)"
-    >
-      <dxo-toolbar>
-        <dxi-item location="before">
-          <div class="grid-header h5 fw-bold border-bottom">RA Data</div>
-        </dxi-item>
 
-        <dxi-item
-          location="after"
-          widget="dxButton"
-          [options]="{
-            text: 'Distribute RA',
-            icon: '',
-            type: 'default',
-            stylingMode: 'contained',
-            disabled: !isRASelected,
-            onClick: distributeRA
-          }"
-        >
-        </dxi-item>
-
-        <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
-      </dxo-toolbar>
-
-      <dxo-sorting mode="single"></dxo-sorting>
-      <dxo-filter-row [visible]="true"></dxo-filter-row>
-      <dxo-header-filter [visible]="true"></dxo-header-filter>
-      <dxo-column-chooser
-        [height]="500"
-        hideOnOutsideClick="true"
-        [enabled]="true"
-        mode="select"
-      >
-      </dxo-column-chooser>
-    </dx-data-grid>
-
-    <!-- Bottom Grid -->
     <dx-data-grid
       #hisGrid
       [dataSource]="HISGridData"
@@ -330,13 +269,13 @@
       [selection]="{
         mode: 'multiple',
         showCheckBoxesMode: 'always',
-        allowSelectAll: false
+        allowSelectAll: false,
       }"
       [allowColumnResizing]="true"
       [allowColumnReordering]="true"
       [columnFixing]="{
         enabled: true,
-        texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+        texts: { fix: 'Freeze', unfix: 'Unfreeze' },
       }"
       (onSelectionChanged)="onHISRowSelected($event)"
     >
@@ -347,6 +286,65 @@
 
         <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
       </dxo-toolbar>
+      <dxo-sorting mode="single"></dxo-sorting>
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
+      <dxo-header-filter [visible]="true"></dxo-header-filter>
+      <dxo-column-chooser
+        [height]="500"
+        hideOnOutsideClick="true"
+        [enabled]="true"
+        mode="select"
+      >
+      </dxo-column-chooser>
+    </dx-data-grid>
+
+    <!-- Bottom Grid -->
+    <dx-data-grid
+      #raGrid
+      [dataSource]="RAGridData"
+      [columns]="RAProcessPopUpColumns"
+      [showBorders]="true"
+      class="mb-1"
+      [height]="'50%'"
+      [keyExpr]="'ID'"
+      [rowAlternationEnabled]="true"
+      [paging]="{ enabled: false }"
+      [selection]="{
+        mode: 'multiple',
+        showCheckBoxesMode: 'always',
+      }"
+      [focusedRowEnabled]="false"
+      [scrolling]="{ mode: 'virtual' }"
+      [allowColumnReordering]="true"
+      [allowColumnResizing]="true"
+      [columnFixing]="{
+        enabled: true,
+        texts: { fix: 'Freeze', unfix: 'Unfreeze' },
+      }"
+      (onSelectionChanged)="onRADataRowSelected($event)"
+    >
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div class="grid-header h5 fw-bold border-bottom">RA Data</div>
+        </dxi-item>
+
+        <dxi-item
+          location="after"
+          widget="dxButton"
+          [options]="{
+            text: 'Multi Match',
+            icon: '',
+            type: 'default',
+            stylingMode: 'contained',
+            disabled: !isHisSelected,
+            onClick: distributeRA,
+          }"
+        >
+        </dxi-item>
+
+        <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
+      </dxo-toolbar>
+
       <dxo-sorting mode="single"></dxo-sorting>
       <dxo-filter-row [visible]="true"></dxo-filter-row>
       <dxo-header-filter [visible]="true"></dxo-header-filter>
@@ -375,50 +373,18 @@
   [(visible)]="isDistributePopupVisible"
   [width]="'95vw'"
   [height]="'100vh'"
-  title="Distribute RA and Match"
+  title="Process Data"
   [showCloseButton]="true"
   (onHiding)="clearDistributePopup()"
 >
   <div class="m-0 p-0 h-100 d-flex flex-column">
-    <!-- RA Data Grid -->
-    <dx-data-grid
-      class="mb-3"
-      [dataSource]="[selectedRARow]"
-      [columns]="RAProcessPopUpColumns"
-      [showBorders]="true"
-      [height]="'25%'"
-      [columnAutoWidth]="true"
-      [selection]="{ mode: 'single' }"
-      [focusedRowEnabled]="true"
-      [focusedRowIndex]="0"
-      keyExpr="UNIQUE_KEY"
-      [allowColumnResizing]="true"
-      [allowColumnReordering]="true"
-    >
-      <dxo-toolbar>
-        <dxi-item location="before">
-          <div class="grid-header h5 fw-bold border-bottom">RA Data</div>
-        </dxi-item>
-
-        <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
-      </dxo-toolbar>
-
-      <dxo-column-chooser
-        [height]="500"
-        hideOnOutsideClick="true"
-        [enabled]="true"
-        mode="select"
-      >
-      </dxo-column-chooser>
-    </dx-data-grid>
-
     <!-- Middle Claim Data -->
     <dx-data-grid
       #distributeGrid
       [dataSource]="DistributeHISGridData"
       [columns]="DistributeHISColumns"
       [showBorders]="true"
-      [height]="'60%'"
+      [height]="'40%'"
       [columnAutoWidth]="true"
       [keyExpr]="'ID'"
       [rowAlternationEnabled]="true"
@@ -448,7 +414,7 @@
             hint: isFilterRowVisible ? 'Hide Filter Row' : 'Show Filter Row',
             onClick: toggleFilterRow,
             stylingMode: 'text',
-            elementAttr: { class: 'commonButtons' }
+            elementAttr: { class: 'commonButtons' },
           }"
         ></dxi-item>
 
@@ -478,7 +444,7 @@
     </dx-data-grid>
 
     <div
-      class="d-flex align-items-center border-top pt-3 mb-2 flex-nowrap gap-4"
+      class="d-flex align-items-center border-top pt-1 mb-1 flex-nowrap gap-4"
     >
       <div class="ms-auto me-5">
         <dx-text-box
@@ -490,7 +456,18 @@
         ></dx-text-box>
       </div>
 
-      <div class="ms-auto d-flex flex-nowrap gap-1 me-4">
+      <!-- <div class="ms-auto d-flex flex-nowrap gap-1 me-4"> -->
+        
+        <!-- <dx-text-box
+          [value]="getSelectedTotal('NET_AMOUNT1')"
+          label="Net Claimed"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box> -->
+      <!-- </div> -->
+
+      <div class="ms-auto d-flex flex-nowrap gap-1">
         <dx-text-box
           [value]="getSelectedTotal('GROSS_CLAIMED')"
           label="Gross Claimed"
@@ -498,16 +475,7 @@
           [readOnly]="true"
           width="130"
         ></dx-text-box>
-        <dx-text-box
-          [value]="getSelectedTotal('NET_AMOUNT1')"
-          label="Net Claimed"
-          labelMode="floating"
-          [readOnly]="true"
-          width="130"
-        ></dx-text-box>
-      </div>
-
-      <div class="ms-auto d-flex flex-nowrap gap-1">
+        
         <dx-text-box
           [value]="getSelectedTotal('OverBillingAmount')"
           label="Over Billing"
@@ -544,6 +512,177 @@
           width="130"
         ></dx-text-box>
       </div>
+    </div>
+
+    <!-- RA Data Grid -->
+    <dx-data-grid
+      class="mb-3"
+      [dataSource]="selectedRARows"
+      [columns]="RAProcessPopUpColumns"
+      [showBorders]="true"
+      [height]="'35%'"
+      [columnAutoWidth]="true"
+      [selection]="{ mode: 'single' }"
+      [focusedRowEnabled]="true"
+      [focusedRowIndex]="0"
+      keyExpr="ID"
+      [selection]="{ mode: 'multiple', showCheckBoxesMode: 'always' }"
+      (onSelectionChanged)="onDistributeRASelectionChanged($event)"
+      [allowColumnResizing]="true"
+      [allowColumnReordering]="true"
+    >
+      <dxo-toolbar>
+        <dxi-item location="before">
+          <div class="grid-header h5 fw-bold border-bottom">RA Data</div>
+        </dxi-item>
+
+        <dxi-item name="columnChooserButton" locateInMenu="auto"></dxi-item>
+      </dxo-toolbar>
+
+      <dxo-column-chooser
+        [height]="500"
+        hideOnOutsideClick="true"
+        [enabled]="true"
+        mode="select"
+      >
+      </dxo-column-chooser>
+
+      <!-- <dxo-summary>
+        <ng-container *ngFor="let col of RAProcessPopUpColumns">
+          <dxi-total-item
+            *ngIf="col.dataType === 'number'"
+            [column]="col.dataField"
+            summaryType="sum"
+            [valueFormat]="'#,##0.00'"
+            displayFormat="Total: {0}"
+          >
+          </dxi-total-item>
+        </ng-container>
+      </dxo-summary> -->
+    </dx-data-grid>
+
+    <div
+      class="d-flex align-items-center border-top pt-1 mb-1 flex-nowrap gap-4"
+    >
+      <!-- <div class="ms-auto me-5">
+        <dx-text-box
+          [value]="totalRASelected"
+          label="Total Selected"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+      </div> -->
+
+      <div class="ms-auto me-5">
+        <dx-text-box
+          [value]="totalRASelected"
+          label="Total Selected"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+      </div>
+
+      <div class="ms-auto d-flex flex-nowrap gap-1">
+        <dx-text-box
+          [value]="getSelectedRATotal('GROSS_CLAIMED')"
+          label="Gross Claimed"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+
+        <!-- <dx-text-box
+          [value]="getSelectedRATotal('NET_AMOUNT1')"
+          label="Net Claimed"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box> -->
+
+        <dx-text-box
+          [value]="getSelectedRATotal('OB_AMOUNT')"
+          label="Over Billing"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedRATotal('REJECTED_AMOUNT')"
+          label="Rejected"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedRATotal('DISCOUNT_AMOUNT')"
+          label="Discount"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedRATotal('COPAY_DEDUCTION')"
+          label="Co-Pay"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedRATotal('NET_PAYABLE')"
+          label="Net Payable"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+
+        <!-- <dx-text-box
+          [value]="getSelectedTotal('NET_AMOUNT1')"
+          label="Net Claimed"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box> -->
+      </div>
+
+      <!-- <div class="ms-auto d-flex flex-nowrap gap-1">
+        <dx-text-box
+          [value]="getSelectedTotal('OverBillingAmount')"
+          label="Over Billing"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSummaryAmount('AuditingRejectedAmount')"
+          label="Rejected"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSelectedTotal('DISCOUNT')"
+          label="Discount"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSummaryAmount('Co-PayandDeductible')"
+          label="Co-Pay"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+        <dx-text-box
+          [value]="getSummaryAmount('NetPayable')"
+          label="Net Payable"
+          labelMode="floating"
+          [readOnly]="true"
+          width="130"
+        ></dx-text-box>
+      </div> -->
     </div>
 
     <!-- Buttons Row at Bottom Right Distribute RA Match  -->
@@ -584,18 +723,21 @@
 </dx-load-panel>
 
 <!-- mismatched Gross amount distribute Ra processing Popup -->
- <dx-popup
+<dx-popup
   [(visible)]="showGrossMismatchPopup"
   title="Gross Amount Mismatch"
   [width]="400"
-  [height]="200"
+  [height]="300"
   [closeOnOutsideClick]="false"
 >
-  <p>
-    Gross amounts are different from RA Gross Amount.
-    <br />
-    Do you want to continue?
-  </p>
+  <p>The total claim gross amount does not match the RA gross amount.</p>
+
+  <div class="mt-2">
+    <div><b>Claim Gross Amount:</b> {{ HisgrossAmount }}</div>
+    <div><b>RA Gross Amount:</b> {{ RagrossAmount }}</div>
+  </div>
+
+  <p class="mt-3">Do you want to continue?</p>
 
   <div class="d-flex justify-content-end gap-2 mt-4">
     <dx-button

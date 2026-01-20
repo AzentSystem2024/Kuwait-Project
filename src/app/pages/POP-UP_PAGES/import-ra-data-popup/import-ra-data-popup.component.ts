@@ -60,6 +60,7 @@ export class ImportRADataPopupComponent implements OnInit {
       actualField: string;
     };
   } = {};
+  @Input() fileName: string | null = null;
 
   @Output() closeForm = new EventEmitter();
 
@@ -115,6 +116,7 @@ export class ImportRADataPopupComponent implements OnInit {
   RA_RECEIVING_DATE: Date = new Date();
   // ===== Footer total variables =====
   totalSelected: any = 0;
+  totalRASelected: any = 0;
 
   autoProcessPopup: boolean = false;
   InsuranceColumns: any;
@@ -136,8 +138,8 @@ export class ImportRADataPopupComponent implements OnInit {
   showGrossMismatchPopup: boolean = false;
   confirmDistribute: boolean = false;
   // Header mismatch tracker (child-component only)
-  precision:any
-    invalidRows = new Set<number>();
+  precision: any;
+  invalidRows = new Set<number>();
   focusedRowKey: any = null;
   rowInvalidNumbers: number[] = [];
 
@@ -146,24 +148,34 @@ export class ImportRADataPopupComponent implements OnInit {
     { expected: string; actual: string }
   >();
 
+  selectedRARows: any[] = [];
+
+  selectedRAIds: number[] = [];
+  selectedRAIdsString: string = '';
+  selectedDistributedRARows: any[] = [];
+
+  HisgrossAmount: any;
+  RagrossAmount: any;
+
+  isHisSelected = false;
+
   constructor(
     private dataservice: DataService,
     private mastersrvce: MasterReportService,
-    private reportengine: ReportEngineService
+    private reportengine: ReportEngineService,
   ) {
     this.getHisColumnsForUniqueKey();
     this.get_RA_Columns_Data();
-     const systemInfo = JSON.parse(
-      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+    const systemInfo = JSON.parse(
+      sessionStorage.getItem('SYSTEM_INFO') || '{}',
     );
     console.log(systemInfo);
     this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
-    console.log(this.precision);  
+    console.log(this.precision);
   }
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-   
 
     try {
       await this.fetch_insurance_dropdown_data();
@@ -173,12 +185,11 @@ export class ImportRADataPopupComponent implements OnInit {
       } else {
         this.applyFetchedData(this.fetchedData);
       }
-   this.ColumnNames = this.columnData.map((column) => column.caption);
+      this.ColumnNames = this.columnData.map((column) => column.caption);
       this.fetch_all_column_and_uniqueKey_data();
       setTimeout(() => {
-      this.validateAndFocusFirstInvalidRow();
-    }, 0);
-
+        this.validateAndFocusFirstInvalidRow();
+      }, 0);
     } catch (error) {
       notify({
         message: 'Initialization failed.',
@@ -241,12 +252,11 @@ export class ImportRADataPopupComponent implements OnInit {
       dataField: col.ColumnName,
       caption: col.ColumnTitle,
       width: 150,
-          dataType: 'DECIMAL',
-    format: {
-      type: 'fixedPoint',
-      precision: this.precision
-    }
-
+      dataType: 'DECIMAL',
+      format: {
+        type: 'fixedPoint',
+        precision: 3,
+      },
     }));
     this.ColumnNames = this.columnData.map((column) => column.caption);
     this.initDataSource(res);
@@ -256,11 +266,11 @@ export class ImportRADataPopupComponent implements OnInit {
     this.totalRaItems = res.data.length;
 
     this.totalPendingprocessed = res.data.filter(
-      (item: any) => item.Status === 'Not Processed'
+      (item: any) => item.Status === 'Not Processed',
     ).length;
 
     this.totalProcessed = res.data.filter(
-      (item: any) => item.Status === 'Processed'
+      (item: any) => item.Status === 'Processed',
     ).length;
 
     this.get_RA_Columns_Data();
@@ -278,7 +288,6 @@ export class ImportRADataPopupComponent implements OnInit {
           }
         }),
     });
-    
   }
 
   // ========== onCellPrepared validator ==========
@@ -303,7 +312,7 @@ export class ImportRADataPopupComponent implements OnInit {
     if (e.rowType !== 'data') return;
 
     const colInfo = this.columnData.find(
-      (c: any) => c.dataField === e.column.dataField
+      (c: any) => c.dataField === e.column.dataField,
     );
     if (!colInfo) return;
 
@@ -347,7 +356,7 @@ export class ImportRADataPopupComponent implements OnInit {
   highlightColumnHeader(dataField: string) {
     setTimeout(() => {
       const headerCells = document.querySelectorAll(
-        `.dx-header-row .dx-datagrid-text-content`
+        `.dx-header-row .dx-datagrid-text-content`,
       );
 
       headerCells.forEach((headerCell: any) => {
@@ -439,7 +448,7 @@ export class ImportRADataPopupComponent implements OnInit {
         next: (res: any) => {
           if (res && res.flag === '1') {
             this.InsuranceColumns = res.data[0].columns.filter(
-              (col: any) => col.HisMatched === true
+              (col: any) => col.HisMatched === true,
             );
 
             const uniqueKeyhis = res.data[0].uniqueKeys;
@@ -447,7 +456,7 @@ export class ImportRADataPopupComponent implements OnInit {
             this.uniqueKeyData = res.data[0].uniqueKeys;
             // set selected values (array of ColumnID from uniqueKeyData)
             this.selectedUniqueColumns = this.uniqueKeyData.map(
-              (u: any) => u.ColumnID
+              (u: any) => u.ColumnID,
             );
 
             this.selecteRAuniqueKeys = uniqueKeyhis
@@ -463,7 +472,7 @@ export class ImportRADataPopupComponent implements OnInit {
             notify(
               res.message || 'Failed to fetch insurance details',
               'error',
-              3000
+              3000,
             );
           }
         },
@@ -621,95 +630,93 @@ export class ImportRADataPopupComponent implements OnInit {
   //     this.isSaving = false;
   //   }
   // }
-  
-async onSaveClick() {
-  const userId = Number(sessionStorage.getItem('UserID')) || 0;
-  const insuranceId = this.selectedInsuranceId || 0;
-  this.selected_Insurance_id = insuranceId;
 
-  // -------- Insurance validation --------
-  if (!insuranceId || insuranceId === 0) {
-    notify({
-      message: 'Please select an Insurance before saving.',
-      type: 'error',
-      displayTime: 3000,
-      position: { at: 'top right', my: 'top right', of: window },
-    });
-    return;
-  }
+  async onSaveClick() {
+    const userId = Number(sessionStorage.getItem('UserID')) || 0;
+    const insuranceId = this.selectedInsuranceId || 0;
+    this.selected_Insurance_id = insuranceId;
 
-  this.isLoading = true;
-  this.isSaving = true;
-
-  try {
-    // -------- Read full datasource --------
-    const allData = (this.dataSource || []).map((item) => ({ ...item }));
-
-    // -------- No data check --------
-    if (allData.length === 0) {
+    // -------- Insurance validation --------
+    if (!insuranceId || insuranceId === 0) {
       notify({
-        message: 'No data available to save.',
-        type: 'warning',
+        message: 'Please select an Insurance before saving.',
+        type: 'error',
         displayTime: 3000,
         position: { at: 'top right', my: 'top right', of: window },
       });
-      this.isLoading = false;
-      this.isSaving = false;
       return;
     }
 
-    // -------- SAVE-TIME VALIDATION --------
-    const invalidRows: number[] = [];
+    this.isLoading = true;
+    this.isSaving = true;
 
-    allData.forEach((row, index) => {
-      // Excel row number (assumes header row exists)
-      const excelRowNo = row.__excelRowNo ?? index + 2;
+    try {
+      // -------- Read full datasource --------
+      const allData = (this.dataSource || []).map((item) => ({ ...item }));
 
-      this.columnData.forEach((col: any) => {
-        const value = row[col.dataField];
+      // -------- No data check --------
+      if (allData.length === 0) {
+        notify({
+          message: 'No data available to save.',
+          type: 'warning',
+          displayTime: 3000,
+          position: { at: 'top right', my: 'top right', of: window },
+        });
+        this.isLoading = false;
+        this.isSaving = false;
+        return;
+      }
 
-        if (value === null || value === '') return;
+      // -------- SAVE-TIME VALIDATION --------
+      const invalidRows: number[] = [];
 
-        // DATETIME validation
-        if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
-          invalidRows.push(excelRowNo);
-        }
+      allData.forEach((row, index) => {
+        // Excel row number (assumes header row exists)
+        const excelRowNo = row.__excelRowNo ?? index + 2;
 
-        // DECIMAL validation
-        if (
-          col.type === 'DECIMAL' &&
-          isNaN(Number(value.toString().replace(/,/g, '')))
-        ) {
-          invalidRows.push(excelRowNo);
-        }
+        this.columnData.forEach((col: any) => {
+          const value = row[col.dataField];
+
+          if (value === null || value === '') return;
+
+          // DATETIME validation
+          if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
+            invalidRows.push(excelRowNo);
+          }
+
+          // DECIMAL validation
+          if (
+            col.type === 'DECIMAL' &&
+            isNaN(Number(value.toString().replace(/,/g, '')))
+          ) {
+            invalidRows.push(excelRowNo);
+          }
+        });
       });
-    });
 
-    // -------- If invalid rows found → STOP SAVE --------
-    const uniqueInvalidRows = [...new Set(invalidRows)].sort((a, b) => a - b);
+      // -------- If invalid rows found → STOP SAVE --------
+      const uniqueInvalidRows = [...new Set(invalidRows)].sort((a, b) => a - b);
 
-    if (uniqueInvalidRows.length > 0) {
-      const rowText =
-        uniqueInvalidRows.length > 10
-          ? uniqueInvalidRows.slice(0, 10).join(', ') + '...'
-          : uniqueInvalidRows.join(', ');
-          
+      if (uniqueInvalidRows.length > 0) {
+        const rowText =
+          uniqueInvalidRows.length > 10
+            ? uniqueInvalidRows.slice(0, 10).join(', ') + '...'
+            : uniqueInvalidRows.join(', ');
 
-      notify({
-        message:
-          `Cannot save Excel.\n\n` +
-          `Invalid data found at row(s): ${rowText}`,
-        type: 'error',
-        displayTime: 6000,
-        position: { at: 'top right', my: 'top right', of: window },
-      });
+        notify({
+          message:
+            `Cannot save Excel.\n\n` +
+            `Invalid data found at row(s): ${rowText}`,
+          type: 'error',
+          displayTime: 6000,
+          position: { at: 'top right', my: 'top right', of: window },
+        });
 
-      this.isLoading = false;
-      this.isSaving = false;
-      return; // STOP HERE
-    }
+        this.isLoading = false;
+        this.isSaving = false;
+        return; // STOP HERE
+      }
 
-    
       if (this.invalidData) {
         notify({
           message:
@@ -723,64 +730,66 @@ async onSaveClick() {
         return;
       }
 
-    // -------- Batch save logic --------
-    const batchSize = 15000;
-    const totalRecords = allData.length;
-    const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
-    const commonBatchId = `${insuranceId}_${datetime}`;
-    const totalBatches = Math.ceil(totalRecords / batchSize);
+      // -------- Batch save logic --------
+      const batchSize = 15000;
+      const totalRecords = allData.length;
+      const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
+      const commonBatchId = `${insuranceId}_${datetime}`;
+      const totalBatches = Math.ceil(totalRecords / batchSize);
 
-    for (let i = 0; i < totalBatches; i++) {
-      const start = i * batchSize;
-      const end = Math.min(start + batchSize, totalRecords);
-      const currentBatch = allData.slice(start, end);
+      for (let i = 0; i < totalBatches; i++) {
+        const start = i * batchSize;
+        const end = Math.min(start + batchSize, totalRecords);
+        const currentBatch = allData.slice(start, end);
 
-      const payload = {
-        USerID: userId,
-        InsuranceID: insuranceId,
-        IsAutoProcessed: false,
-        BatchNo: commonBatchId,
-        import_ra_data: currentBatch,
-      };
+        const payload = {
+          USerID: userId,
+          InsuranceID: insuranceId,
+          IsAutoProcessed: false,
+          BatchNo: commonBatchId,
+          FileName: this.fileName ?? '',
+          import_ra_data: currentBatch,
+        };
 
-      const res: any = await this.dataservice.Import_RA_Data(payload).toPromise();
+        const res: any = await this.dataservice
+          .Import_RA_Data(payload)
+          .toPromise();
 
-      if (res?.flag === '1') {
-        this.LogID = res.LogID;
-        notify({
-          message: `Batch ${i + 1}/${totalBatches} imported successfully!`,
-          type: 'success',
-          displayTime: 2000,
-          position: { at: 'top right', my: 'top right', of: window },
-        });
-      } else {
-        throw new Error(res?.message || `Batch ${i + 1} import failed`);
+        if (res?.flag === '1') {
+          this.LogID = res.LogID;
+          notify({
+            message: `Batch ${i + 1}/${totalBatches} imported successfully!`,
+            type: 'success',
+            displayTime: 2000,
+            position: { at: 'top right', my: 'top right', of: window },
+          });
+        } else {
+          throw new Error(res?.message || `Batch ${i + 1} import failed`);
+        }
       }
-    }
 
-    // -------- Final success --------
-    notify({
-      message: 'All batches imported successfully!',
-      type: 'success',
-      displayTime: 4000,
-      position: { at: 'top right', my: 'top right', of: window },
-    });
+      // -------- Final success --------
+      notify({
+        message: 'All batches imported successfully!',
+        type: 'success',
+        displayTime: 4000,
+        position: { at: 'top right', my: 'top right', of: window },
+      });
 
-    if (this.autoProcess) {
-      this.get_RA_Columns_Data();
-      this.totalRaItems = this.dataSource.length;
-      this.autoProcessPopup = true;
-    } else {
-      this.close();
+      if (this.autoProcess) {
+        this.get_RA_Columns_Data();
+        this.totalRaItems = this.dataSource.length;
+        this.autoProcessPopup = true;
+      } else {
+        this.close();
+      }
+    } catch (error) {
+      this.handleError(error);
+    } finally {
+      this.isLoading = false;
+      this.isSaving = false;
     }
-  } catch (error) {
-    this.handleError(error);
-  } finally {
-    this.isLoading = false;
-    this.isSaving = false;
   }
-}
-
 
   //==================porcessing popup autoprocess is checked
   onAutoProcessChanged(e: any) {
@@ -831,7 +840,7 @@ async onSaveClick() {
           position: { at: 'top right', my: 'top right' },
           displayTime: 1000,
         },
-        'error'
+        'error',
       );
     } else if (error.status === 500) {
       notify(
@@ -841,7 +850,7 @@ async onSaveClick() {
           position: { at: 'top right', my: 'top right' },
           displayTime: 1000,
         },
-        'error'
+        'error',
       );
     } else {
       notify(
@@ -850,7 +859,7 @@ async onSaveClick() {
           position: { at: 'top right', my: 'top right' },
           displayTime: 1000,
         },
-        'error'
+        'error',
       );
     }
     this.isSaving = false;
@@ -888,7 +897,7 @@ async onSaveClick() {
       workbook.xlsx.writeBuffer().then((buffer) => {
         saveAs(
           new Blob([buffer], { type: 'application/octet-stream' }),
-          'RA Data Export.xlsx'
+          'RA Data Export.xlsx',
         );
       });
     });
@@ -914,7 +923,6 @@ async onSaveClick() {
   // ======== change unique key and process data =============
   onChangeAndProcess(): Promise<void> {
     return new Promise((resolve) => {
-    
       const insurance = this.selectedInsuranceId;
       const logId = this.fetchedData?.ID || this.LogID;
       const payload = {
@@ -948,6 +956,40 @@ async onSaveClick() {
     });
   }
 
+
+
+  ProcessedCount(): Promise<void> {
+    return new Promise((resolve) => {
+      const insurance = this.selectedInsuranceId;
+      const logId = this.fetchedData?.ID || this.LogID;
+      const payload = {
+        InsuranceID: insurance,
+        LogID: logId,
+      };
+
+      this.isLoadingManualProcess = true;
+      this.dataservice
+        .RA_Data_Process_count(payload)
+        .subscribe((res: any) => {
+          this.isLoadingManualProcess = false;
+
+          if (res && res.flag === '1') {
+            this.totalProcessed = res.TotalProcessed;
+            this.totalPendingprocessed = res.PendingProcess;
+            this.manualProcess = res.ManualProcess;
+            this.notFound = res.NotFound;
+          } else {
+            this.totalProcessed = 0;
+            this.totalPendingprocessed = 0;
+            this.manualProcess = 0;
+            this.notFound = 0;
+          }
+
+          resolve();
+        });
+    });
+  }
+
   // =========== process popup open and data fetching =============
   async onProcessClick() {
     if (this.uniqueKeyChanged) {
@@ -964,31 +1006,66 @@ async onSaveClick() {
 
     this.isLoading = true;
 
-    this.dataservice.fetch_RA_Process_Data_list(payload).subscribe({
+    // this.dataservice.fetch_RA_Process_Data_list(payload).subscribe({
+    //   next: (response: any) => {
+    //     if (response.flag === '1') {
+    //       this.RAProcessPopUpColumns = response.columns.map((col: any) => ({
+    //         dataField: col.ColumnName,
+    //         caption: col.ColumnTitle,
+    //         minWidth: 100,
+    //         maxWidth: 250,
+    //           dataType: 'DECIMAL',
+    //            format: {
+    //   type: 'fixedPoint',
+    //   precision: this.precision}
+    //       }));
+
+    //       this.RAGridData = response.data;
+
+    //       if (this.raGrid?.instance) {
+    //         this.raGrid.instance.clearSelection();
+    //         this.raGrid.instance.option('focusedRowIndex', -1);
+    //       }
+
+    //       if (this.hisGrid?.instance) {
+    //         this.hisGrid.instance.clearSelection();
+    //         this.hisGrid.instance.option('focusedRowIndex', -1);
+    //       }
+
+    //       this.isProcessPopupVisible = true;
+    //     }
+    //     this.isLoading = false;
+    //   },
+    //   error: () => {
+    //     this.isLoading = false;
+    //   },
+    // });
+
+    this.dataservice.fetch_HIS_Process_Data_list(payload).subscribe({
       next: (response: any) => {
         if (response.flag === '1') {
-          this.RAProcessPopUpColumns = response.columns.map((col: any) => ({
+          this.HISProcessPopUpColumns = response.columns.map((col: any) => ({
             dataField: col.ColumnName,
             caption: col.ColumnTitle,
             minWidth: 100,
             maxWidth: 250,
-              dataType: 'DECIMAL',
-               format: {
-      type: 'fixedPoint',
-      precision: this.precision}
+            dataType: 'DECIMAL',
+            format: {
+              type: 'fixedPoint',
+              precision: 3,
+            },
           }));
-            
-   
-          this.RAGridData = response.data;
 
-          if (this.raGrid?.instance) {
-            this.raGrid.instance.clearSelection();
-            this.raGrid.instance.option('focusedRowIndex', -1);
-          }
+          this.HISGridData = response.data;
 
           if (this.hisGrid?.instance) {
             this.hisGrid.instance.clearSelection();
             this.hisGrid.instance.option('focusedRowIndex', -1);
+          }
+
+          if (this.raGrid?.instance) {
+            this.raGrid.instance.clearSelection();
+            this.raGrid.instance.option('focusedRowIndex', -1);
           }
 
           this.isProcessPopupVisible = true;
@@ -1002,12 +1079,90 @@ async onSaveClick() {
   }
 
   // =============== Ra data row selection change event =========
-  onRADataRowSelected(e: any) {
-    if (!e.selectedRowsData?.length) {
-      this.isRASelected = false;
-      this.lastRASelection = null;
+  // onRADataRowSelected(e: any) {
+  //   if (!e.selectedRowsData?.length) {
+  //     this.isRASelected = false;
+  //     this.lastRASelection = null;
+  //     return;
+  //   }
+
+  //   // Allow only one selection at a time
+  //   if (e.selectedRowKeys.length > 1) {
+  //     const lastSelectedKey = e.selectedRowKeys[e.selectedRowKeys.length - 1];
+  //     e.component.selectRows([lastSelectedKey], false);
+  //   }
+
+  //   const selectedRow = e.selectedRowsData[e.selectedRowsData.length - 1];
+  //   if (!selectedRow) return;
+
+  //   this.lastRASelection = selectedRow;
+
+  //   const payload = {
+  //     UniqueKey: selectedRow.UNIQUE_KEY,
+  //     InsuranceID: this.selectedInsuranceId,
+  //   };
+  //   this.HISGridData = [];
+
+  //   this.dataservice.fetch_HIS_Process_Data_list(payload).subscribe({
+  //     next: (response: any) => {
+  //       if (response.flag === '1') {
+  //         this.isRASelected = true;
+  //         this.HISGridData = response.data;
+  //         this.HISProcessPopUpColumns = response.columns.map((col: any) => ({
+  //           dataField: col.ColumnName,
+  //           caption: col.ColumnTitle,
+  //           minWidth: 100,
+  //           maxWidth: 150,
+  //              dataType: 'DECIMAL',
+  //              format: {
+  //     type: 'fixedPoint',
+  //     precision: this.precision}
+  //         }));
+
+  //         setTimeout(() => {
+  //           const hisGrid = this.hisGrid?.instance;
+  //           if (hisGrid && this.HISGridData?.length) {
+  //             const match = this.HISGridData.find(
+  //               (row: any) =>
+  //                 row.UNIQUE_KEY === selectedRow.UNIQUE_KEY &&
+  //                 row.GROSS_CLAIMED === selectedRow.GROSS_CLAIMED
+  //             );
+
+  //             const focusKey = match ? match.ID : this.HISGridData[0].ID;
+
+  //             if (focusKey) {
+  //               hisGrid.option('focusedRowKey', null); // reset
+  //               setTimeout(() => {
+  //                 hisGrid.option('focusedRowEnabled', true);
+  //                 hisGrid.option('focusedRowKey', focusKey);
+  //                 hisGrid.navigateToRow(focusKey);
+  //               }, 50);
+  //             }
+  //           }
+  //         }, 200);
+  //       }
+  //     },
+  //     error: () => {
+  //       // handle error
+  //     },
+  //   });
+  // }
+
+  onHISRowSelected(e: any) {
+    // if (!e.selectedRowsData?.length) {
+    //   this.isRASelected = false;
+    //   this.lastRASelection = null;
+    //   return;
+    // }
+
+    if (!e.selectedRowKeys || e.selectedRowKeys.length === 0) {
+      this.isHisSelected = false;
       return;
     }
+
+    // ✅ something selected → enable
+    this.isHisSelected = true;
+
 
     // Allow only one selection at a time
     if (e.selectedRowKeys.length > 1) {
@@ -1024,41 +1179,43 @@ async onSaveClick() {
       UniqueKey: selectedRow.UNIQUE_KEY,
       InsuranceID: this.selectedInsuranceId,
     };
-    this.HISGridData = [];
 
-    this.dataservice.fetch_HIS_Process_Data_list(payload).subscribe({
+    this.RAGridData = [];
+
+    this.dataservice.fetch_RA_Process_Data_list(payload).subscribe({
       next: (response: any) => {
         if (response.flag === '1') {
-          this.isRASelected = true;
-          this.HISGridData = response.data;
-          this.HISProcessPopUpColumns = response.columns.map((col: any) => ({
+          // this.isRASelected = true;
+          this.RAGridData = response.data;
+          this.RAProcessPopUpColumns = response.columns.map((col: any) => ({
             dataField: col.ColumnName,
             caption: col.ColumnTitle,
             minWidth: 100,
             maxWidth: 150,
-               dataType: 'DECIMAL',
-               format: {
-      type: 'fixedPoint',
-      precision: this.precision}
+            dataType: 'DECIMAL',
+            format: {
+              type: 'fixedPoint',
+              precision: 3,
+            },
           }));
 
           setTimeout(() => {
-            const hisGrid = this.hisGrid?.instance;
-            if (hisGrid && this.HISGridData?.length) {
-              const match = this.HISGridData.find(
+            const raGrid = this.raGrid?.instance;
+            if (raGrid && this.RAGridData?.length) {
+              const match = this.RAGridData.find(
                 (row: any) =>
                   row.UNIQUE_KEY === selectedRow.UNIQUE_KEY &&
-                  row.GROSS_CLAIMED === selectedRow.GROSS_CLAIMED
+                  row.GROSS_CLAIMED === selectedRow.GROSS_CLAIMED,
               );
 
-              const focusKey = match ? match.ID : this.HISGridData[0].ID;
+              const focusKey = match ? match.ID : this.RAGridData[0].ID;
 
               if (focusKey) {
-                hisGrid.option('focusedRowKey', null); // reset
+                raGrid.option('focusedRowKey', null); // reset
                 setTimeout(() => {
-                  hisGrid.option('focusedRowEnabled', true);
-                  hisGrid.option('focusedRowKey', focusKey);
-                  hisGrid.navigateToRow(focusKey);
+                  raGrid.option('focusedRowEnabled', true);
+                  raGrid.option('focusedRowKey', focusKey);
+                  raGrid.navigateToRow(focusKey);
                 }, 50);
               }
             }
@@ -1072,8 +1229,15 @@ async onSaveClick() {
   }
 
   // ========HIS data row selection event =======
-  onHISRowSelected(e: any) {
-    if (!e.selectedRowsData?.length) return;
+  onRADataRowSelected(e: any) {
+     // ✅ nothing selected → disable
+    if (!e.selectedRowKeys || e.selectedRowKeys.length === 0) {
+      this.isRASelected = false;
+      return;
+    }
+
+    // ✅ something selected → enable
+    this.isRASelected = true;
 
     if (e.selectedRowKeys.length > 1) {
       const lastKey = e.selectedRowKeys[e.selectedRowKeys.length - 1];
@@ -1089,11 +1253,21 @@ async onSaveClick() {
   // ========= Distribute RA button click =========
   distributeRA = () => {
     if (!this.lastRASelection) return;
-    this.selectedRARow = this.lastRASelection;
+    // this.selectedRARow = this.lastRASelection;
+
+    const uniqueKey = this.lastRASelection.UNIQUE_KEY;
+
+    // 🔥 Get ALL RA rows with same UNIQUE_KEY
+    this.selectedRARows = this.RAGridData.filter(
+      (ra: any) => ra.UNIQUE_KEY === uniqueKey,
+    );
+
+    // Keep one row only for reference (gross check, rejection note, etc.)
+    this.selectedRARow = this.selectedRARows[0];
 
     // Load HIS claims matching RA's unique key
     this.DistributeHISGridData = this.HISGridData.filter(
-      (row) => row.UNIQUE_KEY === this.selectedRARow.UNIQUE_KEY
+      (row) => row.UNIQUE_KEY === this.selectedRARow.UNIQUE_KEY,
     ).map((row) => ({
       ...row,
       NetPayable: null,
@@ -1153,6 +1327,22 @@ async onSaveClick() {
     this.isDistributePopupVisible = true;
   };
 
+  onDistributeRASelectionChanged(e: any) {
+    const rows = e.selectedRowsData || [];
+
+    this.selectedDistributedRARows = rows;
+
+    this.totalRASelected = rows.length;
+
+    this.selectedRAIds = rows.map((r: any) => r.ID);
+
+    // 🔥 "1,2,3,4,5" format
+    this.selectedRAIdsString = this.selectedRAIds.join(',');
+
+    console.log('Selected RA IDs array:', this.selectedRAIds);
+    console.log('Selected RA IDs string:', this.selectedRAIdsString);
+  }
+
   // ========== distribute RA his grid selection change event =====
   onDistributeSelectionChanged(e: any) {
     this.selectedDistributeRows = e.selectedRowsData || [];
@@ -1178,20 +1368,28 @@ async onSaveClick() {
   };
   // ====== Calculate totals using only selected rows ======
   getSelectedTotal(field: string): string {
-    if (!this.selectedDistributeRows?.length) return '0.00';
+    if (!this.selectedDistributeRows?.length) return '0.000';
     const total = this.selectedDistributeRows.reduce((sum, row) => {
       return sum + (Number(row[field]) || 0);
     }, 0);
-    return total.toFixed(2);
+    return total.toFixed(3);
+  }
+
+  getSelectedRATotal(field: string): string {
+    if (!this.selectedDistributedRARows?.length) return '0.000';
+    const total = this.selectedDistributedRARows.reduce((sum, row) => {
+      return sum + (Number(row[field]) || 0);
+    }, 0);
+    return total.toFixed(3);
   }
   // ========== get summary Amount ==========
   getSummaryAmount(column: string): string {
-    if (!this.distributeGrid?.instance) return '0.00';
+    if (!this.distributeGrid?.instance) return '0.000';
     const summaryValue =
       this.distributeGrid.instance.getTotalSummaryValue(column);
     return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 3,
+      maximumFractionDigits: 3,
     }).format(summaryValue || 0);
   }
 
@@ -1229,39 +1427,122 @@ async onSaveClick() {
     this.totalSelected = 0;
     this.selectedDistributeRows = [];
     this.isDistributePopupVisible = false;
-    this.autoProcessPopup = false;
-    this.viewDetails();
+    this.autoProcessPopup = true;
+    // this.viewDetails();
+    this.ProcessedCount();
   }
 
   // ====== on click of RA distribute process button ====
-  onSubmitDistributeRA() {
-    if (!this.selectedRARow) {
-      notify('Please select an RA before distributing.', 'warning', 3000);
-      return;
-    }
+  async onSubmitDistributeRA() {
+    // if (!this.selectedRARow) {
+    //   notify('Please select an RA before distributing.', 'warning', 3000);
+    //   return;
+    // }
     if (!this.selectedDistributeRows?.length) {
       notify(
         'Please select at least one row before distributing.',
         'warning',
-        3000
+        3000,
       );
       return;
     }
-    if (!this.selectedRARow) {
-      notify('Please select an RA before distributing.', 'warning', 3000);
+
+    if (!this.selectedDistributedRARows?.length) {
+      notify(
+        'Please select at least one row before distributing.',
+        'warning',
+        3000,
+      );
       return;
     }
 
     const selectedClaimvalues = this.transformPayload(
-      this.selectedDistributeRows
+      this.selectedDistributeRows,
     );
-    const totalGrossClaimed = this.getSelectedTotal('GROSS_CLAIMED');
-    const HisgrossAmount = Number(totalGrossClaimed).toFixed(3);
-    const RaGrossAmount = this.selectedRARow.GROSS_CLAIMED.toFixed(3);
-  
-    this.isLoadingManualProcess = true;
+    const totalHISGrossClaimed = this.getSelectedTotal('GROSS_CLAIMED');
+    const HisgrossAmount = Number(totalHISGrossClaimed).toFixed(3);
+    // const RaGrossAmount = this.selectedRARow.GROSS_CLAIMED.toFixed(3);
+    const totalRAGrossClaimed = this.getSelectedRATotal('GROSS_CLAIMED');
+    const RaGrossAmount = Number(totalRAGrossClaimed).toFixed(3);
+
+    this.HisgrossAmount = HisgrossAmount;
+    this.RagrossAmount = RaGrossAmount;
+
+    const hisRejected =
+      Number(this.getSelectedTotal('AuditingRejectedAmount')) || 0;
+    const raRejected = Number(this.getSelectedRATotal('REJECTED_AMOUNT')) || 0;
+
+    const hisNetPayable = this.DistributeHISGridData
+    .filter(row => this.isRowSelected(row))
+    .reduce((sum, row) => {
+      const claimed = Number(row.NET_AMOUNT1) || 0;
+      const rejected = Number(row.AuditingRejectedAmount) || 0;
+      const copay = Number(row['Co-PayandDeductible']) || 0;
+
+      return sum + (claimed - rejected - copay);
+    }, 0);
+
+
+    const raNetPayable = Number(this.getSelectedRATotal('NET_PAYABLE')) || 0;
+
+    const rejectedMismatch =
+  hisRejected.toFixed(3) !== raRejected.toFixed(3);
+
+const netPayableMismatch =
+  hisNetPayable.toFixed(3) !== raNetPayable.toFixed(3);
+
+if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
+
+  let message = '';
+
+  if (rejectedMismatch) {
+    message += `
+      <b style="display:inline-block; min-width:200px;">Rejected Amount</b><br/>
+      Claim: ${hisRejected.toFixed(3)}<br/>
+      RA: ${raRejected.toFixed(3)}<br/><br/>
+    `;
+  }
+
+  if (netPayableMismatch) {
+    message += `
+      <b style="display:inline-block; min-width:200px;">Net Payable Amount</b><br/>
+      Claim: ${hisNetPayable.toFixed(3)}<br/>
+      RA: ${raNetPayable.toFixed(3)}<br/><br/>
+    `;
+  }
+
+  message += `Do you want to continue?`;
+
+  const result = await custom({
+    title: '⚠ Amount Mismatch',
+    messageHtml: message,
+    buttons: [
+      {
+        text: 'Cancel',
+        type: 'danger',   
+        stylingMode: 'contained',
+        onClick: () => false,
+      },
+      {
+        text: 'Continue',
+        type: 'default',
+        stylingMode: 'contained',
+        onClick: () => true,
+      },
+    ],
+  }).show();
+
+  if (!result) {
+    return; // ❌ stop submit
+  }
+
+  this.confirmDistribute = true; // ✅ allow next run
+}
+
+
+    // this.isLoadingManualProcess = true;
     const payload = {
-      RaID: this.selectedRARow.ID,
+      RA_IDS: this.selectedRAIdsString,
       distributed_data: this.transformPayload(this.selectedDistributeRows),
     };
     if (HisgrossAmount !== RaGrossAmount && !this.confirmDistribute) {
@@ -1288,7 +1569,7 @@ async onSaveClick() {
           this.selectedDistributeRows = [];
           this.distributeGrid?.instance.refresh();
           this.RAGridData = [];
-          this.HISGridData = [];
+          // this.HISGridData = [];
           this.clearDistributePopup();
           this.onProcessClick();
         } else {
@@ -1340,7 +1621,7 @@ async onSaveClick() {
           type: 'warning',
           displayTime: 3000,
         },
-        { position: 'top right' }
+        { position: 'top right' },
       );
       return;
     }
@@ -1390,21 +1671,29 @@ async onSaveClick() {
         if (response.flag === '1') {
           // Remove processed rows from grids
           this.RAGridData = this.RAGridData.filter(
-            (r: any) => r.ID !== raRow.ID
+            (r: any) => r.ID !== raRow.ID,
           );
           this.HISGridData = this.HISGridData.filter(
-            (h: any) => h.ID !== hisRow.ID
+            (h: any) => h.ID !== hisRow.ID,
           );
 
           // Only auto-process when total rows for this UNIQUE_KEY = 2
           if (!autoProcessNext && raRow) {
             const raRemaining = this.RAGridData.filter(
-              (r: any) => r.UNIQUE_KEY === raRow.UNIQUE_KEY
+              (r: any) => r.UNIQUE_KEY === raRow.UNIQUE_KEY,
             );
 
-            if (raRemaining.length === 1 && this.HISGridData.length === 1) {
+            const hisRemaining = this.HISGridData.filter(
+              (r: any) => r.UNIQUE_KEY === hisRow.UNIQUE_KEY,
+            );
+
+            console.log(raRemaining.length,"raRemaining")
+            console.log(hisRemaining.length,"hisgriddatalength")
+
+
+            if (raRemaining.length === 1 && hisRemaining.length === 1) {
               const lastRaRow = raRemaining[0];
-              const lastHisRow = this.HISGridData[0];
+              const lastHisRow = hisRemaining[0];
 
               // prevent HIS API trigger during auto-select
               this.skipHisLoad = true;
@@ -1414,12 +1703,15 @@ async onSaveClick() {
 
               // Auto trigger submit for the last pair (no confirmation dialog)
               this.onSubmitProcess(true);
+              console.log('onSubmistProcess')
+              
             } else {
-              this.HISGridData = [];
+              this.skipHisLoad = false;
             }
           }
         } else {
           notify({
+
             message: response.message || 'Process failed',
             type: 'error',
             displayTime: 3000,
@@ -1445,9 +1737,11 @@ async onSaveClick() {
     this.RAProcessPopUpColumns = [];
     this.HISGridData = [];
     this.HISProcessPopUpColumns = [];
-    this.autoProcessPopup = false;
+    this.autoProcessPopup = true;
     this.isLoading = false;
-    this.viewDetails();
+    // this.viewDetails();
+
+    this.ProcessedCount();
   }
 
   //==================RA dropdown onchange function===============
@@ -1455,7 +1749,7 @@ async onSaveClick() {
     this.uniqueKeyChanged = true;
 
     const SelectedRaKey = e.component._dataSource._items.filter((item: any) =>
-      e.value.includes(item.ColumnID)
+      e.value.includes(item.ColumnID),
     );
   }
 
@@ -1487,7 +1781,7 @@ async onSaveClick() {
     this.uniqueKeyChanged = true;
 
     const selectedHISObjects = e.component._dataSource._items.filter(
-      (item: any) => e.value.includes(item.ID)
+      (item: any) => e.value.includes(item.ID),
     );
 
     this.finalHISObjects = selectedHISObjects.map((item: any) => ({
@@ -1498,7 +1792,6 @@ async onSaveClick() {
       ColumnTitle: item.DESCRIPTION,
       IsHisColumn: true,
     }));
-  
   }
 
   displayColumn(item: any) {
@@ -1526,53 +1819,53 @@ async onSaveClick() {
     this.showGrossMismatchPopup = false;
   }
 
-
-  
   //=========================validate data time==============
   validateAndFocusFirstInvalidRow() {
-  const invalidRows: number[] = [];
+    const invalidRows: number[] = [];
 
-  this.dataSource.forEach((row: any, index: number) => {
-    const excelRowNo = row.__excelRowNo ?? index + 2;
+    this.dataSource.forEach((row: any, index: number) => {
+      const excelRowNo = row.__excelRowNo ?? index + 2;
 
-    this.columnData.forEach((col: any) => {
-      const value = row[col.dataField];
-      if (value === null || value === '') return;
+      this.columnData.forEach((col: any) => {
+        const value = row[col.dataField];
+        if (value === null || value === '') return;
 
-      if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
-        invalidRows.push(index); // 👉 GRID INDEX
-      }
+        if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
+          invalidRows.push(index); // 👉 GRID INDEX
+        }
 
-      if (
-        col.type === 'DECIMAL' &&
-        isNaN(Number(value.toString().replace(/,/g, '')))
-      ) {
-        invalidRows.push(index);
-      }
+        if (
+          col.type === 'DECIMAL' &&
+          isNaN(Number(value.toString().replace(/,/g, '')))
+        ) {
+          invalidRows.push(index);
+        }
+      });
     });
-  });
 
-  const uniqueInvalidIndexes = [...new Set(invalidRows)].sort((a, b) => a - b);
-
-  if (uniqueInvalidIndexes.length > 0) {
-    const firstInvalidIndex = uniqueInvalidIndexes[0];
-
-    // 👇 THIS is what grid needs
-    this.focusedRowKey = this.dataSource[firstInvalidIndex]?.ID ?? firstInvalidIndex;
-
-    this.rowInvalidNumbers = uniqueInvalidIndexes.map(
-      (i) => this.dataSource[i].__excelRowNo ?? i + 2
+    const uniqueInvalidIndexes = [...new Set(invalidRows)].sort(
+      (a, b) => a - b,
     );
 
-    notify({
-      message:
-        `Invalid data found at row(s): ${this.rowInvalidNumbers.join(', ')}`,
-      type: 'error',
-      displayTime: 6000,
-      position: { at: 'top right', my: 'top right', of: window },
-    });
+    if (uniqueInvalidIndexes.length > 0) {
+      const firstInvalidIndex = uniqueInvalidIndexes[0];
+
+      // 👇 THIS is what grid needs
+      this.focusedRowKey =
+        this.dataSource[firstInvalidIndex]?.ID ?? firstInvalidIndex;
+
+      this.rowInvalidNumbers = uniqueInvalidIndexes.map(
+        (i) => this.dataSource[i].__excelRowNo ?? i + 2,
+      );
+
+      notify({
+        message: `Invalid data found at row(s): ${this.rowInvalidNumbers.join(', ')}`,
+        type: 'error',
+        displayTime: 6000,
+        position: { at: 'top right', my: 'top right', of: window },
+      });
+    }
   }
-}
 }
 
 @NgModule({

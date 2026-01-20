@@ -335,6 +335,13 @@ export class DataService {
     return this.http.post(url, reqbody);
   }
 
+  // ======= Process Count ============
+  RA_Data_Process_count(payload: any) {
+    const url = `${BASE_URL}RaData/count`;
+    const reqbody = payload;
+    return this.http.post(url, reqbody);
+  }
+
   //===================duplication checking api when load excel data==================
     get_Duplicated_His_Data_List(payload:any) {
     const Url = `${BASE_URL}HisData/checkduplicate`;
