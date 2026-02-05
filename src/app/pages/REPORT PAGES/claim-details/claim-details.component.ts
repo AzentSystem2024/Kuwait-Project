@@ -468,8 +468,8 @@ precision:any
         formatType === 'decimal'
           ? {
               style: 'decimal',
-              minimumFractionDigits: this.precision,
-              maximumFractionDigits: this.precision,
+              minimumFractionDigits: 3,
+              maximumFractionDigits: 3,
             }
           : null,
       alignByColumn: isGroupItem, // Align by column if it's a group item
@@ -495,11 +495,11 @@ precision:any
       if (column.Type === 'Decimal') {
         columnFormat = {
           type: 'fixedPoint',
-          precision: this.precision,
+          precision: 3,
           formatter: (value) =>
             new Intl.NumberFormat(userLocale, {
-              minimumFractionDigits: this.precision,
-              maximumFractionDigits: this.precision,
+              minimumFractionDigits: 3,
+              maximumFractionDigits: 3,
             }).format(value),
         };
       }

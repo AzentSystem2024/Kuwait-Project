@@ -9,12 +9,9 @@
       <dxi-item
         itemType="group"
         cssClass="form-group"
-        style="margin-left: 40px;"
+        style="margin-left: 40px"
         [colCount]="5"
-
       >
-
-
         <dxi-item [colSpan]="1">
           <dx-date-box
             labelMode="floating"
@@ -44,21 +41,20 @@
           >
           </dx-date-box>
         </dxi-item>
-                <dxi-item [colSpan]="1">
+        <dxi-item [colSpan]="1">
           <div>
-                      <dx-date-box
-            labelMode="floating"
-            labelLocation="left"
-            label="As on Date"
-            type="date"
-            displayFormat="dd/MM/yyyy"
-            valueFormat="yyyy/MM/dd"
-            [(value)]="As_on_date"
-            [min]="minDate"
-            [max]="maxDate"
-          >
-          </dx-date-box>
-
+            <dx-date-box
+              labelMode="floating"
+              labelLocation="left"
+              label="As on Date"
+              type="date"
+              displayFormat="dd/MM/yyyy"
+              valueFormat="yyyy/MM/dd"
+              [(value)]="As_on_date"
+              [min]="minDate"
+              [max]="maxDate"
+            >
+            </dx-date-box>
           </div>
         </dxi-item>
 
@@ -81,7 +77,6 @@
     <dx-button
       class="toggleButton"
       icon="{{ isContentVisible ? 'chevronup' : 'chevrondown' }}"
-    
       type="normal"
       [hint]="isContentVisible ? 'Hide Filter Contend' : 'Show Filter Contend'"
       [width]="200"
@@ -97,7 +92,7 @@
       #dataGrid
       class="grid reportGrid reportGridFooter theme-dependent"
       [height]="isContentVisible ? '80vh' : '80vh'"
-      [noDataText]="!isContentVisible ? ' ' : 'No data '"
+      [noDataText]="!isContentVisible ? ' No data' : 'No data '"
       [dataSource]="dataGrid_DataSource"
       [showBorders]="true"
       [allowColumnResizing]="false"
@@ -110,25 +105,51 @@
       [headerFilter]="{ visible: false }"
       [columnFixing]="{
         enabled: true,
-        texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+        texts: { fix: 'Freeze', unfix: 'Unfreeze' },
       }"
       (onExporting)="onExporting($event)"
       [summary]="summaryColumnsData"
-        (onRowExpanding)="onRowExpanding($event)"
-  (onRowCollapsed)="onRowCollapsed($event)"
-    (onContentReady)="onContentReady()"
+      (onRowExpanding)="onRowExpanding($event)"
+      (onRowCollapsed)="onRowCollapsed($event)"
+      (onContentReady)="onContentReady()"
     >
-    
-<dxi-column dataField="InsuranceCode" caption="Short Name"></dxi-column>
-<dxi-column dataField="InsuranceName" caption="InsuranceName"></dxi-column>
-<!-- <dxi-column dataField="AgeDays" caption="AgeDays"></dxi-column> -->
-<dxi-column dataField="Days_0_30"   [format]="{ type: 'fixedPoint', precision: precision  }" caption=" 0–30"></dxi-column>
-<dxi-column dataField="Days_31_60"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 31–60"></dxi-column>
-<dxi-column dataField="Days_61_90"   [format]="{ type: 'fixedPoint', precision: precision  }" caption=" 61–90"></dxi-column>
-<dxi-column dataField="Days_91_120"  [format]="{ type: 'fixedPoint', precision: precision  }" caption=" 91–120"></dxi-column>
-<dxi-column dataField="Days_Above_120"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" Above 120"></dxi-column>
-<dxi-column dataField="BalanceAmount"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Total Amount"></dxi-column>
-<!-- 
+      <dxi-column dataField="InsuranceCode" caption="Short Name"></dxi-column>
+      <dxi-column
+        dataField="InsuranceName"
+        caption="InsuranceName"
+      ></dxi-column>
+      <!-- <dxi-column dataField="AgeDays" caption="AgeDays"></dxi-column> -->
+      <dxi-column
+        dataField="Days_0_30"
+        [format]="{ type: 'fixedPoint', precision: 3 }"
+        caption=" 0–30"
+      ></dxi-column>
+      <dxi-column
+        dataField="Days_31_60"
+        [format]="{ type: 'fixedPoint', precision: 3 }"
+        caption=" 31–60"
+      ></dxi-column>
+      <dxi-column
+        dataField="Days_61_90"
+        [format]="{ type: 'fixedPoint', precision: 3 }"
+        caption=" 61–90"
+      ></dxi-column>
+      <dxi-column
+        dataField="Days_91_120"
+        [format]="{ type: 'fixedPoint', precision: 3 }"
+        caption=" 91–120"
+      ></dxi-column>
+      <dxi-column
+        dataField="Days_Above_120"
+        [format]="{ type: 'fixedPoint', precision: 3 }"
+        caption=" Above 120"
+      ></dxi-column>
+      <dxi-column
+        dataField="BalanceAmount"
+        [format]="{ type: 'fixedPoint', precision: 3 }"
+        caption="Total Amount"
+      ></dxi-column>
+      <!-- 
      <ng-container *ngFor="let column of columnsConfig">
   
 
@@ -156,7 +177,7 @@
     ></dxi-column>
   
 </ng-container> -->
-<!-- </ng-container> -->
+      <!-- </ng-container> -->
       <dxo-search-panel [visible]="true"></dxo-search-panel>
       <dxo-paging [pageSize]="20"></dxo-paging>
       <dxo-pager
@@ -215,7 +236,7 @@
             onClick: refresh,
             stylingMode: 'text',
             disabled: isEmptyDatagrid,
-            hint: 'Refresh'
+            hint: 'Refresh',
           }"
         ></dxi-item>
 
@@ -226,7 +247,7 @@
             icon: 'search',
             onClick: filterClick,
             disabled: isEmptyDatagrid,
-            hint: 'Search Column'
+            hint: 'Search Column',
           }"
         ></dxi-item>
 
@@ -248,7 +269,7 @@
         ></dxi-item>
 
         <dxi-item name="exportButton" [disabled]="isEmptyDatagrid"></dxi-item>
-<dxi-item
+        <dxi-item
           class="columnfinderclass"
           widget="dxDropDownButton"
           [options]="{
@@ -258,15 +279,13 @@
             noDataText: 'Load data and try again',
             disabled: isEmptyDatagrid,
             hint: 'Column location finder',
-            icon:'columnproperties',
+            icon: 'columnproperties',
             dropDownOptions: {
               width: 'auto',
-              height: '60vh'
+              height: '60vh',
             },
-
           }"
-        ></dxi-item> 
-
+        ></dxi-item>
       </dxo-toolbar>
 
       <dxo-grouping
@@ -274,7 +293,7 @@
         [contextMenuEnabled]="true"
         [expandMode]="'rowClick'"
       ></dxo-grouping>
-  <dxo-master-detail [enabled]="true" template="detail"></dxo-master-detail>
+      <dxo-master-detail [enabled]="true" template="detail"></dxo-master-detail>
       <div class="ms-3" *dxTemplate="let data of 'detail'">
         <dx-data-grid
           #detailsdatagrid
@@ -284,15 +303,19 @@
           [rowAlternationEnabled]="true"
           [summary]="DetailsummaryColumns"
           [height]="'40vh'"
-          [noDataText]="" 
-           (onContentReady)="onDetailGridReady(detailsdatagrid)"
+          [noDataText]=""
+          (onContentReady)="onDetailGridReady(detailsdatagrid)"
         >
-         <dxo-header-filter [visible]="true" highlight="true"></dxo-header-filter>
-          <dxo-scrolling 
-      mode="standard" 
-      direction="both" 
-      showScrollbar="always">
-  </dxo-scrolling>
+          <dxo-header-filter
+            [visible]="true"
+            highlight="true"
+          ></dxo-header-filter>
+          <dxo-scrolling
+            mode="standard"
+            direction="both"
+            showScrollbar="always"
+          >
+          </dxo-scrolling>
           <dxo-pager
             [visible]="false"
             [allowedPageSizes]="allowedPageSizes"
@@ -300,37 +323,97 @@
             [showPageSizeSelector]="showPageSizeSelector"
             [showInfo]="showInfo"
             [showNavigationButtons]="showNavButtons"
-
           >
           </dxo-pager>
-<dxi-column dataField="InsuranceCode" caption="Short Name"></dxi-column>
-<dxi-column dataField="InsuranceName" caption="Insurance Name"></dxi-column>
-<!-- <dxi-column dataField="AgeDays" caption="AgeDays"></dxi-column> -->
-<dxi-column dataField="Days_0_30"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 0–30"></dxi-column>
-<dxi-column dataField="Days_31_60"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 31–60"></dxi-column>
-<dxi-column dataField="Days_61_90"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 61–90"></dxi-column>
-<dxi-column dataField="Days_91_120"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" 91–120"></dxi-column>
-<dxi-column dataField="Days_Above_120"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption=" Above 120"></dxi-column>
-<dxi-column dataField="TRANSACTION_DATE" caption="Transaction Date" dataType="date"   format="dd-MM-yyyy"></dxi-column>
-<dxi-column dataField="INVOICE_NO" caption="Invoice No"></dxi-column>
-<dxi-column dataField="PREINVOICENO" caption="PreInvoice No"></dxi-column>
-<dxi-column dataField="NET_CLAIM"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Net Claimed"></dxi-column>
-<dxi-column dataField="REJECTED_AMOUNT"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Rejected Amount"></dxi-column>
-<dxi-column dataField="NET_PAYABLE"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Net Payable"></dxi-column>
-<dxi-column dataField="BalanceAmount"  [format]="{ type: 'fixedPoint', precision: precision  }"  caption="Balance Amount"></dxi-column>
-<dxi-column dataField="PATIENT_ID" caption="Patient ID"></dxi-column>
-<dxi-column dataField="CIVIL_ID" caption="Civil ID"></dxi-column>
-<dxi-column dataField="IPOP" caption="IP/OP"></dxi-column>
-<dxi-column dataField="BENEFICIARY_NAME" caption="Beneficiary Name"></dxi-column>
-<dxi-column dataField="TREATING_PHYSICIAN" caption="Treating Physician"></dxi-column>
-<dxi-column dataField="ITEM_CODE" caption="Item Code"></dxi-column>
-<dxi-column dataField="ITEM_DESCRIPTION" caption="Item Description"></dxi-column>
-<dxi-column dataField="MAIN_SYMPTOMS" caption="Main Symptoms"></dxi-column>
-<dxi-column dataField="STATUS_NAME" caption="Status"></dxi-column>
-<dxi-column dataField="BATCH_NO" caption="Batch No"></dxi-column>
-<dxi-column dataField="PAYER" caption="Payer"></dxi-column>
+          <dxi-column
+            dataField="InsuranceCode"
+            caption="Short Name"
+          ></dxi-column>
+          <dxi-column
+            dataField="InsuranceName"
+            caption="Insurance Name"
+          ></dxi-column>
+          <!-- <dxi-column dataField="AgeDays" caption="AgeDays"></dxi-column> -->
+          <dxi-column
+            dataField="Days_0_30"
+            [format]="{ type: 'fixedPoint', precision: 3 }"
+            caption=" 0–30"
+          ></dxi-column>
+          <dxi-column
+            dataField="Days_31_60"
+            [format]="{ type: 'fixedPoint', precision: 3 }"
+            caption=" 31–60"
+          ></dxi-column>
+          <dxi-column
+            dataField="Days_61_90"
+            [format]="{ type: 'fixedPoint', precision: 3 }"
+            caption=" 61–90"
+          ></dxi-column>
+          <dxi-column
+            dataField="Days_91_120"
+            [format]="{ type: 'fixedPoint', precision: 3 }"
+            caption=" 91–120"
+          ></dxi-column>
+          <dxi-column
+            dataField="Days_Above_120"
+            [format]="{ type: 'fixedPoint', precision: 3 }"
+            caption=" Above 120"
+          ></dxi-column>
+          <dxi-column
+            dataField="TRANSACTION_DATE"
+            caption="Transaction Date"
+            dataType="date"
+            format="dd-MM-yyyy"
+          ></dxi-column>
+          <dxi-column dataField="INVOICE_NO" caption="Invoice No"></dxi-column>
+          <dxi-column
+            dataField="PREINVOICENO"
+            caption="PreInvoice No"
+          ></dxi-column>
+          <dxi-column
+            dataField="NET_CLAIM"
+            [format]="{ type: 'fixedPoint', precision: 3 }"
+            caption="Net Claimed"
+          ></dxi-column>
+          <dxi-column
+            dataField="REJECTED_AMOUNT"
+            [format]="{ type: 'fixedPoint', precision: 3 }"
+            caption="Rejected Amount"
+          ></dxi-column>
+          <dxi-column
+            dataField="NET_PAYABLE"
+            [format]="{ type: 'fixedPoint', precision: 3 }"
+            caption="Net Payable"
+          ></dxi-column>
+          <dxi-column
+            dataField="BalanceAmount"
+            [format]="{ type: 'fixedPoint', precision: 3 }"
+            caption="Balance Amount"
+          ></dxi-column>
+          <dxi-column dataField="PATIENT_ID" caption="Patient ID"></dxi-column>
+          <dxi-column dataField="CIVIL_ID" caption="Civil ID"></dxi-column>
+          <dxi-column dataField="IPOP" caption="IP/OP"></dxi-column>
+          <dxi-column
+            dataField="BENEFICIARY_NAME"
+            caption="Beneficiary Name"
+          ></dxi-column>
+          <dxi-column
+            dataField="TREATING_PHYSICIAN"
+            caption="Treating Physician"
+          ></dxi-column>
+          <dxi-column dataField="ITEM_CODE" caption="Item Code"></dxi-column>
+          <dxi-column
+            dataField="ITEM_DESCRIPTION"
+            caption="Item Description"
+          ></dxi-column>
+          <dxi-column
+            dataField="MAIN_SYMPTOMS"
+            caption="Main Symptoms"
+          ></dxi-column>
+          <dxi-column dataField="STATUS_NAME" caption="Status"></dxi-column>
+          <dxi-column dataField="BATCH_NO" caption="Batch No"></dxi-column>
+          <dxi-column dataField="PAYER" caption="Payer"></dxi-column>
 
-       
           <dxo-scrolling mode="virtual"></dxo-scrolling>
           <dxo-header-filter [visible]="isFilterOpened">
             <dxo-search [enabled]="true"></dxo-search>
@@ -339,10 +422,9 @@
             [visible]="isFilterOpened"
             [applyFilter]="applyFilter"
           ></dxo-filter-row>
-    
         </dx-data-grid>
       </div>
-   
+
       <dxo-header-filter [visible]="true">
         <dxo-search [enabled]="true"></dxo-search>
       </dxo-header-filter>

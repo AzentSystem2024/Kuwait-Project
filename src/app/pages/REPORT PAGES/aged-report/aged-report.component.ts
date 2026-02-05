@@ -143,14 +143,14 @@ export class AgedReportComponent {
   DetailColumnNames: string[] = [];
   constructor(
     private dataservice: DataService,
-    private reportengine: ReportEngineService
+    private reportengine: ReportEngineService,
   ) {
     this.get_searchParameters_Dropdown_Values();
     this.minDate = new Date(2000, 1, 1); // Set the minimum date
     this.maxDate = new Date(); // Set the maximum date
 
     const systemInfo = JSON.parse(
-      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+      sessionStorage.getItem('SYSTEM_INFO') || '{}',
     );
     console.log(systemInfo);
     this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
@@ -278,7 +278,7 @@ export class AgedReportComponent {
       this.dataGrid_DataSource = res.header.SummaryData;
       this.isEmptyDatagrid = false;
       this.summaryColumnsData = this.generateSummaryColumns(
-        res.header.SummaryData
+        res.header.SummaryData,
       );
     });
   }
@@ -294,6 +294,7 @@ export class AgedReportComponent {
   }
   onCellClick(e: any) {
     // this.dataGrid.instance.beginCustomLoading('');
+    this.loadingVisible = true;
 
     const formData = {
       InsuranceID: e.data.InsuranceID,
@@ -305,17 +306,18 @@ export class AgedReportComponent {
 
     this.dataservice.get_aged_details(formData).subscribe((res: any) => {
       // this.dataGrid.instance.endCustomLoading();
+      this.loadingVisible = false;
       this.DetailsColumns = res.header.DetailData;
 
       this.FilteredDetailData = res.header.DetailData;
       const balanceAmout = this.FilteredDetailData.filter(
-        (item) => item.BalanceAmount > 0
+        (item) => item.BalanceAmount > 0,
       );
 
       console.log(balanceAmout);
       const totalAmount = balanceAmout.reduce(
         (sum, item) => sum + item.BalanceAmount,
-        0
+        0,
       );
       console.log(totalAmount);
     });
@@ -325,7 +327,7 @@ export class AgedReportComponent {
           column: 'Days_0_30',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
+          valueFormat: { type: 'fixedPoint', precision: 3 },
           showInColumn: 'Days_0_30',
           alignment: 'right',
         },
@@ -333,7 +335,7 @@ export class AgedReportComponent {
           column: 'Days_31_60',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
+          valueFormat: { type: 'fixedPoint', precision: 3 },
           showInColumn: 'Days_31_60',
           alignment: 'right',
         },
@@ -341,7 +343,7 @@ export class AgedReportComponent {
           column: 'Days_61_90',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
+          valueFormat: { type: 'fixedPoint', precision: 3 },
           showInColumn: 'Days_61_90',
           alignment: 'right',
         },
@@ -349,7 +351,7 @@ export class AgedReportComponent {
           column: 'Days_91_120',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
+          valueFormat: { type: 'fixedPoint', precision: 3 },
           showInColumn: 'Days_91_120',
           alignment: 'right',
         },
@@ -357,7 +359,7 @@ export class AgedReportComponent {
           column: 'Days_Above_120',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
+          valueFormat: { type: 'fixedPoint', precision: 3 },
           showInColumn: 'Days_Above_120',
           alignment: 'right',
         },
@@ -365,7 +367,7 @@ export class AgedReportComponent {
           column: 'BalanceAmount',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
+          valueFormat: { type: 'fixedPoint', precision: 3 },
           showInColumn: 'BalanceAmount',
           alignment: 'right',
         },
@@ -373,7 +375,7 @@ export class AgedReportComponent {
           column: 'NET_CLAIM',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
+          valueFormat: { type: 'fixedPoint', precision: 3 },
           showInColumn: 'NET_CLAIM',
           alignment: 'right',
         },
@@ -381,7 +383,7 @@ export class AgedReportComponent {
           column: 'NET_PAYABLE',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
+          valueFormat: { type: 'fixedPoint', precision: 3 },
           showInColumn: 'NET_PAYABLE',
           alignment: 'right',
         },
@@ -389,7 +391,7 @@ export class AgedReportComponent {
           column: 'REJECTED_AMOUNT',
           summaryType: 'sum',
           displayFormat: '{0}',
-          valueFormat: { type: 'fixedPoint', precision: this.precision },
+          valueFormat: { type: 'fixedPoint', precision: 3 },
           showInColumn: 'REJECTED_AMOUNT',
           alignment: 'right',
         },
@@ -459,7 +461,7 @@ export class AgedReportComponent {
 
     // Pick only numeric columns
     const numericColumns = Object.keys(firstRow).filter(
-      (key) => typeof firstRow[key] === 'number'
+      (key) => typeof firstRow[key] === 'number',
     );
 
     return {
@@ -469,7 +471,7 @@ export class AgedReportComponent {
         displayFormat: '{0}',
         valueFormat: {
           type: 'fixedPoint',
-          precision: this.precision,
+          precision: 3,
         },
         showInColumn: col,
         alignment: 'right',
