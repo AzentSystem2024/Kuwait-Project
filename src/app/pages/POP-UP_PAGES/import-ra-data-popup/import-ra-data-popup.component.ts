@@ -1,7 +1,9 @@
 import { FormItemDateModule } from './../../../components/utils/form-datebox/form-datebox.component';
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectorRef,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   ElementRef,
   EventEmitter,
   Input,
@@ -33,6 +35,9 @@ import { exportDataGrid } from 'devextreme/excel_exporter';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { ReportEngineService } from '../../REPORT PAGES/report-engine.service';
+import { Router } from '@angular/router';
+import { ProcessScreenModule } from '../../OPERATIONS/process-screen/process-screen.component';
+import { ProcessScreenComponent } from '../../OPERATIONS/process-screen/process-screen.component';
 @Component({
   selector: 'app-import-ra-data-popup',
   templateUrl: './import-ra-data-popup.component.html',
@@ -40,10 +45,16 @@ import { ReportEngineService } from '../../REPORT PAGES/report-engine.service';
 })
 export class ImportRADataPopupComponent implements OnInit {
   @ViewChild(DxDataGridComponent, { static: true })
-  dataGrid: DxDataGridComponent;
+  dataGrid!: DxDataGridComponent;
+  @ViewChild(ProcessScreenComponent, { static: false })
+  ProcessScreenComponent!: ProcessScreenComponent;
+
+  @ViewChild(DxDataGridComponent, { static: true })
+  itemsGridRef!: DxDataGridComponent;
+
   @ViewChild('raGrid', { static: false }) raGrid!: DxDataGridComponent;
   @ViewChild('hisGrid', { static: false }) hisGrid!: DxDataGridComponent;
-  @ViewChild('fileInput', { static: false }) fileInput: ElementRef;
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
   @ViewChild('distributeGrid', { static: false }) distributeGrid: any;
 
   @Input() LogID: any = null;
@@ -63,6 +74,7 @@ export class ImportRADataPopupComponent implements OnInit {
   @Input() fileName: string | null = null;
 
   @Output() closeForm = new EventEmitter();
+  @Output() handleclose = new EventEmitter();
 
   readonly allowedPageSizes: any = [50, 100, 1000];
   displayMode: any = 'full';
@@ -79,7 +91,6 @@ export class ImportRADataPopupComponent implements OnInit {
   autoProcess: boolean = true;
   fullcolumnsData: any;
   selectedKeys: any[] = [];
-  UniqueColumnData: any[];
   selectedColumns: any[] = [];
   selectedFieldNames: string[] = [];
   selecteRAuniqueKeys: any;
@@ -158,11 +169,46 @@ export class ImportRADataPopupComponent implements OnInit {
   RagrossAmount: any;
 
   isHisSelected = false;
+  totalNetPayable: any;
+  TotalEDI: any;
+  TotalRA: any;
+  MatchedTotalHis: any;
+  MatchedTotalRA: any;
+  ManualProcessing: any;
+  selected_his_Data: any[] = [];
+  combinationMatchingPopup: boolean = false;
+
+  selectedCombinationFormat: any;
+  generatedPreview: any;
+  selectedSeparator: any;
+  sampleRARow: any[] = [];
+  sampleHISRow: any[] = [];
+  selectedSeparatorHIS: any;
+  generatedPreviewRA: any;
+  UniquekeyGernarationPayload: any = {
+    InsuranceID: 0,
+    UKeys: [],
+  };
+  hisrows: any;
+  uniqueKeyObj: any[] = [];
+  displayUniqueKeys: any[] = [];
+  displayTableData: any;
+  allowSelectAllFlag: boolean = false;
+  autoProcessPopupscreen: boolean = false;
+  identifiedPercent: any = 0;
+  processedPercent: any = 0;
+  manualPercent: any = 0;
+  notFoundPercent: any = 0;
+  identifiedHis: any;
+  PendignHis: any;
+  User_Id: any;
 
   constructor(
     private dataservice: DataService,
     private mastersrvce: MasterReportService,
     private reportengine: ReportEngineService,
+    private cdRef: ChangeDetectorRef,
+    private router: Router,
   ) {
     this.getHisColumnsForUniqueKey();
     this.get_RA_Columns_Data();
@@ -172,6 +218,7 @@ export class ImportRADataPopupComponent implements OnInit {
     console.log(systemInfo);
     this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
     console.log(this.precision);
+    this.sessionDetails();
   }
 
   async ngOnInit(): Promise<void> {
@@ -185,7 +232,7 @@ export class ImportRADataPopupComponent implements OnInit {
       } else {
         this.applyFetchedData(this.fetchedData);
       }
-      this.ColumnNames = this.columnData.map((column) => column.caption);
+      this.ColumnNames = this.columnData.map((column: any) => column.caption);
       this.fetch_all_column_and_uniqueKey_data();
       setTimeout(() => {
         this.validateAndFocusFirstInvalidRow();
@@ -202,6 +249,10 @@ export class ImportRADataPopupComponent implements OnInit {
     }
   }
 
+  sessionDetails() {
+    const LoginResponse = JSON.parse(localStorage.getItem('userData') || '{}');
+    this.User_Id = LoginResponse.USER_ID;
+  }
   // ============ detailed view ==========
   private async viewDetails(): Promise<void> {
     const logid = this.LogID;
@@ -258,7 +309,7 @@ export class ImportRADataPopupComponent implements OnInit {
         precision: 3,
       },
     }));
-    this.ColumnNames = this.columnData.map((column) => column.caption);
+    this.ColumnNames = this.columnData.map((column: any) => column.caption);
     this.initDataSource(res);
 
     this.selected_Insurance_id = res.InsuranceID;
@@ -460,12 +511,15 @@ export class ImportRADataPopupComponent implements OnInit {
             );
 
             this.selecteRAuniqueKeys = uniqueKeyhis
-              .filter((item) => item.IsHisColumn === false)
-              .map((item) => item.ColumnID);
+              .filter((item: any) => item.IsHisColumn === false)
+              .map((item: any) => item.ColumnID);
 
             this.selecteHISuniqueKeys = uniqueKeyhis
-              .filter((item) => item.IsHisColumn === true)
-              .map((item) => item.ColumnID);
+              .filter((item: any) => item.IsHisColumn === true)
+              .map((item: any) => item.ColumnID);
+
+            this.displayUniqueKeys = res.data[0].uniqueKeys;
+            this.prepareDisplayLevels(this.displayUniqueKeys);
 
             // this.selecteHISuniqueKeys=this.
           } else {
@@ -508,129 +562,6 @@ export class ImportRADataPopupComponent implements OnInit {
     return `${dd}/${mm}/${yyyy}`;
   }
 
-  // =========== save excel Ra data ==========
-  // async onSaveClick() {
-  //   const userId = Number(sessionStorage.getItem('UserID')) || 0;
-  //   const insuranceId = this.selectedInsuranceId || 0;
-  //   this.selected_Insurance_id = insuranceId;
-
-  //   if (!insuranceId || insuranceId === 0) {
-  //     notify({
-  //       message: 'Please select an Insurance before saving.',
-  //       type: 'error',
-  //       displayTime: 3000,
-  //       position: { at: 'top right', my: 'top right', of: window },
-  //     });
-  //     return;
-  //   }
-
-  //   this.isLoading = true;
-  //   this.isSaving = true;
-
-  //   try {
-  //     const allData = (this.dataSource || []).map((item) => ({
-  //       ...item,
-  //     }));
-
-  //     const batchSize = 15000;
-  //     const totalRecords = allData.length;
-
-  //     if (totalRecords === 0) {
-  //       notify({
-  //         message: 'No data available to save.',
-  //         type: 'warning',
-  //         displayTime: 3000,
-  //         position: { at: 'top right', my: 'top right', of: window },
-  //       });
-  //       this.isLoading = false;
-  //       this.isSaving = false;
-  //       return;
-  //     }
-
-  //     if (this.invalidData) {
-  //       notify({
-  //         message:
-  //           'The Excel file contains invalid data. Please correct it before saving.',
-  //         type: 'error',
-  //         displayTime: 4000,
-  //         position: { at: 'top right', my: 'top right', of: window },
-  //       });
-  //       this.isLoading = false;
-  //       this.isSaving = false;
-  //       return;
-  //     }
-  //     // Generate one common BatchID for all payloads
-  //     const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
-  //     const commonBatchId = `${insuranceId}_${datetime}`;
-
-  //     const totalBatches = Math.ceil(totalRecords / batchSize);
-
-  //     for (let i = 0; i < totalBatches; i++) {
-  //       const start = i * batchSize;
-  //       const end = Math.min(start + batchSize, totalRecords);
-  //       const currentBatch = allData.slice(start, end);
-
-  //       const payload = {
-  //         USerID: userId,
-  //         InsuranceID: insuranceId,
-  //         IsAutoProcessed: false,
-  //         BatchNo: commonBatchId,
-  //         import_ra_data: currentBatch,
-  //       };
-
-  //       await this.dataservice
-  //         .Import_RA_Data(payload)
-  //         .toPromise()
-  //         .then((res: any) => {
-  //           if (res.flag === '1') {
-  //             this.LogID = res.LogID;
-  //             notify({
-  //               message: `Batch ${
-  //                 i + 1
-  //               }/${totalBatches} imported successfully!`,
-  //               type: 'success',
-  //               displayTime: 2000,
-  //               position: { at: 'top right', my: 'top right', of: window },
-  //             });
-  //           } else {
-  //             throw new Error(res.message || `Batch ${i + 1} import failed.`);
-  //           }
-  //         })
-  //         .catch((err) => {
-  //           notify({
-  //             message: `Error importing batch ${i + 1}: ${err.message}`,
-  //             type: 'error',
-  //             displayTime: 4000,
-  //             position: { at: 'top right', my: 'top right', of: window },
-  //           });
-  //           throw err;
-  //         });
-  //     }
-
-  //     // Final success notification
-  //     notify({
-  //       message: 'All batches imported successfully!',
-  //       type: 'success',
-  //       displayTime: 4000,
-  //       position: { at: 'top right', my: 'top right', of: window },
-  //     });
-  //     if (this.autoProcess) {
-  //       this.get_RA_Columns_Data();
-  //       this.totalRaItems = this.dataSource.length;
-  //       this.autoProcessPopup = true;
-  //     } else {
-  //       this.close();
-  //     }
-
-  //     // this.close();
-  //   } catch (error) {
-  //     this.handleError(error);
-  //   } finally {
-  //     this.isLoading = false;
-  //     this.isSaving = false;
-  //   }
-  // }
-
   async onSaveClick() {
     const userId = Number(sessionStorage.getItem('UserID')) || 0;
     const insuranceId = this.selectedInsuranceId || 0;
@@ -652,7 +583,7 @@ export class ImportRADataPopupComponent implements OnInit {
 
     try {
       // -------- Read full datasource --------
-      const allData = (this.dataSource || []).map((item) => ({ ...item }));
+      const allData = (this.dataSource || []).map((item: any) => ({ ...item }));
 
       // -------- No data check --------
       if (allData.length === 0) {
@@ -670,7 +601,7 @@ export class ImportRADataPopupComponent implements OnInit {
       // -------- SAVE-TIME VALIDATION --------
       const invalidRows: number[] = [];
 
-      allData.forEach((row, index) => {
+      allData.forEach((row: any, index: any) => {
         // Excel row number (assumes header row exists)
         const excelRowNo = row.__excelRowNo ?? index + 2;
 
@@ -779,7 +710,7 @@ export class ImportRADataPopupComponent implements OnInit {
       if (this.autoProcess) {
         this.get_RA_Columns_Data();
         this.totalRaItems = this.dataSource.length;
-        this.autoProcessPopup = true;
+        // this.autoProcessPopup = true;
       } else {
         this.close();
       }
@@ -927,7 +858,7 @@ export class ImportRADataPopupComponent implements OnInit {
       const logId = this.fetchedData?.ID || this.LogID;
       const payload = {
         InsuranceID: insurance,
-        LogID: logId,
+        LogID: 0,
         RA_UNIQUE_KEY: this.selecteRAuniqueKeys.join(','),
         HIS_UNIQUE_KEY: this.selecteHISuniqueKeys.join(','),
       };
@@ -939,10 +870,11 @@ export class ImportRADataPopupComponent implements OnInit {
           this.isLoadingManualProcess = false;
 
           if (res && res.flag === '1') {
-            this.totalProcessed = res.TotalProcessed;
-            this.totalPendingprocessed = res.PendingProcess;
-            this.manualProcess = res.ManualProcess;
-            this.notFound = res.NotFound;
+            this.TotalRA = res.TotalRA;
+            this.MatchedTotalHis = res.MatchedTotalHis;
+            this.MatchedTotalRA = res.MatchedTotalRA;
+            this.ManualProcessing = res.ManualProcessing;
+            this.TotalEDI = res.TotalEDI;
           } else {
             this.totalProcessed = 0;
             this.totalPendingprocessed = 0;
@@ -956,8 +888,6 @@ export class ImportRADataPopupComponent implements OnInit {
     });
   }
 
-
-
   ProcessedCount(): Promise<void> {
     return new Promise((resolve) => {
       const insurance = this.selectedInsuranceId;
@@ -968,25 +898,23 @@ export class ImportRADataPopupComponent implements OnInit {
       };
 
       this.isLoadingManualProcess = true;
-      this.dataservice
-        .RA_Data_Process_count(payload)
-        .subscribe((res: any) => {
-          this.isLoadingManualProcess = false;
+      this.dataservice.RA_Data_Process_count(payload).subscribe((res: any) => {
+        this.isLoadingManualProcess = false;
 
-          if (res && res.flag === '1') {
-            this.totalProcessed = res.TotalProcessed;
-            this.totalPendingprocessed = res.PendingProcess;
-            this.manualProcess = res.ManualProcess;
-            this.notFound = res.NotFound;
-          } else {
-            this.totalProcessed = 0;
-            this.totalPendingprocessed = 0;
-            this.manualProcess = 0;
-            this.notFound = 0;
-          }
+        if (res && res.flag === '1') {
+          this.totalProcessed = res.TotalProcessed;
+          this.totalPendingprocessed = res.PendingProcess;
+          this.manualProcess = res.ManualProcess;
+          this.notFound = res.NotFound;
+        } else {
+          this.totalProcessed = 0;
+          this.totalPendingprocessed = 0;
+          this.manualProcess = 0;
+          this.notFound = 0;
+        }
 
-          resolve();
-        });
+        resolve();
+      });
     });
   }
 
@@ -1005,41 +933,6 @@ export class ImportRADataPopupComponent implements OnInit {
     };
 
     this.isLoading = true;
-
-    // this.dataservice.fetch_RA_Process_Data_list(payload).subscribe({
-    //   next: (response: any) => {
-    //     if (response.flag === '1') {
-    //       this.RAProcessPopUpColumns = response.columns.map((col: any) => ({
-    //         dataField: col.ColumnName,
-    //         caption: col.ColumnTitle,
-    //         minWidth: 100,
-    //         maxWidth: 250,
-    //           dataType: 'DECIMAL',
-    //            format: {
-    //   type: 'fixedPoint',
-    //   precision: this.precision}
-    //       }));
-
-    //       this.RAGridData = response.data;
-
-    //       if (this.raGrid?.instance) {
-    //         this.raGrid.instance.clearSelection();
-    //         this.raGrid.instance.option('focusedRowIndex', -1);
-    //       }
-
-    //       if (this.hisGrid?.instance) {
-    //         this.hisGrid.instance.clearSelection();
-    //         this.hisGrid.instance.option('focusedRowIndex', -1);
-    //       }
-
-    //       this.isProcessPopupVisible = true;
-    //     }
-    //     this.isLoading = false;
-    //   },
-    //   error: () => {
-    //     this.isLoading = false;
-    //   },
-    // });
 
     this.dataservice.fetch_HIS_Process_Data_list(payload).subscribe({
       next: (response: any) => {
@@ -1068,7 +961,7 @@ export class ImportRADataPopupComponent implements OnInit {
             this.raGrid.instance.option('focusedRowIndex', -1);
           }
 
-          this.isProcessPopupVisible = true;
+          this.isDistributePopupVisible = true;
         }
         this.isLoading = false;
       },
@@ -1078,91 +971,14 @@ export class ImportRADataPopupComponent implements OnInit {
     });
   }
 
-  // =============== Ra data row selection change event =========
-  // onRADataRowSelected(e: any) {
-  //   if (!e.selectedRowsData?.length) {
-  //     this.isRASelected = false;
-  //     this.lastRASelection = null;
-  //     return;
-  //   }
-
-  //   // Allow only one selection at a time
-  //   if (e.selectedRowKeys.length > 1) {
-  //     const lastSelectedKey = e.selectedRowKeys[e.selectedRowKeys.length - 1];
-  //     e.component.selectRows([lastSelectedKey], false);
-  //   }
-
-  //   const selectedRow = e.selectedRowsData[e.selectedRowsData.length - 1];
-  //   if (!selectedRow) return;
-
-  //   this.lastRASelection = selectedRow;
-
-  //   const payload = {
-  //     UniqueKey: selectedRow.UNIQUE_KEY,
-  //     InsuranceID: this.selectedInsuranceId,
-  //   };
-  //   this.HISGridData = [];
-
-  //   this.dataservice.fetch_HIS_Process_Data_list(payload).subscribe({
-  //     next: (response: any) => {
-  //       if (response.flag === '1') {
-  //         this.isRASelected = true;
-  //         this.HISGridData = response.data;
-  //         this.HISProcessPopUpColumns = response.columns.map((col: any) => ({
-  //           dataField: col.ColumnName,
-  //           caption: col.ColumnTitle,
-  //           minWidth: 100,
-  //           maxWidth: 150,
-  //              dataType: 'DECIMAL',
-  //              format: {
-  //     type: 'fixedPoint',
-  //     precision: this.precision}
-  //         }));
-
-  //         setTimeout(() => {
-  //           const hisGrid = this.hisGrid?.instance;
-  //           if (hisGrid && this.HISGridData?.length) {
-  //             const match = this.HISGridData.find(
-  //               (row: any) =>
-  //                 row.UNIQUE_KEY === selectedRow.UNIQUE_KEY &&
-  //                 row.GROSS_CLAIMED === selectedRow.GROSS_CLAIMED
-  //             );
-
-  //             const focusKey = match ? match.ID : this.HISGridData[0].ID;
-
-  //             if (focusKey) {
-  //               hisGrid.option('focusedRowKey', null); // reset
-  //               setTimeout(() => {
-  //                 hisGrid.option('focusedRowEnabled', true);
-  //                 hisGrid.option('focusedRowKey', focusKey);
-  //                 hisGrid.navigateToRow(focusKey);
-  //               }, 50);
-  //             }
-  //           }
-  //         }, 200);
-  //       }
-  //     },
-  //     error: () => {
-  //       // handle error
-  //     },
-  //   });
-  // }
-
   onHISRowSelected(e: any) {
-    // if (!e.selectedRowsData?.length) {
-    //   this.isRASelected = false;
-    //   this.lastRASelection = null;
-    //   return;
-    // }
-
     if (!e.selectedRowKeys || e.selectedRowKeys.length === 0) {
       this.isHisSelected = false;
       return;
     }
 
-    // ✅ something selected → enable
+    //  something selected → enable
     this.isHisSelected = true;
-
 
     // Allow only one selection at a time
     if (e.selectedRowKeys.length > 1) {
@@ -1230,13 +1046,13 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // ========HIS data row selection event =======
   onRADataRowSelected(e: any) {
-     // ✅ nothing selected → disable
+    //  nothing selected → disable
     if (!e.selectedRowKeys || e.selectedRowKeys.length === 0) {
       this.isRASelected = false;
       return;
     }
 
-    // ✅ something selected → enable
+    //  something selected → enable
     this.isRASelected = true;
 
     if (e.selectedRowKeys.length > 1) {
@@ -1250,81 +1066,121 @@ export class ImportRADataPopupComponent implements OnInit {
     return this.selectedDistributeRows?.some((r) => r.ID === row.ID) || false;
   }
 
-  // ========= Distribute RA button click =========
-  distributeRA = () => {
-    if (!this.lastRASelection) return;
-    // this.selectedRARow = this.lastRASelection;
+  distributeRA = async () => {
+    this.isLoadingManualProcess = true;
+    // this.onChangeAndProcess();
 
-    const uniqueKey = this.lastRASelection.UNIQUE_KEY;
+    try {
+      this.isLoading = true;
 
-    // 🔥 Get ALL RA rows with same UNIQUE_KEY
-    this.selectedRARows = this.RAGridData.filter(
-      (ra: any) => ra.UNIQUE_KEY === uniqueKey,
-    );
+      const payload = {
+        InsuranceID: this.selectedInsuranceId,
+        LogID: this.fetchedData?.ID || this.LogID,
+        USER_ID: this.User_Id,
+      };
 
-    // Keep one row only for reference (gross check, rejection note, etc.)
-    this.selectedRARow = this.selectedRARows[0];
+      //  Await API to prevent UI blocking
+      const response: any = await this.dataservice
+        .fetch_HIS_Process_Data_list(payload)
+        .toPromise();
 
-    // Load HIS claims matching RA's unique key
-    this.DistributeHISGridData = this.HISGridData.filter(
-      (row) => row.UNIQUE_KEY === this.selectedRARow.UNIQUE_KEY,
-    ).map((row) => ({
-      ...row,
-      NetPayable: null,
-    }));
+      if (response.flag !== '1') return;
+      this.isLoadingManualProcess = false;
+      this.isDistributePopupVisible = true;
 
-    this.selectedDistributeRows = [];
+      //  Build HIS Columns (same logic)
+      this.HISProcessPopUpColumns = response.columns.map((col: any) => ({
+        dataField: col.ColumnName,
+        caption: col.ColumnTitle,
+        minWidth: 100,
+        maxWidth: 250,
+        dataType: 'DECIMAL',
+        format: { type: 'fixedPoint', precision: 3 },
+      }));
 
-    this.DistributeHISColumns = [
-      { type: 'selection', fixed: true, fixedPosition: 'left' },
-      ...this.HISProcessPopUpColumns.map((col) => ({
-        ...col,
-        allowEditing: false,
-      })),
-      {
-        dataField: 'OverBillingAmount',
-        caption: 'Over Billing',
-        dataType: 'number',
-        allowEditing: (r: any) => this.isRowSelected(r),
-        format: '#,##0.00',
-      },
-      {
-        dataField: 'AuditingRejectedAmount',
-        caption: 'Audit Rejected',
-        dataType: 'number',
-        allowEditing: (r: any) => this.isRowSelected(r),
-        format: '#,##0.00',
-      },
+      //  Set Grid Data
+      this.HISGridData = response.data;
 
-      {
-        dataField: 'Co-PayandDeductible',
-        caption: 'Co-pay & Deduction',
-        dataType: 'number',
-        allowEditing: (r: any) => this.isRowSelected(r),
-        format: '#,##0.00',
-      },
+      //  Build Distribute Grid Data (same)
+      this.DistributeHISGridData = this.HISGridData.map((row: any) => ({
+        ...row,
+        NetPayable: null,
+      }));
 
-      {
-        dataField: 'NetPayable',
-        caption: 'Net Payable',
-        dataType: 'number',
-        format: '#,##0.00',
-        allowEditing: false,
-        calculateCellValue: (rowData: any) => {
-          if (!this.selectedDistributeRows?.some((r) => r.ID === rowData.ID)) {
-            return null;
-          }
+      //  Reset selection once
+      this.selectedDistributeRows = [];
 
-          const claimed = Number(rowData.NET_AMOUNT1) || 0;
-          const rejected = Number(rowData.AuditingRejectedAmount) || 0;
-          const copay = Number(rowData['Co-PayandDeductible']) || 0;
+      //  Build Columns once (no logic change)
+      this.DistributeHISColumns = [
+        { type: 'selection', fixed: true, fixedPosition: 'left' },
 
-          return claimed - rejected - copay;
+        ...this.HISProcessPopUpColumns.map((col: any) => ({
+          ...col,
+          allowEditing: false,
+        })),
+
+        {
+          dataField: 'OverBillingAmount',
+          caption: 'Over Billing',
+          dataType: 'number',
+          allowEditing: (r: any) => this.isRowSelected(r),
+          format: '#,##0.000',
         },
-      },
-    ];
 
-    this.isDistributePopupVisible = true;
+        {
+          dataField: 'AuditingRejectedAmount',
+          caption: 'Audit Rejected',
+          dataType: 'number',
+          allowEditing: (r: any) => this.isRowSelected(r),
+          format: '#,##0.000',
+        },
+
+        {
+          dataField: 'Co-PayandDeductible',
+          caption: 'Co-pay & Deduction',
+          dataType: 'number',
+          allowEditing: (r: any) => this.isRowSelected(r),
+          format: '#,##0.000',
+        },
+
+        {
+          dataField: 'NetPayable',
+          caption: 'Net Payable',
+          dataType: 'number',
+          format: '#,##0.000',
+          allowEditing: false,
+          calculateCellValue: (rowData: any) => {
+            if (
+              !this.selectedDistributeRows?.some((r) => r.ID === rowData.ID)
+            ) {
+              return null;
+            }
+
+            const claimed = Number(rowData.NET_AMOUNT1) || 0;
+            const rejected = Number(rowData.AuditingRejectedAmount) || 0;
+            const copay = Number(rowData['Co-PayandDeductible']) || 0;
+
+            // console.log(claimed - rejected - copay);
+            return claimed - rejected - copay;
+          },
+        },
+      ];
+
+      //  Reset grids (same behavior, but done once)
+      this.hisGrid?.instance?.clearSelection();
+      this.raGrid?.instance?.clearSelection();
+
+      this.hisGrid?.instance?.option('focusedRowIndex', -1);
+      this.raGrid?.instance?.option('focusedRowIndex', -1);
+
+      //  Keep your logic
+      const uniqueKey = this.lastRASelection.UNIQUE_KEY;
+      this.selectedRARow = this.selectedRARows?.[0];
+    } catch (err) {
+      console.error('distributeRA error:', err);
+    } finally {
+      this.isLoading = false;
+    }
   };
 
   onDistributeRASelectionChanged(e: any) {
@@ -1336,7 +1192,7 @@ export class ImportRADataPopupComponent implements OnInit {
 
     this.selectedRAIds = rows.map((r: any) => r.ID);
 
-    // 🔥 "1,2,3,4,5" format
+    //  "1,2,3,4,5" format
     this.selectedRAIdsString = this.selectedRAIds.join(',');
 
     console.log('Selected RA IDs array:', this.selectedRAIds);
@@ -1345,15 +1201,99 @@ export class ImportRADataPopupComponent implements OnInit {
 
   // ========== distribute RA his grid selection change event =====
   onDistributeSelectionChanged(e: any) {
-    this.selectedDistributeRows = e.selectedRowsData || [];
-    this.totalSelected = this.selectedDistributeRows.length;
+    // console.log(e, '---------------------event data-------------------');
 
+    console.log(e, '---------------------event data-------------------');
+
+    const selectedRows = e.selectedRowsData || [];
+    this.selectedDistributeRows = e.selectedRowsData || [];
+    if (!selectedRows.length) {
+      this.selectedDistributeRows = [];
+      this.totalSelected = 0;
+      this.RAGridData = [];
+      return;
+    }
+
+    const latestRow = selectedRows[selectedRows.length - 1];
+    const latestKey = latestRow.UNIQUE_KEY;
+
+    //  Keep only rows with same UNIQUE_KEY
+    const sameKeyRows = selectedRows.filter(
+      (row: any) => row.UNIQUE_KEY === latestKey,
+    );
+
+    // ❗ If mixed UNIQUE_KEY detected → reset to only latest group
+    if (sameKeyRows.length !== selectedRows.length) {
+      e.component.clearSelection();
+      e.component.selectRows(
+        sameKeyRows.map((r: any) => r.ID),
+        false,
+      );
+    }
+
+    //  Update selected rows state
+    this.selectedDistributeRows = sameKeyRows;
+    this.totalSelected = sameKeyRows.length;
+
+    //  Update NetPayable only for selected rows
     this.DistributeHISGridData.forEach((row) => {
-      if (this.isRowSelected(row)) {
-        row.NetPayable = Number(row.NET_AMOUNT1) || 0;
-      } else {
-        row.NetPayable = null;
-      }
+      row.NetPayable = this.selectedDistributeRows.some((r) => r.ID === row.ID)
+        ? Number(row.NET_AMOUNT1) || 0
+        : null;
+    });
+
+    //  Continue your existing logic
+    const selectedRow = latestRow;
+    this.lastRASelection = selectedRow;
+
+    const payload = {
+      UniqueKey: selectedRow.UNIQUE_KEY,
+      InsuranceID: this.selectedInsuranceId,
+    };
+
+    this.dataservice.fetch_RA_Process_Data_list(payload).subscribe({
+      next: (response: any) => {
+        if (response.flag === '1') {
+          // this.isRASelected = true;
+          this.RAGridData = response.data;
+          this.RAProcessPopUpColumns = response.columns.map((col: any) => ({
+            dataField: col.ColumnName,
+            caption: col.ColumnTitle,
+            minWidth: 100,
+            maxWidth: 150,
+            dataType: 'DECIMAL',
+            format: {
+              type: 'fixedPoint',
+              precision: 3,
+            },
+          }));
+
+          setTimeout(() => {
+            const raGrid = this.raGrid?.instance;
+            if (raGrid && this.RAGridData?.length) {
+              const match = this.RAGridData.find(
+                (row: any) =>
+                  row.UNIQUE_KEY === selectedRow.UNIQUE_KEY &&
+                  row.GROSS_CLAIMED === selectedRow.GROSS_CLAIMED,
+              );
+
+              const focusKey = match ? match.ID : this.RAGridData[0].ID;
+
+              if (focusKey) {
+                raGrid.option('focusedRowKey', null); // reset
+                setTimeout(() => {
+                  raGrid.option('focusedRowEnabled', true);
+                  raGrid.option('focusedRowKey', focusKey);
+                  raGrid.navigateToRow(focusKey);
+                }, 50);
+              }
+            }
+          }, 200);
+        }
+      },
+      error: () => {
+        // handle error
+      },
     });
 
     e.component.refresh(true);
@@ -1396,11 +1336,23 @@ export class ImportRADataPopupComponent implements OnInit {
   // ====== Block editing for unselected rows ======
   ondistributionHISgridEditingStart(e: any) {
     const row = e.data;
+    console.log(e);
     if (!this.isRowSelected(row)) {
       e.cancel = true;
     }
   }
 
+  updateNetPayableSummary() {
+    if (!this.distributeGrid?.instance) return;
+    this.checkAllowSelectAllFromGrid();
+
+    const summary =
+      this.distributeGrid.instance.getTotalSummaryValue('NetPayable');
+
+    this.totalNetPayable = Number(summary || 0);
+
+    console.log('NetPayable Summary:', this.totalNetPayable);
+  }
   // ==== Recalculate NetPayable after edits ========
   updateFooterTotals() {
     this.DistributeHISGridData = this.DistributeHISGridData.map((row) => {
@@ -1428,16 +1380,13 @@ export class ImportRADataPopupComponent implements OnInit {
     this.selectedDistributeRows = [];
     this.isDistributePopupVisible = false;
     this.autoProcessPopup = true;
+    this.RAGridData = [];
     // this.viewDetails();
-    this.ProcessedCount();
+    this.get_EDI_Data_Status();
   }
 
   // ====== on click of RA distribute process button ====
   async onSubmitDistributeRA() {
-    // if (!this.selectedRARow) {
-    //   notify('Please select an RA before distributing.', 'warning', 3000);
-    //   return;
-    // }
     if (!this.selectedDistributeRows?.length) {
       notify(
         'Please select at least one row before distributing.',
@@ -1472,9 +1421,9 @@ export class ImportRADataPopupComponent implements OnInit {
       Number(this.getSelectedTotal('AuditingRejectedAmount')) || 0;
     const raRejected = Number(this.getSelectedRATotal('REJECTED_AMOUNT')) || 0;
 
-    const hisNetPayable = this.DistributeHISGridData
-    .filter(row => this.isRowSelected(row))
-    .reduce((sum, row) => {
+    const hisNetPayable = this.DistributeHISGridData.filter((row) =>
+      this.isRowSelected(row),
+    ).reduce((sum, row) => {
       const claimed = Number(row.NET_AMOUNT1) || 0;
       const rejected = Number(row.AuditingRejectedAmount) || 0;
       const copay = Number(row['Co-PayandDeductible']) || 0;
@@ -1482,77 +1431,92 @@ export class ImportRADataPopupComponent implements OnInit {
       return sum + (claimed - rejected - copay);
     }, 0);
 
-
     const raNetPayable = Number(this.getSelectedRATotal('NET_PAYABLE')) || 0;
 
-    const rejectedMismatch =
-  hisRejected.toFixed(3) !== raRejected.toFixed(3);
+    const rejectedMismatch = hisRejected.toFixed(3) !== raRejected.toFixed(3);
 
-const netPayableMismatch =
-  hisNetPayable.toFixed(3) !== raNetPayable.toFixed(3);
+    const netPayableMismatch =
+      hisNetPayable.toFixed(3) !== raNetPayable.toFixed(3);
 
-if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
+    if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
+      let message = '';
 
-  let message = '';
-
-  if (rejectedMismatch) {
-    message += `
+      if (rejectedMismatch) {
+        message += `
       <b style="display:inline-block; min-width:200px;">Rejected Amount</b><br/>
       Claim: ${hisRejected.toFixed(3)}<br/>
       RA: ${raRejected.toFixed(3)}<br/><br/>
     `;
-  }
+        //     message += `
+        //   <b style="display:inline-block; min-width:200px;">Net Payable Amount</b><br/>
+        //   Claim: ${hisNetPayable.toFixed(3)}<br/>
+        //   RA: ${raNetPayable.toFixed(3)}<br/><br/>
+        // `;
+      }
 
-  if (netPayableMismatch) {
-    message += `
+      if (netPayableMismatch) {
+        message += `
       <b style="display:inline-block; min-width:200px;">Net Payable Amount</b><br/>
       Claim: ${hisNetPayable.toFixed(3)}<br/>
       RA: ${raNetPayable.toFixed(3)}<br/><br/>
     `;
-  }
+        //     message += `
+        //   <b style="display:inline-block; min-width:200px;">Rejected Amount</b><br/>
+        //   Claim: ${hisRejected.toFixed(3)}<br/>
+        //   RA: ${raRejected.toFixed(3)}<br/><br/>
+        // `;
+      }
 
-  message += `Do you want to continue?`;
+      message += `Do you want to continue?`;
 
-  const result = await custom({
-    title: '⚠ Amount Mismatch',
-    messageHtml: message,
-    buttons: [
-      {
-        text: 'Cancel',
-        type: 'danger',   
-        stylingMode: 'contained',
-        onClick: () => false,
-      },
-      {
-        text: 'Continue',
-        type: 'default',
-        stylingMode: 'contained',
-        onClick: () => true,
-      },
-    ],
-  }).show();
+      const result = await custom({
+        title: '⚠ Amount Mismatch',
+        messageHtml: message,
+        buttons: [
+          {
+            text: 'Cancel',
+            type: 'danger',
+            stylingMode: 'contained',
+            onClick: () => false,
+          },
+          {
+            text: 'Continue',
+            type: 'default',
+            stylingMode: 'contained',
+            onClick: () => true,
+          },
+        ],
+      }).show();
 
-  if (!result) {
-    return; // ❌ stop submit
-  }
+      if (!result) {
+        return; //  stop submit
+      }
 
-  this.confirmDistribute = true; // ✅ allow next run
-}
-
+      this.confirmDistribute = true; //  allow next run
+    }
 
     // this.isLoadingManualProcess = true;
     const payload = {
       RA_IDS: this.selectedRAIdsString,
       distributed_data: this.transformPayload(this.selectedDistributeRows),
     };
-    if (HisgrossAmount !== RaGrossAmount && !this.confirmDistribute) {
-      this.showGrossMismatchPopup = true;
-      this.isLoadingManualProcess = false;
-      return;
-    }
+    this.selected_his_Data = this.transformPayload(this.selectedDistributeRows);
+    console.log(
+      this.selected_his_Data,
+      '-----------------selected his data-------------------',
+    );
+    console.log(
+      this.DistributeHISGridData,
+      '====================DistributeHISGridData===================',
+    );
+    // if (HisgrossAmount !== RaGrossAmount && !this.confirmDistribute) {
+    //   // this.showGrossMismatchPopup = true;
+    //   this.isLoadingManualProcess = false;
+    //   return;
+    // }
 
     this.confirmDistribute = false;
-    this.showGrossMismatchPopup = false;
+    // this.showGrossMismatchPopup = false;
     this.isLoadingManualProcess = true;
 
     this.dataservice.submit_RA_Distribution_Data(payload).subscribe({
@@ -1562,21 +1526,28 @@ if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
           notify(
             res.message || 'RA distribution completed successfully',
             'success',
-            3000
+            3000,
           );
 
           // Reset UI state
           this.selectedDistributeRows = [];
           this.distributeGrid?.instance.refresh();
           this.RAGridData = [];
-          // this.HISGridData = [];
-          this.clearDistributePopup();
-          this.onProcessClick();
+          // const selectedHisIDs = this.selected_his_Data.map(
+          //   (x: any) => x.hisID,
+          // );
+          // this.DistributeHISGridData = this.DistributeHISGridData.filter(
+          //   (h: any) => !selectedHisIDs.includes(h.hisID),
+          // );
+
+          // this.clearDistributePopup();
+          this.distributeRA();
+          // this.onProcessClick();
         } else {
           notify(
             res.message || 'Failed to process RA distribution',
             'error',
-            3000
+            3000,
           );
         }
       },
@@ -1670,10 +1641,11 @@ if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
 
         if (response.flag === '1') {
           // Remove processed rows from grids
+          // DistributeHISGridData;
           this.RAGridData = this.RAGridData.filter(
             (r: any) => r.ID !== raRow.ID,
           );
-          this.HISGridData = this.HISGridData.filter(
+          this.DistributeHISGridData = this.DistributeHISGridData.filter(
             (h: any) => h.ID !== hisRow.ID,
           );
 
@@ -1683,13 +1655,12 @@ if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
               (r: any) => r.UNIQUE_KEY === raRow.UNIQUE_KEY,
             );
 
-            const hisRemaining = this.HISGridData.filter(
+            const hisRemaining = this.DistributeHISGridData.filter(
               (r: any) => r.UNIQUE_KEY === hisRow.UNIQUE_KEY,
             );
 
-            console.log(raRemaining.length,"raRemaining")
-            console.log(hisRemaining.length,"hisgriddatalength")
-
+            console.log(raRemaining.length, 'raRemaining');
+            console.log(hisRemaining.length, 'hisgriddatalength');
 
             if (raRemaining.length === 1 && hisRemaining.length === 1) {
               const lastRaRow = raRemaining[0];
@@ -1703,15 +1674,13 @@ if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
 
               // Auto trigger submit for the last pair (no confirmation dialog)
               this.onSubmitProcess(true);
-              console.log('onSubmistProcess')
-              
+              console.log('onSubmistProcess');
             } else {
               this.skipHisLoad = false;
             }
           }
         } else {
           notify({
-
             message: response.message || 'Process failed',
             type: 'error',
             displayTime: 3000,
@@ -1741,7 +1710,7 @@ if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
     this.isLoading = false;
     // this.viewDetails();
 
-    this.ProcessedCount();
+    this.get_EDI_Data_Status();
   }
 
   //==================RA dropdown onchange function===============
@@ -1769,8 +1738,8 @@ if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
 
       // 2) Get IDs where HisMatched == true from editColumns
       const hisMatchedIds = this.editColumns
-        .filter((c) => c.HisMatched === true)
-        .map((c) => c.ColumnID);
+        .filter((c: any) => c.HisMatched === true)
+        .map((c: any) => c.ColumnID);
 
       // 3) Preselect those IDs in TagBox
       this.selecteRAuniqueKeys = hisMatchedIds;
@@ -1816,7 +1785,7 @@ if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
 
   onCancelGrossMismatch() {
     this.confirmDistribute = false;
-    this.showGrossMismatchPopup = false;
+    // this.showGrossMismatchPopup = false;
   }
 
   //=========================validate data time==============
@@ -1866,8 +1835,97 @@ if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
       });
     }
   }
-}
 
+  prepareDisplayLevels(data: any[]) {
+    this.displayTableData = data.map((levelArray, index) => {
+      const hisNames: string[] = [];
+      const raNames: string[] = [];
+
+      levelArray.forEach((item: any) => {
+        if (item.ColumnName) {
+          hisNames.push(item.ColumnName);
+        }
+
+        if (item.RA_COLUMN_TITLE) {
+          raNames.push(item.RA_COLUMN_TITLE);
+        }
+      });
+
+      return {
+        sl: index + 1,
+        his: hisNames.join(', '),
+        ra: raNames.join(', '),
+      };
+    });
+
+    console.log(
+      this.displayTableData,
+      '=================displayTableData===================',
+    );
+  }
+
+  // async Process_screen() {
+  //   this.handleclose.emit(); // Close popup first
+  //   // await this.navigateToProcess();
+  // }
+
+  checkAllowSelectAllFromGrid() {
+    const visibleRows = this.distributeGrid?.instance?.getVisibleRows();
+
+    if (!visibleRows || visibleRows.length === 0) {
+      this.allowSelectAllFlag = false;
+    } else {
+      const data = visibleRows.map((r: any) => r.data);
+      const firstKey = data[0].UNIQUE_KEY;
+
+      this.allowSelectAllFlag = data.every(
+        (item: any) => item.UNIQUE_KEY === firstKey,
+      );
+    }
+
+    // 🔥 Update grid option
+    this.distributeGrid?.instance?.option(
+      'selection.allowSelectAll',
+      this.allowSelectAllFlag,
+    );
+
+    console.log('Filtered Allow Select All:', this.allowSelectAllFlag);
+  }
+
+  //===========================status of insruace data=======================
+  get_EDI_Data_Status() {
+    console.log('==================get_status_Edi===================');
+    const payload = {
+      INSURANCE_ID: this.selectedInsuranceId,
+    };
+
+    this.dataservice.get_status_Edi(payload).subscribe((res: any) => {
+      console.log(res, '=================get_status_Edi===================');
+      this.TotalEDI = res.HisCount;
+      this.identifiedHis = res.Identified;
+      this.MatchedTotalHis = res.Processed;
+      this.ManualProcessing = res.RequiredManual;
+      this.PendignHis = res.Pending;
+
+      // ===== Percentage Calculations =====
+      this.identifiedPercent = this.TotalEDI
+        ? ((this.identifiedHis / this.TotalEDI) * 100).toFixed(2)
+        : 0;
+
+      this.processedPercent = this.identifiedHis
+        ? ((this.MatchedTotalHis / this.identifiedHis) * 100).toFixed(2)
+        : 0;
+
+      this.manualPercent = this.identifiedHis
+        ? ((this.ManualProcessing / this.identifiedHis) * 100).toFixed(2)
+        : 0;
+
+      this.notFoundPercent = this.TotalEDI
+        ? ((this.PendignHis / this.TotalEDI) * 100).toFixed(2)
+        : 0;
+    });
+  }
+}
 @NgModule({
   imports: [
     CommonModule,
@@ -1881,9 +1939,12 @@ if ((rejectedMismatch || netPayableMismatch) && !this.confirmDistribute) {
     DxPopupModule,
     DxTagBoxModule,
     DxDateBoxModule,
+    DxSelectBoxModule,
+    ProcessScreenModule,
   ],
   providers: [],
   declarations: [ImportRADataPopupComponent],
   exports: [ImportRADataPopupComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ImportRADataPopupModule {}

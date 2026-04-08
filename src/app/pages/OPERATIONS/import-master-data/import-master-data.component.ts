@@ -70,7 +70,7 @@ export class ImportMasterDataComponent implements OnInit {
   constructor(
     private service: MasterReportService,
     private router: Router,
-    private dataService: DataService
+    private dataService: DataService,
   ) {
     this.UserID = sessionStorage.getItem('UserID');
   }

@@ -4,15 +4,15 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { formatDate } from '@angular/common';
+import { data } from 'jquery';
 
 const BASE_URL = environment.PROJECTX_API_BASE_URL;
 
 const Token = JSON.parse(localStorage.getItem('Token'));
 
-
 @Injectable()
 export class DataService {
-    private months: { name: string; value: any }[] = [
+  private months: { name: string; value: any }[] = [
     { name: 'All', value: '' },
     { name: 'January', value: 0 },
     { name: 'February', value: 1 },
@@ -27,7 +27,10 @@ export class DataService {
     { name: 'November', value: 10 },
     { name: 'December', value: 11 },
   ];
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {}
 
   //======Facility Drop down data=====================
   Get_GropDown(dropDownField: any) {
@@ -78,7 +81,7 @@ export class DataService {
   import_Local_folder_Claim_data(
     facilityID: any,
     fileName: any,
-    fileData: any
+    fileData: any,
   ) {
     const userid = sessionStorage.getItem('UserID');
     const url = `${BASE_URL}facility/importclaim`;
@@ -94,7 +97,7 @@ export class DataService {
   import_Local_folder_Remittance_data(
     facilityID: any,
     fileName: any,
-    fileData: any
+    fileData: any,
   ) {
     const userid = sessionStorage.getItem('UserID');
     const url = `${BASE_URL}facility/importremittance`;
@@ -321,14 +324,14 @@ export class DataService {
     return this.http.post(url, reqbody);
   }
 
-    // ======= fetch import RA process data list ======
-    submit_RA_Distribution_Data(payload: any) {
-      const url = `${BASE_URL}RAData/distribute`;
-      const reqbody = payload;
-      return this.http.post(url, reqbody);
-    }
+  // ======= fetch import RA process data list ======
+  submit_RA_Distribution_Data(payload: any) {
+    const url = `${BASE_URL}RAData/distribute`;
+    const reqbody = payload;
+    return this.http.post(url, reqbody);
+  }
 
-     // =======  RA Re_process data list ======
+  // =======  RA Re_process data list ======
   manual_ReProcess_RA_Data(payload: any) {
     const url = `${BASE_URL}RaData/reprocess`;
     const reqbody = payload;
@@ -343,7 +346,7 @@ export class DataService {
   }
 
   //===================duplication checking api when load excel data==================
-    get_Duplicated_His_Data_List(payload:any) {
+  get_Duplicated_His_Data_List(payload: any) {
     const Url = `${BASE_URL}HisData/checkduplicate`;
     const reqbody = payload;
     return this.http.post(Url, reqbody);
@@ -351,42 +354,40 @@ export class DataService {
 
   //===============His column for set unique key=================
 
-  His_Columns_For_UniqueKey(payload:any) {
+  His_Columns_For_UniqueKey(payload: any) {
     const Url = `${BASE_URL}DropDown`;
-   const reqbody ={
-  "NAME": "HIS_COLUMNS",
-}
+    const reqbody = {
+      NAME: 'HIS_COLUMNS',
+    };
     return this.http.post(Url, reqbody);
   }
-  
+
   //===============RA column for set unique key=================
 
-  RA_Columns_For_UniqueKey(payload:any) {
+  RA_Columns_For_UniqueKey(payload: any) {
     const Url = `${BASE_URL}DropDown`;
-   const reqbody =payload 
+    const reqbody = payload;
     return this.http.post(Url, reqbody);
   }
 
-
-    //============Share months to component ================
+  //============Share months to component ================
   getMonths(): { name: string; value: number }[] {
     return this.months;
   }
-//======================ageing deport details=================
-  get_aged_details(item:any){
-  const Url = `${BASE_URL}reports/InsuranceAgeing/getDetail`;
-   const reqbody =item 
+  //======================ageing deport details=================
+  get_aged_details(item: any) {
+    const Url = `${BASE_URL}reports/InsuranceAgeing/getDetail`;
+    const reqbody = item;
     return this.http.post(Url, reqbody);
   }
   //==================Ageing summary report summary
-    get_Aged_Summary(item:any){
-  const Url = `${BASE_URL}reports/InsuranceAgeing/getSummary`;
-   const reqbody =item 
+  get_Aged_Summary(item: any) {
+    const Url = `${BASE_URL}reports/InsuranceAgeing/getSummary`;
+    const reqbody = item;
     return this.http.post(Url, reqbody);
+  }
 
-}
-
-//================system information api===================
+  //================system information api===================
 
   get_System_info_data() {
     const url = `${BASE_URL}system/info`;
@@ -394,5 +395,22 @@ export class DataService {
     return this.http.post(url, reqBody);
   }
 
+  // //============ unque key based on level================
+  insert_uniquekey_data(item: any) {
+    const url = `${BASE_URL}RAData/InsuranceUkey`;
+    const reqBody = item;
+    return this.http.post(url, reqBody);
+  }
+  select_uniquekey_data(id: any) {
+    const url = `${BASE_URL}RAData/getukey/${id}`;
+    const reqBody = {};
+    return this.http.post(url, reqBody);
+  }
 
+  //------------------get  status data of edi=================
+  get_status_Edi(item: any) {
+    const url = `${BASE_URL}insurance/getstatus`;
+    const reqBody = item;
+    return this.http.post(url, reqBody);
+  }
 }

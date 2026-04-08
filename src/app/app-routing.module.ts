@@ -65,6 +65,8 @@ import { CheckPostOfficeComponent } from './pages/OPERATIONS/check-post-office/c
 import { ImportHISDataComponent } from './pages/OPERATIONS/import-his-data/import-his-data.component';
 import { ImportRADataComponent } from './pages/OPERATIONS/import-ra-data/import-ra-data.component';
 import { AgedReportComponent } from './pages/REPORT PAGES/aged-report/aged-report.component';
+import { ProcessScreenComponent } from './pages/OPERATIONS/process-screen/process-screen.component';
+import { RecallProcessComponent } from './pages/OPERATIONS/recall-process/recall-process.component';
 const routes: Routes = [
   {
     path: '',
@@ -336,9 +338,19 @@ const routes: Routes = [
         component: BalanceAmountToBeReceivedComponent,
         canActivate: [AuthGuardService],
       },
-          {
+      {
         path: 'Insurance-ageing',
         component: AgedReportComponent,
+        canActivate: [AuthGuardService],
+      },
+      {
+        path: 'process',
+        component: ProcessScreenComponent,
+        canActivate: [AuthGuardService],
+      },
+      {
+        path: 'revoke-process',
+        component: RecallProcessComponent,
         canActivate: [AuthGuardService],
       },
       {

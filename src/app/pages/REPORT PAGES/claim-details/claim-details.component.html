@@ -110,7 +110,6 @@
     <dx-button
       class="toggleButton"
       icon="{{ isContentVisible ? 'chevronup' : 'chevrondown' }}"
-    
       type="normal"
       [hint]="isContentVisible ? 'Hide Filter Contend' : 'Show Filter Contend'"
       [width]="200"
@@ -138,7 +137,7 @@
       [headerFilter]="{ visible: false }"
       [columnFixing]="{
         enabled: true,
-        texts: { fix: 'Freeze', unfix: 'Unfreeze' }
+        texts: { fix: 'Freeze', unfix: 'Unfreeze' },
       }"
       (onExporting)="onExporting($event)"
       [summary]="summaryColumnsData"
@@ -225,9 +224,15 @@
         [visible]="isFilterOpened"
         [applyFilter]="applyFilter"
       ></dxo-filter-row>
-      <dxo-export
+      <!-- <dxo-export
         [enabled]="true"
         [allowExportSelectedData]="true"
+        [formats]="['xlsx']"
+      >
+      </dxo-export> -->
+      <dxo-export
+        [enabled]="true"
+        [allowExportSelectedData]="false"
         [formats]="['xlsx']"
       >
       </dxo-export>
@@ -246,7 +251,7 @@
             onClick: refresh,
             stylingMode: 'text',
             disabled: isEmptyDatagrid,
-            hint: 'Refresh'
+            hint: 'Refresh',
           }"
         ></dxi-item>
 
@@ -257,7 +262,7 @@
             icon: 'search',
             onClick: filterClick,
             disabled: isEmptyDatagrid,
-            hint: 'Search Column'
+            hint: 'Search Column',
           }"
         ></dxi-item>
 
@@ -278,7 +283,12 @@
           }"
         ></dxi-item>
 
-        <dxi-item name="exportButton" [disabled]="isEmptyDatagrid"></dxi-item>
+        <!-- <dxi-item name="exportButton" [disabled]="isEmptyDatagrid"></dxi-item> -->
+        <dxi-item
+          name="exportButton"
+          location="after"
+          cssClass="custom-export-button"
+        ></dxi-item>
 
         <!-- <dxi-item
           widget="dxButton"
@@ -322,12 +332,11 @@
             noDataText: 'Load data and try again',
             disabled: isEmptyDatagrid,
             hint: 'Column location finder',
-            icon:'columnproperties',
+            icon: 'columnproperties',
             dropDownOptions: {
               width: 'auto',
-              height: '60vh'
+              height: '60vh',
             },
-
           }"
         ></dxi-item>
       </dxo-toolbar>

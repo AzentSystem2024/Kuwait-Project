@@ -26,7 +26,9 @@ import * as XLSX from 'xlsx';
 import notify from 'devextreme/ui/notify';
 import { MasterReportService } from '../../MASTER PAGES/master-report.service';
 import { ReportEngineService } from '../../REPORT PAGES/report-engine.service';
-
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import * as ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 @Component({
   selector: 'app-import-his-data-import',
   templateUrl: './import-his-data.component.html',
@@ -89,14 +91,16 @@ export class ImportHISDataFormComponent implements OnInit {
   columnDatasss: any;
   ColumnNames: any;
   precision: any;
+  focusedRowKey: any;
+  isLoadingDuplication: boolean = false;
 
   constructor(
     private dataservice: DataService,
     private masterService: MasterReportService,
-    private reportengine: ReportEngineService
+    private reportengine: ReportEngineService,
   ) {
     const systemInfo = JSON.parse(
-      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+      sessionStorage.getItem('SYSTEM_INFO') || '{}',
     );
     console.log(systemInfo);
     this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
@@ -147,7 +151,7 @@ export class ImportHISDataFormComponent implements OnInit {
         displayFormat: '{0}',
         valueFormat: {
           type: 'fixedPoint',
-          precision: this.precision,
+          precision: 3,
         },
       })),
     };
@@ -167,10 +171,10 @@ export class ImportHISDataFormComponent implements OnInit {
 
     if (!this.dataSource?.length || !this.columnData?.length) return;
     const excelColumns = Object.keys(this.dataSource[0]).map((c) =>
-      c.trim().toLowerCase()
+      c.trim().toLowerCase(),
     );
     const hisColumns = this.columnData.map((c) =>
-      c.dataField.trim().toLowerCase()
+      c.dataField.trim().toLowerCase(),
     );
     excelColumns.forEach((excelCol, index) => {
       if (!hisColumns.includes(excelCol)) {
@@ -189,7 +193,7 @@ export class ImportHISDataFormComponent implements OnInit {
       .subscribe((res: any) => {
         const selected_Data = res.data[0];
         this.UniqueKeys = selected_Data.uniqueKeys.filter(
-          (item: any) => item.IsHisColumn === true
+          (item: any) => item.IsHisColumn === true,
         );
       });
   }
@@ -207,7 +211,7 @@ export class ImportHISDataFormComponent implements OnInit {
             col.Type === 'DECIMAL'
               ? {
                   type: 'fixedPoint',
-                  precision: this.precision,
+                  precision: 3,
                 }
               : undefined,
         }));
@@ -223,7 +227,7 @@ export class ImportHISDataFormComponent implements OnInit {
             col.Type === 'DECIMAL'
               ? {
                   type: 'fixedPoint',
-                  precision: this.precision,
+                  precision: 3,
                 }
               : undefined,
         }));
@@ -246,6 +250,7 @@ export class ImportHISDataFormComponent implements OnInit {
   //=======================Duplicated data ==============
   duplicated_Data() {
     if (!this.viewData) {
+      // this.isLoadingDuplication = true;
       const userId = Number(sessionStorage.getItem('UserID')) || 0;
       const insuranceId = this.selectedInsurance || 0;
       if (!insuranceId) return;
@@ -253,7 +258,7 @@ export class ImportHISDataFormComponent implements OnInit {
       const titleToNameMap = this.getTitleToNameMap();
 
       const convertedData = (this.dataSource || []).map((row) =>
-        this.mapRowForPayload(row, titleToNameMap)
+        this.mapRowForPayload(row, titleToNameMap),
       );
 
       const payload = {
@@ -292,7 +297,7 @@ export class ImportHISDataFormComponent implements OnInit {
     if (e.rowType !== 'data') return;
 
     const colInfo = this.columnDatasss.find(
-      (c: any) => c.dataField === e.column.dataField
+      (c: any) => c.dataField === e.column.dataField,
     );
     if (!colInfo) return;
 
@@ -415,7 +420,7 @@ export class ImportHISDataFormComponent implements OnInit {
   highlightColumnHeader(dataField: string) {
     setTimeout(() => {
       const headerCells = document.querySelectorAll(
-        `.dx-header-row .dx-datagrid-text-content`
+        `.dx-header-row .dx-datagrid-text-content`,
       );
 
       headerCells.forEach((headerCell: any) => {
@@ -423,7 +428,7 @@ export class ImportHISDataFormComponent implements OnInit {
           headerCell.innerText === dataField ||
           this.getCaptionByField(dataField) === headerCell.innerText
         ) {
-          // 🚫 do not override mismatch tooltip
+          //  do not override mismatch tooltip
           if (!headerCell.title) {
             headerCell.title = 'Contains invalid data';
           }
@@ -467,6 +472,7 @@ export class ImportHISDataFormComponent implements OnInit {
   //============================get_duplicated_data=========================
 
   get_duplicated_data(res: any) {
+    // this.isLoadingDuplication = false;
     // These rows come from backend that already contain duplicates
     const duplicateRows = res.data[0].import_his_data || [];
     const isDuplicate_Value = res.IS_DUPLICATE;
@@ -484,12 +490,12 @@ export class ImportHISDataFormComponent implements OnInit {
       ITEM_CODE: new Set(
         duplicateRows
           .map((row: any) => (row.ITEM_CODE ?? '').toString().trim())
-          .filter((v) => v)
+          .filter((v) => v),
       ),
       INVOICE_NO: new Set(
         duplicateRows
           .map((row: any) => (row.INVOICE_NO ?? '').toString().trim())
-          .filter((v) => v)
+          .filter((v) => v),
       ),
       INVOICE_DATE: new Set(
         duplicateRows
@@ -497,7 +503,7 @@ export class ImportHISDataFormComponent implements OnInit {
             if (!row.INVOICE_DATE) return '';
             return new Date(row.INVOICE_DATE).toISOString().split('T')[0];
           })
-          .filter((v) => v)
+          .filter((v) => v),
       ),
     };
 
@@ -526,6 +532,132 @@ export class ImportHISDataFormComponent implements OnInit {
   }
 
   // ========= main save import data ===========
+  // async onSaveClick() {
+  //   if (
+  //     !this.Duplication_data ||
+  //     this.selectedPriorityKey == 1 ||
+  //     this.selectedPriorityKey == 2
+  //   ) {
+  //     if (this.isChecked) {
+  //       this.dataSource;
+  //     }
+
+  //     const userId = Number(sessionStorage.getItem('UserID')) || 0;
+  //     const insuranceId = this.selectedInsurance || 0;
+
+  //     if (!insuranceId || insuranceId === 0) {
+  //       notify({
+  //         message: 'Please select an Insurance before saving.',
+  //         type: 'error',
+  //         displayTime: 3000,
+  //         position: { at: 'top right', my: 'top right', of: window },
+  //       });
+  //       return;
+  //     }
+
+  //     if (this.isValidData == false) {
+  //       notify({
+  //         message: `The Excel file contains invalid data. Please correct it before saving`,
+  //         type: 'error',
+  //         displayTime: 4000,
+  //         position: { at: 'top right', my: 'top right', of: window },
+  //       });
+  //       return;
+  //     }
+
+  //     this.isSaving = true;
+  //     this.isLoading = true;
+
+  //     try {
+  //       const titleToNameMap = this.getTitleToNameMap();
+  //       const allData = (this.dataSource || []).map((row) =>
+  //         this.mapRowForPayload(row, titleToNameMap),
+  //       );
+
+  //       const totalRecords = allData.length;
+  //       const batchSize = 15000;
+
+  //       if (totalRecords === 0) {
+  //         notify({
+  //           message: 'No data available to save.',
+  //           type: 'warning',
+  //           displayTime: 3000,
+  //           position: { at: 'top right', my: 'top right', of: window },
+  //         });
+  //         this.isSaving = false;
+  //         this.isLoading = false;
+  //         return;
+  //       }
+  //       // Create one shared batch ID for all chunks
+  //       const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
+  //       const batchId = `${insuranceId}_${datetime}`;
+
+  //       const totalBatches = Math.ceil(totalRecords / batchSize);
+
+  //       for (let i = 0; i < totalBatches; i++) {
+  //         const start = i * batchSize;
+  //         const end = Math.min(start + batchSize, totalRecords);
+  //         const currentBatch = allData.slice(start, end);
+  //         const payload = {
+  //           userId: userId,
+  //           insuranceId: insuranceId,
+  //           BatchNo: batchId,
+  //           import_his_data: currentBatch,
+  //           MANAGE_DUPLICATE: this.selectedPriorityKey,
+  //         };
+
+  //         await this.dataservice
+  //           .Import_His_Data(payload)
+  //           .toPromise()
+  //           .then((res: any) => {
+  //             if (res.flag === '1') {
+  //               notify({
+  //                 message: `Batch ${
+  //                   i + 1
+  //                 }/${totalBatches} uploaded successfully!`,
+  //                 type: 'success',
+  //                 displayTime: 2000,
+  //                 position: { at: 'top right', my: 'top right', of: window },
+  //               });
+  //             } else {
+  //               throw new Error(res.message || `Batch ${i + 1} failed.`);
+  //             }
+  //           })
+  //           .catch((err) => {
+  //             notify({
+  //               message: `Error importing batch ${i + 1}: ${err.message}`,
+  //               type: 'error',
+  //               displayTime: 4000,
+  //               position: { at: 'top right', my: 'top right', of: window },
+  //             });
+  //             throw err; // stop further batches on error
+  //           });
+  //       }
+
+  //       notify({
+  //         message: 'All batches imported successfully!',
+  //         type: 'success',
+  //         displayTime: 4000,
+  //         position: { at: 'top right', my: 'top right', of: window },
+  //       });
+
+  //       this.close();
+  //     } catch (error) {
+  //     } finally {
+  //       this.isSaving = false;
+  //       this.isLoading = false;
+  //     }
+  //   } else {
+  //     notify({
+  //       message:
+  //         'Duplicate data found. Please choose to skip or overwrite the (unprocessed) records.',
+  //       type: 'success',
+  //       displayTime: 4000,
+  //       position: { at: 'top right', my: 'top right', of: window },
+  //     });
+  //   }
+  // }
+
   async onSaveClick() {
     if (
       !this.Duplication_data ||
@@ -548,6 +680,77 @@ export class ImportHISDataFormComponent implements OnInit {
         });
         return;
       }
+      // -------- SAVE-TIME VALIDATION (ROW + COLUMN) --------
+      const invalidCells: {
+        rowIndex: number;
+        excelRow: number;
+        column: string;
+      }[] = [];
+
+      this.dataSource.forEach((row: any, index: number) => {
+        const excelRowNo = row.__excelRowNo ?? index + 2;
+
+        this.columnDatasss.forEach((col: any) => {
+          const value = row[col.dataField];
+
+          if (value === null || value === undefined || value === '') return;
+
+          // DATETIME
+          if (col.type === 'DATETIME' && !this.isValidDDMMYYYY(value)) {
+            invalidCells.push({
+              rowIndex: index,
+              excelRow: excelRowNo,
+              column: col.caption,
+            });
+          }
+
+          // DECIMAL
+          if (
+            col.type === 'DECIMAL' &&
+            isNaN(Number(value.toString().replace(/,/g, '')))
+          ) {
+            invalidCells.push({
+              rowIndex: index,
+              excelRow: excelRowNo,
+              column: col.caption,
+            });
+          }
+        });
+      });
+
+      // -------- STOP SAVE if invalid --------
+      if (invalidCells.length > 0) {
+        // Unique rows
+        const rowIndexes = [
+          ...new Set(invalidCells.map((x) => x.rowIndex)),
+        ].sort((a, b) => a - b);
+
+        const excelRows = rowIndexes.map(
+          (i) => this.dataSource[i].__excelRowNo ?? i + 2,
+        );
+
+        // Focus first invalid row
+        const firstInvalid = rowIndexes[0];
+        this.focusedRowKey = this.dataSource[firstInvalid]?.ID ?? firstInvalid;
+
+        // Build readable message
+        const details = invalidCells
+          .slice(0, 10)
+          .map((x) => `Row ${x.excelRow} → ${x.column}`)
+          .join(', ');
+
+        notify({
+          message:
+            `Cannot save Excel.\n\n` +
+            `Invalid data found:\n${details}` +
+            (invalidCells.length > 10 ? '\n...' : ''),
+          type: 'error',
+          displayTime: 9000,
+          position: { at: 'top right', my: 'top right', of: window },
+        });
+
+        return; //  STOP SAVE
+      }
 
       if (this.isValidData == false) {
         notify({
@@ -565,7 +768,7 @@ export class ImportHISDataFormComponent implements OnInit {
       try {
         const titleToNameMap = this.getTitleToNameMap();
         const allData = (this.dataSource || []).map((row) =>
-          this.mapRowForPayload(row, titleToNameMap)
+          this.mapRowForPayload(row, titleToNameMap),
         );
 
         const totalRecords = allData.length;
@@ -584,35 +787,35 @@ export class ImportHISDataFormComponent implements OnInit {
         }
 
         //  CHECK EMPTY VALUE IN UNIQUE KEY COLUMN (INLINE)
-        const uniqueKeyColumns = (this.UniqueKeys || [])
-          .filter((k: any) => k.IsHisColumn === true)
-          .map((k: any) => k.ColumnName); // ONLY ColumnName
+        //         const uniqueKeyColumns = (this.UniqueKeys || [])
+        //           .filter((k: any) => k.IsHisColumn === true)
+        //           .map((k: any) => k.ColumnName); // ONLY ColumnName
 
-        if (uniqueKeyColumns.length > 0) {
-          for (let i = 0; i < this.dataSource.length; i++) {
-            const row = this.dataSource[i];
+        //         if (uniqueKeyColumns.length > 0) {
+        //           for (let i = 0; i < this.dataSource.length; i++) {
+        //             const row = this.dataSource[i];
 
-            for (const col of uniqueKeyColumns) {
-              const val = row[col];
+        //             for (const col of uniqueKeyColumns) {
+        //               const val = row[col];
 
-              if (
-                val === null ||
-                val === undefined ||
-                (typeof val === 'string' && val.trim() === '')
-              ) {
-                notify({
-                  message: `Cannot save Excel.
-Empty value found in UNIQUE column "${col}"
-at row ${i + 1}.`,
-                  type: 'error',
-                  displayTime: 5000,
-                  position: { at: 'top right', my: 'top right', of: window },
-                });
-                return;
-              }
-            }
-          }
-        }
+        //               if (
+        //                 val === null ||
+        //                 val === undefined ||
+        //                 (typeof val === 'string' && val.trim() === '')
+        //               ) {
+        //                 notify({
+        //                   message: `Cannot save Excel.
+        // Empty value found in UNIQUE column "${col}"
+        // at row ${i + 1}.`,
+        //                   type: 'error',
+        //                   displayTime: 5000,
+        //                   position: { at: 'top right', my: 'top right', of: window },
+        //                 });
+        //                 return;
+        //               }
+        //             }
+        //           }
+        //         }
 
         // Create one shared batch ID for all chunks
         const datetime = new Date().toISOString().replace(/[-:.TZ]/g, '');
@@ -700,7 +903,7 @@ at row ${i + 1}.`,
           position: { at: 'top right', my: 'top right' },
           displayTime: 1000,
         },
-        'error'
+        'error',
       );
     } else if (error.status === 500) {
       notify(
@@ -710,7 +913,7 @@ at row ${i + 1}.`,
           position: { at: 'top right', my: 'top right' },
           displayTime: 1000,
         },
-        'error'
+        'error',
       );
     } else {
       notify(
@@ -719,7 +922,7 @@ at row ${i + 1}.`,
           position: { at: 'top right', my: 'top right' },
           displayTime: 1000,
         },
-        'error'
+        'error',
       );
     }
 
@@ -744,6 +947,25 @@ at row ${i + 1}.`,
     this.clearData();
     this.isLoading = false;
     this.closeForm.emit();
+  }
+
+  handleExporting(e: any): void {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Data');
+
+    exportDataGrid({
+      component: e.component,
+      worksheet: worksheet,
+      autoFilterEnabled: true,
+    }).then(() => {
+      workbook.xlsx.writeBuffer().then((buffer) => {
+        saveAs(
+          new Blob([buffer], { type: 'application/octet-stream' }),
+          'RA Data Export.xlsx',
+        );
+      });
+    });
+    e.cancel = true;
   }
 }
 

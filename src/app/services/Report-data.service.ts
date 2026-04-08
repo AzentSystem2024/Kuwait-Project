@@ -30,7 +30,10 @@ export class ReportService {
     { name: 'December', value: 11 },
   ];
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {}
 
   //============Share months to component ================
   getMonths(): { name: string; value: number }[] {
@@ -49,7 +52,7 @@ export class ReportService {
     PayerId: any,
     Payer: any,
     Clinician: any,
-    OrderingClinician: any
+    OrderingClinician: any,
   ) {
     const url = `${BASE_URL}reports/claimdetails`;
     const reqBodyData = {
@@ -215,7 +218,7 @@ export class ReportService {
   get_CliamDetails_InnerDrillDown_Submission_Data(
     FacilityID: any,
     SubmissionUID: any,
-    ClaimUID: any
+    ClaimUID: any,
   ) {
     const url = `${BASE_URL}reports/claimdetails/submission`;
     const reqBody = {
@@ -230,7 +233,7 @@ export class ReportService {
   get_CliamDetails_InnerDrillDown_Resubmission_Data(
     FacilityID: any,
     SubmissionUID: any,
-    ClaimUID: any
+    ClaimUID: any,
   ) {
     const url = `${BASE_URL}reports/claimdetails/resubmission`;
     const reqBody = {
@@ -245,7 +248,7 @@ export class ReportService {
   get_CliamDetails_InnerDrillDown_Remittance_Data(
     FacilityID: any,
     RemittanceDownloadUID: any,
-    RemittanceUID: any
+    RemittanceUID: any,
   ) {
     const url = `${BASE_URL}reports/claimdetails/remittance`;
     const reqBody = {
@@ -277,7 +280,7 @@ export class ReportService {
         workbook.xlsx.writeBuffer().then((buffer) => {
           saveAs(
             new Blob([buffer], { type: 'application/octet-stream' }),
-            `${fileName}.xlsx`
+            `${fileName}.xlsx`,
           );
         });
       });
@@ -354,6 +357,20 @@ export class ReportService {
 
       // DenialCode: formData.DenialCodes,
     };
+    return this.http.post(url, reqBody);
+  }
+
+  //==================Revoke List===========================
+
+  get_revoke_list(item: any) {
+    const url = `${BASE_URL}revokeprocess/list`;
+    const reqBody = item;
+    return this.http.post(url, reqBody);
+  }
+
+  Revoke_process(item: any) {
+    const url = `${BASE_URL}revokeprocess/revoke`;
+    const reqBody = item;
     return this.http.post(url, reqBody);
   }
 }

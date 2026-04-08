@@ -57,7 +57,7 @@
           hint: isFilterRowVisible ? 'Hide Filter Row' : 'Show Filter Row',
           onClick: toggleFilterRow,
           stylingMode: 'text',
-          elementAttr: { class: 'commonButtons' }
+          elementAttr: { class: 'commonButtons' },
         }"
       ></dxi-item>
       <dxi-item
@@ -70,7 +70,7 @@
           icon: 'refresh',
           hint: 'Refresh',
           onClick: refresh,
-          stylingMode: 'text'
+          stylingMode: 'text',
         }"
       ></dxi-item>
       <!--
@@ -116,7 +116,7 @@
     [(visible)]="isUpdateFormPopupOpened"
     title="Edit Insurance Company"
     height="auto"
-    width="80%"
+    width="85%"
     (onHiding)="popUpClose()"
   >
     <app-insurance-new-form

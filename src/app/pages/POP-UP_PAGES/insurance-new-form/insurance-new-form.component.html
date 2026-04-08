@@ -7,7 +7,7 @@
         <div class="mb-3 row align-items-center">
           <div class="col-8 col-sm-6 col-md-5">
             <dx-text-box
-              label="Short Name"
+              label="Short Name *"
               labelMode="floating"
               [(value)]="insuranceCompany.shortName"
             >
@@ -30,7 +30,7 @@
 
         <div class="mb-3">
           <dx-text-box
-            label="Company Name"
+            label="Company Name *"
             labelMode="floating"
             [(value)]="insuranceCompany.companyName"
           >
@@ -45,7 +45,7 @@
 
         <div class="mb-3">
           <dx-select-box
-            label="Classification"
+            label="Classification *"
             labelMode="floating"
             [(value)]="insuranceCompany.classification"
             [items]="classifications"
@@ -63,57 +63,83 @@
         </div>
 
         <div class="mb-3">
-          <dx-text-area
+          <dx-text-box
+            label="Remarks"
+            labelMode="floating"
+            [(value)]="insuranceCompany.remarks"
+          ></dx-text-box>
+          <!-- <dx-text-box
             label="Remarks"
             labelMode="floating"
             [(value)]="insuranceCompany.remarks"
             [height]="80"
-          ></dx-text-area>
+          ></dx-text-box> -->
         </div>
 
-        <div class="mb-3">
-          <dx-tag-box
-            [dataSource]="RA_columns"
-            displayExpr="ColumnTitle"
-            valueExpr="ColumnID"
-            [(value)]="selecteRAuniqueKeys"
-            label="RA Unique Key"
-            labelMode="floating"
-            [showSelectionControls]="true"
-            [showClearButton]="true"
-            [searchEnabled]="true"
-            width="100%"
-            (onValueChanged)="RADropdownOnchangeValue($event)"
+        <h6>Unique Key Settings</h6>
+        <dx-data-grid
+          #dataGridUniquekey
+          keyExpr="id"
+          [dataSource]="UniquekeyGernarationPayload"
+          [showBorders]="true"
+          [showColumnLines]="true"
+          [columnAutoWidth]="false"
+          [wordWrapEnabled]="false"
+          [rowAlternationEnabled]="true"
+          [headerFilter]="{ visible: true }"
+          [allowColumnReordering]="true"
+          [height]="'40vh'"
+          [showColumnHeaders]="true"
+          [allowColumnResizing]="true"
+          [columnResizingMode]="'nextColumn'"
+          [headerFilter]="{ visible: true }"
+          [scrolling]="{ mode: 'standard' }"
+          rowAlternationInterval="2"
+          [selection]="{ mode: 'single' }"
+          [editing]="{
+            mode: 'cell',
+            allowUpdating: true,
+            allowDeleting: true,
+            allowAdding: true,
+            useIcons: true,
+            newRowPosition: 'last',
+          }"
+          (onEditorPreparing)="onEditorPreparing($event)"
+          (oncellPrepared)="onCellPreparedUniquekey($event)"
+          (onRowRemoved)="onRowRemoved($event)"
+          [sorting]="{ mode: 'none' }"
+        >
+          <dxo-row-dragging
+            [allowReordering]="true"
+            [showDragIcons]="true"
+            [dragDirection]="'vertical'"
+            (onReorder)="onReorderuniqueKey($event)"
           >
-            <dx-validator>
-              <dxi-validation-rule
-                type="required"
-                message="This field is required"
-              ></dxi-validation-rule>
-            </dx-validator>
-          </dx-tag-box>
-        </div>
-        <div class="mb-3">
-          <dx-tag-box
-            [dataSource]="hisColumns"
-            displayExpr="DESCRIPTION"
-            valueExpr="ID"
-            [(value)]="selecteHISuniqueKeys"
-            label="HIS Unique Key"
-            labelMode="floating"
-            [showSelectionControls]="true"
-            [showClearButton]="true"
-            [searchEnabled]="true"
-            width="100%"
-            (onValueChanged)="HISDropdownOnchangeValue($event)"
-            ><dx-validator>
-              <dxi-validation-rule
-                type="required"
-                message="This field is required"
-              ></dxi-validation-rule>
-            </dx-validator>
-          </dx-tag-box>
-        </div>
+          </dxo-row-dragging>
+          <dxo-load-panel [showPane]="false"></dxo-load-panel>
+          <dxo-filter-builder [allowHierarchicalFields]="true">
+          </dxo-filter-builder>
+          <dxo-toolbar> </dxo-toolbar>
+          <dxi-column type="drag" width="50"></dxi-column>
+
+          <!-- Existing visible columns -->
+          <dxi-column
+            dataField="his_Column"
+            caption="HIS Column"
+            [calculateDisplayValue]="getHISDescriptions"
+          >
+          </dxi-column>
+
+          <dxi-column
+            dataField="RA_Column"
+            caption="RA Column"
+            [calculateDisplayValue]="getRADescriptions"
+          >
+          </dxi-column>
+          <!-- <dxi-column type="buttons">
+      <dxi-button name="delete" width="80"></dxi-button>
+    </dxi-column> -->
+        </dx-data-grid>
       </div>
 
       <div class="col-md-6">
@@ -166,38 +192,38 @@
       </div>
     </div>
   </dx-validation-group>
+</div>
 
-  <div class="mt-3 d-flex justify-content-end gap-2">
-    <dx-button
-      text="Close"
-      stylingMode="contained"
-      type="normal"
-      (onClick)="close()"
-    ></dx-button>
+<div class="mt-3 d-flex justify-content-end gap-2">
+  <dx-button
+    text="Close"
+    stylingMode="contained"
+    type="normal"
+    (onClick)="close()"
+  ></dx-button>
 
-    <dx-button
-      text="Clear"
-      stylingMode="contained"
-      type="danger"
-      (onClick)="clear()"
-    ></dx-button>
+  <dx-button
+    text="Clear"
+    stylingMode="contained"
+    type="danger"
+    (onClick)="clear()"
+  ></dx-button>
 
-    <dx-button
-      text="Save"
-      stylingMode="contained"
-      type="default"
-      [visible]="!insuranceData"
-      (onClick)="saveInsurance()"
-    ></dx-button>
+  <dx-button
+    text="Save"
+    stylingMode="contained"
+    type="default"
+    [visible]="!insuranceData"
+    (onClick)="saveInsurance()"
+  ></dx-button>
 
-    <dx-button
-      text="Update"
-      stylingMode="contained"
-      type="default"
-      [visible]="insuranceData"
-      (onClick)="updateInsurance()"
-    ></dx-button>
-  </div>
+  <dx-button
+    text="Update"
+    stylingMode="contained"
+    type="default"
+    [visible]="insuranceData"
+    (onClick)="updateInsurance()"
+  ></dx-button>
 </div>
 
 <!-- Popup -->

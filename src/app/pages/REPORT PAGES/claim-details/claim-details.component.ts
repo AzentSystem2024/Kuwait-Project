@@ -51,7 +51,15 @@ import { AdvanceFilterPopupModule } from '../../POP-UP_PAGES/advance-filter-popu
 import { DataService } from 'src/app/services';
 import CustomStore from 'devextreme/data/custom_store';
 import { PopupStateService } from 'src/app/popupStateService.service';
+
+//=====================Excel Exporting Libraries=================
 import { text } from 'stream/consumers';
+import { Workbook } from 'exceljs';
+import * as saveAs from 'file-saver';
+import { Injectable } from '@angular/core';
+import * as FileSaver from 'file-saver';
+import * as XLSX from 'xlsx';
+import * as XLSXStyle from 'xlsx-style';
 
 @Component({
   selector: 'app-claim-details',
@@ -59,6 +67,7 @@ import { text } from 'stream/consumers';
   styleUrls: ['./claim-details.component.scss'],
   providers: [ReportService, ReportEngineService, DatePipe, DataService],
 })
+@Injectable()
 export class ClaimDetailsComponent implements OnInit {
   @ViewChild(DxDataGridComponent, { static: true })
   dataGrid: DxDataGridComponent;
@@ -87,7 +96,7 @@ export class ClaimDetailsComponent implements OnInit {
   To_Date_Value: any = new Date();
   selectedmonth: any = '';
   selectedYear: number | null = null;
-  Insurance_Value;
+  Insurance_Value: any;
 
   //========Variables for Pagination ====================
   readonly allowedPageSizes: any = [20, 50, 'all'];
@@ -138,7 +147,19 @@ export class ClaimDetailsComponent implements OnInit {
   drilldownPopups: any[];
   isCloseButtonClicked: boolean = false;
   closedPopupsSet: Set<string> = new Set();
-precision:any
+  precision: any;
+  //=================Excel Exporting Variables===================
+  EXCEL_TYPE =
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+  EXCEL_EXTENSION = '.xlsx';
+  isExporting = false;
+  exportProgress = 0;
+  exportStatus = '';
+  private worker: Worker | null = null;
+  private chunks: any[][] = [];
+  totalRows: any = 0;
+  private chunkSize = 10000;
+
   constructor(
     private service: ReportService,
     private router: Router,
@@ -146,16 +167,15 @@ precision:any
     private datePipe: DatePipe,
     private dataservice: DataService,
     private popupStateService: PopupStateService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {
-
-      const systemInfo = JSON.parse(
-      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+    const systemInfo = JSON.parse(
+      sessionStorage.getItem('SYSTEM_INFO') || '{}',
     );
     console.log(systemInfo);
     this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
     console.log(this.precision);
-  
+
     // this.loadingVisible = true;
 
     this.minDate = new Date(2000, 1, 1); // Set the minimum date
@@ -185,6 +205,84 @@ precision:any
         this.restorePopupsOnNavigation();
       }
     });
+  }
+
+  public exportAsExcelFile(json: any[], excelFileName: string): void {
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { data: worksheet },
+      SheetNames: ['data'],
+    };
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'buffer',
+    });
+    this.saveAsExcelFile(excelBuffer, excelFileName);
+  }
+
+  private saveAsExcelFile(buffer: any, fileName: string): void {
+    const data: Blob = new Blob([buffer], {
+      type: this.EXCEL_TYPE,
+    });
+    FileSaver.saveAs(
+      data,
+      fileName + '_export_' + new Date().getTime() + this.EXCEL_EXTENSION,
+    );
+  }
+  exportLargeData() {
+    console.log(this.dataGrid, '=========datagrid instance');
+    // const data =  this.dataGrid.instance.getDataSource().items();
+    const data = this.dataGrid_DataSource;
+    console.log(this.dataGrid_DataSource, '=========datagrid datasource');
+
+    console.log(data, '=========data to export');
+
+    if (!data) {
+      notify('No data to export', 'warning', 2000);
+      return;
+    }
+
+    this.isExporting = true;
+    this.exportProgress = 0;
+
+    const chunkSize = 10000;
+    // const total = data.length;
+    let processed = 0;
+
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet([]);
+
+    const processChunk = () => {
+      // const chunk = data.slice(processed, processed + chunkSize);
+
+      // XLSX.utils.sheet_add_json(worksheet, chunk, {
+      //   skipHeader: processed !== 0,
+      //   origin: -1,
+      // });
+
+      processed += chunkSize;
+      // this.exportProgress = Math.round((processed / total) * 100);
+
+      // if (processed < total) {
+      //   setTimeout(processChunk, 0); // ✅ prevents UI freeze
+      // } else {
+      //   const workbook: XLSX.WorkBook = {
+      //     Sheets: { data: worksheet },
+      //     SheetNames: ['data'],
+      //   };
+
+      //   const excelBuffer = XLSX.write(workbook, {
+      //     bookType: 'xlsx',
+      //     type: 'array',
+      //   });
+
+      //   this.saveAsExcelFile(excelBuffer, 'Claim_Details');
+
+      //   this.isExporting = false;
+      //   notify('Export completed!', 'success', 2000);
+      // }
+    };
+
+    processChunk();
   }
 
   ngOnInit(): void {
@@ -337,22 +435,21 @@ precision:any
 
   closePopup1(popup: any): void {
     popup.isOpened = false; // Hide the popup
- 
+
     this.closedPopupsSet.add(popup.id);
     // Additional logic for closing the popup can go here
   }
 
   //===========Function to handle selection change and sort the data==========
   onSelectionChanged(event: any, jsonData: any[], dataSourceKey: string): void {
-   
     const selectedRows = event.selectedRowsData;
     const selectedRowIds = selectedRows.map((row) => row.ID);
     const unselectedRows = jsonData.filter(
-      (row) => !selectedRowIds.includes(row.ID)
+      (row) => !selectedRowIds.includes(row.ID),
     );
     const reorderedData = [...selectedRows, ...unselectedRows];
     this[dataSourceKey] = this.makeAsyncDataSourceFromJson(reorderedData);
-  
+
     this.dataGrid.instance.refresh();
   }
 
@@ -381,22 +478,23 @@ precision:any
         .fetch_Claim_Details(formData)
         .toPromise();
       if (response.flag === '1') {
+        console.log(response, '=========response from api');
         this.isEmptyDatagrid = false;
         this.columndata = response.header.ReportColumns;
         const userLocale = navigator.language || 'en-US';
         this.summaryColumnsData = this.generateSummaryColumns(
-          response.header.ReportColumns
+          response.header.ReportColumns,
         );
 
         this.columnsConfig = this.generateColumnsConfig(
           response.header.ReportColumns,
-          userLocale
+          userLocale,
         );
-     
+
         this.ColumnNames = this.columnsConfig
           .filter((column) => column.visible)
           .map((column) => column.caption);
-       
+
         const formattedReportData = response.header.ReportData;
 
         // Initialize dataGrid_DataSource with the pre-loaded data
@@ -413,7 +511,7 @@ precision:any
             message: `${response.message}`,
             position: { at: 'top right', my: 'top right' },
           },
-          'error'
+          'error',
         );
       }
     } catch (error) {
@@ -425,35 +523,35 @@ precision:any
           position: { at: 'top right', my: 'top right' },
           displayTime: 3000,
         },
-        'error'
+        'error',
       );
     }
   }
   // ================ generate summary columns ===============
   generateSummaryColumns(reportColumns) {
     const decimalColumns = reportColumns.filter(
-      (col) => col.Type === 'Decimal' && col.Summary
+      (col) => col.Type === 'Decimal' && col.Summary,
     );
 
     const intColumns = reportColumns.filter(
-      (col) => col.Type === 'Int32' && col.Summary
+      (col) => col.Type === 'Int32' && col.Summary,
     );
 
     return {
       totalItems: [
         ...decimalColumns.map((col) =>
-          this.createSummaryItem(col, false, 'sum', 'decimal')
+          this.createSummaryItem(col, false, 'sum', 'decimal'),
         ),
         ...intColumns.map((col) =>
-          this.createSummaryItem(col, false, 'sum', 'count')
+          this.createSummaryItem(col, false, 'sum', 'count'),
         ),
       ],
       groupItems: [
         ...decimalColumns.map((col) =>
-          this.createSummaryItem(col, true, 'sum', 'decimal')
+          this.createSummaryItem(col, true, 'sum', 'decimal'),
         ),
         ...intColumns.map((col) =>
-          this.createSummaryItem(col, true, 'sum', 'count')
+          this.createSummaryItem(col, true, 'sum', 'count'),
         ),
       ],
     };
@@ -468,8 +566,8 @@ precision:any
         formatType === 'decimal'
           ? {
               style: 'decimal',
-              minimumFractionDigits: this.precision,
-              maximumFractionDigits: this.precision,
+              minimumFractionDigits: 3,
+              maximumFractionDigits: 3,
             }
           : null,
       alignByColumn: isGroupItem, // Align by column if it's a group item
@@ -495,11 +593,11 @@ precision:any
       if (column.Type === 'Decimal') {
         columnFormat = {
           type: 'fixedPoint',
-          precision: this.precision,
+          precision: 3,
           formatter: (value) =>
             new Intl.NumberFormat(userLocale, {
-              minimumFractionDigits: this.precision,
-              maximumFractionDigits: this.precision,
+              minimumFractionDigits: 3,
+              maximumFractionDigits: 3,
             }).format(value),
         };
       }
@@ -574,7 +672,7 @@ precision:any
       this.To_Date_Value = new Date(
         this.selectedYear,
         this.selectedmonth + 1,
-        0
+        0,
       );
     }
   }
@@ -703,8 +801,10 @@ precision:any
 
   //================Exporting Function===================
   onExporting(event: any) {
+    console.log(event, '===========event ====== data');
     const fileName = 'Cliam-Details-Activity';
-    this.service.exportDataGrid(event, fileName);
+    // this.service.exportDataGrid(event, fileName);
+    this.exportLargeData();
   }
 }
 

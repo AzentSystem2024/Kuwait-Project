@@ -16,7 +16,7 @@
     (onRowPrepared)="onRowPrepared($event)"
     (onCellPrepared)="onCellPrepared($event)"
     [summary]="summaryColumnsData"
-    
+    (onExporting)="handleExporting($event)"
   >
     <dxo-paging [pageSize]="100"></dxo-paging>
     <dxo-pager
@@ -37,6 +37,7 @@
     <dxo-scrolling mode="virtual" [useNative]="false"></dxo-scrolling>
     <dxo-header-filter [visible]="true"></dxo-header-filter>
     <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-export [enabled]="true" [allowExportSelectedData]="false"></dxo-export>
 
     <!-- Toolbar -->
     <dxo-toolbar class="toolBarDiv p-0 m-0">
@@ -60,33 +61,32 @@
           </dx-validator>
         </dx-select-box>
       </dxi-item>
-<dxi-item location="after">
-    <dx-button
-      icon="columnchooser"
-      hint="Column Chooser"
-      (onClick)="dataGrid.instance.showColumnChooser()"
-    ></dx-button>
-  </dxi-item>
-       <dxi-item
-          class="columnfinderclass"
-          widget="dxDropDownButton"
-          [options]="{
-            dataSource: ColumnNames,
-            onItemClick: findColumnLocation,
-            placeholder: 'Search Column',
-            noDataText: 'Load data and try again',
-            hint: 'Column location finder',
-            icon:'columnproperties',
-            dropDownOptions: {
-              width: 'auto',
-              height: '60vh'
-            },
-
-          }"
-        ></dxi-item>
-       
+      <dxi-item location="after" name="exportButton"></dxi-item>
+      <dxi-item location="after">
+        <dx-button
+          icon="columnchooser"
+          hint="Column Chooser"
+          (onClick)="dataGrid.instance.showColumnChooser()"
+        ></dx-button>
+      </dxi-item>
+      <dxi-item
+        class="columnfinderclass"
+        widget="dxDropDownButton"
+        [options]="{
+          dataSource: ColumnNames,
+          onItemClick: findColumnLocation,
+          placeholder: 'Search Column',
+          noDataText: 'Load data and try again',
+          hint: 'Column location finder',
+          icon: 'columnproperties',
+          dropDownOptions: {
+            width: 'auto',
+            height: '60vh',
+          },
+        }"
+      ></dxi-item>
     </dxo-toolbar>
-     <dxo-column-chooser
+    <dxo-column-chooser
       [enabled]="true"
       [height]="500"
       mode="select"
@@ -138,6 +138,14 @@
   shadingColor="rgba(0,0,0,0.4)"
   [showPane]="true"
   message="Loading ..."
+  [closeOnOutsideClick]="false"
+>
+</dx-load-panel>
+<dx-load-panel
+  [(visible)]="isLoadingDuplication"
+  shadingColor="rgba(0,0,0,0.4)"
+  [showPane]="true"
+  message="Duplicated Data Check ..."
   [closeOnOutsideClick]="false"
 >
 </dx-load-panel>

@@ -194,7 +194,7 @@ export class ClaimDetailActivityDrillDownComponent implements OnInit {
   onTabChange(index: number) {
     this.selectedIndex = index;
   }
-
+  
   //==============instance facility selection==================
   onGridBoxOptionChanged(e: DxDropDownBoxTypes.OptionChangedEvent) {
     if (e.name === 'value') {

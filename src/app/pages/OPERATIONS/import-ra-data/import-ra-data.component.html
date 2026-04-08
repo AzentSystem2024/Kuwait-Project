@@ -68,7 +68,7 @@
           hint: isFilterRowVisible ? 'Hide Filter Row' : 'Show Filter Row',
           onClick: toggleFilterRow,
           stylingMode: 'text',
-          elementAttr: { class: 'commonButtons' }
+          elementAttr: { class: 'commonButtons' },
         }"
       ></dxi-item>
 
@@ -82,7 +82,7 @@
           icon: 'refresh',
           stylingMode: 'text',
           hint: 'refresh',
-          onClick: refresh
+          onClick: refresh,
         }"
       ></dxi-item>
 
@@ -121,7 +121,7 @@
     <dxi-column dataField="FileName" caption="File Name"></dxi-column>
     <dxi-column dataField="ImportedUser" caption="Imported User"></dxi-column>
     <dxi-column dataField="ImportedTime" caption="Imported Time"></dxi-column>
-    <dxi-column dataField="Status" caption="Status"></dxi-column>
+    <!-- <dxi-column dataField="Status" caption="Status"></dxi-column> -->
 
     <dxi-column type="buttons" [width]="110" caption=" ">
       <dxi-button
@@ -160,7 +160,7 @@
     title="View Imported RA Data"
     [height]="'auto'"
     width="95%"
-    (onHiding)="onClearData()"
+    (onHiding)="handlePopupClose()"
   >
     <app-import-ra-data-popup
       *ngIf="ViewDataPopup"
@@ -168,6 +168,7 @@
       [LogID]="LogID"
       [fetchedData]="selectedData"
       [summaryColumns]="RaSummaryColumns"
+      (handleclose)="handleclose()"
     ></app-import-ra-data-popup>
   </dx-popup>
 </div>

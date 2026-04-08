@@ -38,8 +38,13 @@ import { AuthInterceptor } from './services/auth.interceptor';
 import { PayerWiseReportModule } from './pages/REPORT PAGES/payer-wise-report/payer-wise-report.component';
 import { BalanceAmountToBeReceivedModule } from './pages/REPORT PAGES/balance-amount-to-be-received/balance-amount-to-be-received.component';
 import { AgedReportModule } from './pages/REPORT PAGES/aged-report/aged-report.component';
-import { InsuranceMasterEditComponent, InsuranceMasterEditModule } from './pages/POP-UP_PAGES/insurance-master-edit/insurance-master-edit.component';
+import {
+  InsuranceMasterEditComponent,
+  InsuranceMasterEditModule,
+} from './pages/POP-UP_PAGES/insurance-master-edit/insurance-master-edit.component';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { ProcessScreenModule } from './pages/OPERATIONS/process-screen/process-screen.component';
+import { RecallProcessModule } from './pages/OPERATIONS/recall-process/recall-process.component';
 
 @NgModule({
   declarations: [AppComponent],
@@ -73,7 +78,9 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
     PayerWiseReportModule,
     BalanceAmountToBeReceivedModule,
     AgedReportModule,
-    InsuranceMasterEditModule
+    InsuranceMasterEditModule,
+    ProcessScreenModule,
+    RecallProcessModule,
   ],
   providers: [
     AuthService,
@@ -81,7 +88,7 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
     AppInfoService,
     ThemeService,
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
-      { provide: LocationStrategy, useClass: HashLocationStrategy }
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
     // { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
   ],
   bootstrap: [AppComponent],

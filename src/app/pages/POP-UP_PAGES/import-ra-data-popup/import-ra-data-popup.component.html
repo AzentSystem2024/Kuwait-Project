@@ -40,6 +40,7 @@
     <dxo-filter-row [visible]="true"></dxo-filter-row>
     <dxo-header-filter [visible]="true"></dxo-header-filter>
     <dxo-scrolling mode="virtual" [useNative]="false"></dxo-scrolling>
+    <!-- <dxo-export [enabled]="true" [allowExportSelectedData]="false"></dxo-export> -->
     <dxo-export [enabled]="true" [allowExportSelectedData]="false"></dxo-export>
 
     <dxo-toolbar>
@@ -76,11 +77,12 @@
         </dx-select-box>
       </dxi-item>
 
-      <dxi-item
+      <!-- <dxi-item
         *ngIf="fetchedData"
         location="after"
         name="exportButton"
-      ></dxi-item>
+      ></dxi-item> -->
+      <dxi-item location="after" name="exportButton"></dxi-item>
 
       <dxi-item
         *ngIf="fetchedData"
@@ -157,13 +159,30 @@
   [(visible)]="autoProcessPopup"
   [showCloseButton]="true"
   [width]="600"
-  [height]="500"
+  [height]="700"
   title="Process Records"
   (onShown)="onChangeAndProcess()"
   (onHidden)="handlePopupHidden()"
 >
   <div *dxTemplate="let data of 'content'" class="p-3 h-100 d-flex flex-column">
     <!-- Section 1: Unique Key + Process -->
+    <p style="font-size: larger; font-weight: 500">Default unique key</p>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>SL</th>
+          <th>HIS</th>
+          <th>RA</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of displayTableData">
+          <td>{{ row.sl }}</td>
+          <td>{{ row.his }}</td>
+          <td>{{ row.ra }}</td>
+        </tr>
+      </tbody>
+    </table>
     <div class="mb-4">
       <dx-tag-box
         [dataSource]="RA_columns"
@@ -196,6 +215,7 @@
         </dx-tag-box>
       </div>
 
+      <!-- <div class="mt-3">{{}}</div> -->
       <div class="mt-3 d-flex justify-content-end">
         <dx-button
           text="Change & Process RA"
@@ -211,19 +231,25 @@
       <h6>Process Summary</h6>
       <div class="d-flex flex-column gap-2 mt-2">
         <div>
-          Total RA Items: <b>{{ totalRaItems }}</b>
+          Total claim Records: <b>{{ TotalEDI }}</b>
         </div>
         <div>
-          Processed: <b>{{ totalProcessed }}</b>
+          Total RA Records: <b>{{ TotalRA }}</b>
         </div>
         <!-- <div>
           Total Pending Process: <b>{{ totalPendingprocessed }}</b>
         </div> -->
         <div>
-          Records require manual processing: <b>{{ manualProcess }}</b>
+          Total processed claim Records: <b>{{ MatchedTotalHis }}</b>
         </div>
         <div>
-          Records not matched with Unique Key: <b>{{ notFound }}</b>
+          Total processed RA Records: <b>{{ MatchedTotalRA }}</b>
+        </div>
+
+        <div>
+          Claim records require manual processing (Based on current unique Key)
+          :
+          <b>{{ ManualProcessing }}</b>
         </div>
       </div>
     </div>
@@ -234,7 +260,7 @@
         text="Manual Process"
         type="default"
         stylingMode="contained"
-        (onClick)="onProcessClick()"
+        (onClick)="distributeRA()"
       ></dx-button>
     </div>
   </div>
@@ -254,9 +280,9 @@
   <div class="h-100 d-flex flex-column">
     <!-- Top Grid -->
 
-    <dx-data-grid
-      #hisGrid
-      [dataSource]="HISGridData"
+    <!-- <dx-data-grid
+      #distributeGrid
+      [dataSource]="DistributeHISGridData"
       [columns]="HISProcessPopUpColumns"
       [showBorders]="true"
       class="flex-grow"
@@ -296,7 +322,7 @@
         mode="select"
       >
       </dxo-column-chooser>
-    </dx-data-grid>
+    </dx-data-grid> -->
 
     <!-- Bottom Grid -->
     <dx-data-grid
@@ -389,14 +415,21 @@
       [keyExpr]="'ID'"
       [rowAlternationEnabled]="true"
       [editing]="{ mode: 'cell', allowUpdating: true }"
-      [selection]="{ mode: 'multiple', showCheckBoxesMode: 'always' }"
+      [selection]="{
+        mode: 'multiple',
+        showCheckBoxesMode: 'always',
+        allowSelectAll: allowSelectAllFlag,
+      }"
       (onSelectionChanged)="onDistributeSelectionChanged($event)"
       (onEditingStart)="ondistributionHISgridEditingStart($event)"
       [allowColumnResizing]="true"
       [allowColumnReordering]="true"
+      [scrolling]="{ mode: 'virtual' }"
+      (onContentReady)="updateNetPayableSummary()"
+      (onSummaryCalculated)="updateNetPayableSummary()"
     >
       <dxo-filter-row [visible]="isFilterRowVisible"></dxo-filter-row>
-
+      <dxo-header-filter [visible]="true"></dxo-header-filter>
       <dxo-paging [pageSize]="0"></dxo-paging>
 
       <dxo-toolbar>
@@ -435,7 +468,7 @@
             *ngIf="col.dataType === 'number'"
             [column]="col.dataField"
             summaryType="sum"
-            [valueFormat]="'#,##0.00'"
+            [valueFormat]="'#,##0.000'"
             displayFormat="Total: {0}"
           >
           </dxi-total-item>
@@ -457,8 +490,8 @@
       </div>
 
       <!-- <div class="ms-auto d-flex flex-nowrap gap-1 me-4"> -->
-        
-        <!-- <dx-text-box
+
+      <!-- <dx-text-box
           [value]="getSelectedTotal('NET_AMOUNT1')"
           label="Net Claimed"
           labelMode="floating"
@@ -475,14 +508,14 @@
           [readOnly]="true"
           width="130"
         ></dx-text-box>
-        
-        <dx-text-box
+
+        <!-- <dx-text-box
           [value]="getSelectedTotal('OverBillingAmount')"
           label="Over Billing"
           labelMode="floating"
           [readOnly]="true"
           width="130"
-        ></dx-text-box>
+        ></dx-text-box> -->
         <dx-text-box
           [value]="getSummaryAmount('AuditingRejectedAmount')"
           label="Rejected"
@@ -517,7 +550,7 @@
     <!-- RA Data Grid -->
     <dx-data-grid
       class="mb-3"
-      [dataSource]="selectedRARows"
+      [dataSource]="RAGridData"
       [columns]="RAProcessPopUpColumns"
       [showBorders]="true"
       [height]="'35%'"
@@ -753,3 +786,16 @@
     ></dx-button>
   </div>
 </dx-popup>
+
+<!-- <dx-popup
+  [(visible)]="autoProcessPopup"
+  title="Auto Process"
+  [width]="'100%'"
+  [height]="'auto'"
+  [showCloseButton]="true"
+>
+  <app-process-screen
+    *ngIf="autoProcessPopup"
+    (closePopup)="autoProcessPopup = false"
+  ></app-process-screen>
+</dx-popup> -->

@@ -78,6 +78,8 @@ export class ImportRADataComponent implements OnInit {
   RaSummaryColumns: any;
   precision: any;
   FileName: string | null = null;
+
+  autoProcessPopupscreen: boolean = false;
   // ================= CLASS LEVEL =================
   private excelColumnMismatchMessage: string | null = null;
   excelColumnMismatchMap: {};
@@ -86,7 +88,7 @@ export class ImportRADataComponent implements OnInit {
     this.UserID = sessionStorage.getItem('UserID');
 
     const systemInfo = JSON.parse(
-      sessionStorage.getItem('SYSTEM_INFO') || '{}'
+      sessionStorage.getItem('SYSTEM_INFO') || '{}',
     );
     console.log(systemInfo);
     this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
@@ -130,7 +132,7 @@ export class ImportRADataComponent implements OnInit {
     const insuranceId = e.value;
     this.selectedInsuranceId = insuranceId;
     const selectedInsurance = this.insuranceList.find(
-      (x: any) => x.ID === insuranceId
+      (x: any) => x.ID === insuranceId,
     );
     this.selectedInsuranceName = selectedInsurance?.DESCRIPTION || '';
     // MUST subscribe
@@ -161,14 +163,14 @@ export class ImportRADataComponent implements OnInit {
 
           this.RaSummaryColumns = this.generateSummaryColumns(res.data);
         }
-      })
+      }),
     );
   }
 
   //======= finding summary columns and summary format =======
   generateSummaryColumns(reportColumns) {
     const decimalColumns = reportColumns.filter(
-      (col) => col.Type === 'DECIMAL'
+      (col) => col.Type === 'DECIMAL',
     );
 
     const intColumns = reportColumns.filter((col) => col.Type === 'Int32');
@@ -176,18 +178,18 @@ export class ImportRADataComponent implements OnInit {
     return {
       totalItems: [
         ...decimalColumns.map((col) =>
-          this.createSummaryItem(col, false, 'sum', 'decimal')
+          this.createSummaryItem(col, false, 'sum', 'decimal'),
         ),
         ...intColumns.map((col) =>
-          this.createSummaryItem(col, false, 'sum', 'count')
+          this.createSummaryItem(col, false, 'sum', 'count'),
         ),
       ],
       groupItems: [
         ...decimalColumns.map((col) =>
-          this.createSummaryItem(col, true, 'sum', 'decimal')
+          this.createSummaryItem(col, true, 'sum', 'decimal'),
         ),
         ...intColumns.map((col) =>
-          this.createSummaryItem(col, true, 'sum', 'count')
+          this.createSummaryItem(col, true, 'sum', 'count'),
         ),
       ],
     };
@@ -279,7 +281,7 @@ export class ImportRADataComponent implements OnInit {
     this.isLoading = true;
     const file = target.files[0];
     this.FileName = file.name;
-    console.log(this.FileName,"FileName")
+    console.log(this.FileName, 'FileName');
     const reader = new FileReader();
 
     reader.onload = (e: any) => {
@@ -327,7 +329,7 @@ export class ImportRADataComponent implements OnInit {
 
       const excelCaptions = Object.keys(rawData[0] || {});
       const normalizedExcelCaptions = excelCaptions.map((c) =>
-        this.normalizeCaption(c)
+        this.normalizeCaption(c),
       );
 
       // ================= COLUMN MISMATCH MAP (SOURCE OF TRUTH) =================
@@ -356,7 +358,7 @@ export class ImportRADataComponent implements OnInit {
           };
 
           mismatchMessages.push(
-            `${expectedCaption} → Found: ${actualCaptionAtIndex}`
+            `${expectedCaption} → Found: ${actualCaptionAtIndex}`,
           );
         }
       });
@@ -420,7 +422,7 @@ export class ImportRADataComponent implements OnInit {
   formatDateFields(
     data: any[],
     dateFields: string[],
-    decimalFields: string[] = []
+    decimalFields: string[] = [],
   ): any[] {
     return data.map((row) => {
       const newRow = { ...row };
@@ -441,7 +443,7 @@ export class ImportRADataComponent implements OnInit {
           dateObj = new Date(
             value.getFullYear(),
             value.getMonth(),
-            value.getDate()
+            value.getDate(),
           );
         }
 
@@ -556,6 +558,7 @@ export class ImportRADataComponent implements OnInit {
 
   // =========== close button click ===========
   CloseEditForm() {
+    console.log('Closing form and refreshing data');
     this.isNewFormPopupOpened = false;
     this.ViewDataPopup = false;
     this.selectedData = null;
@@ -563,6 +566,7 @@ export class ImportRADataComponent implements OnInit {
     this.resetFileInput();
     this.loadImportRALogDataSource();
     this.fetch_insurance_dropdown_data();
+    this.handlePopupClose();
   }
   // ======== show new inport popup =======
   show_new_Form() {
@@ -645,7 +649,7 @@ export class ImportRADataComponent implements OnInit {
     if (!name || !this.insuranceList?.length) return null;
 
     const match = this.insuranceList.find(
-      (x: any) => x.DESCRIPTION?.toLowerCase() === name.toLowerCase()
+      (x: any) => x.DESCRIPTION?.toLowerCase() === name.toLowerCase(),
     );
 
     return match ? match.ID : null;
@@ -674,6 +678,15 @@ export class ImportRADataComponent implements OnInit {
     this.isLoading = false;
     this.selectedInsuranceId = null;
     this.loadImportRALogDataSource();
+    console.log('close----');
+  }
+  handlePopupClose() {
+    this.onClearData();
+  }
+
+  handleclose() {
+    this.ViewDataPopup = false;
+    this.autoProcessPopupscreen = true;
   }
 }
 
