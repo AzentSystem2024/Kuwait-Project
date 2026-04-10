@@ -35,15 +35,15 @@ import {
 })
 export class ImportRADataComponent implements OnInit {
   @ViewChild(DxDataGridComponent, { static: true })
-  dataGrid: DxDataGridComponent;
+  dataGrid!: DxDataGridComponent;
 
   @ViewChild(ImportRADataPopupComponent, { static: false })
-  ImportRADataFormComponent: ImportRADataPopupComponent;
+  ImportRADataFormComponent!: ImportRADataPopupComponent;
 
   @ViewChild('validationGroup', { static: true })
-  validationGroup: DxValidationGroupComponent;
+  validationGroup!: DxValidationGroupComponent;
 
-  @ViewChild('fileInput', { static: false }) fileInput: ElementRef;
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
 
   isNewFormPopupOpened: boolean = false;
   readonly allowedPageSizes: any = [10, 20, 'all'];
@@ -56,8 +56,8 @@ export class ImportRADataComponent implements OnInit {
   dataSource: any;
   selectedData: any;
   ViewDataPopup: any;
-  currentPathName: string;
-  initialized: boolean;
+  currentPathName: any;
+  initialized: any;
 
   isFilterRowVisible: boolean = false;
   columnData: any;
@@ -82,7 +82,7 @@ export class ImportRADataComponent implements OnInit {
   autoProcessPopupscreen: boolean = false;
   // ================= CLASS LEVEL =================
   private excelColumnMismatchMessage: string | null = null;
-  excelColumnMismatchMap: {};
+  excelColumnMismatchMap: any = {};
 
   constructor(private service: DataService) {
     this.UserID = sessionStorage.getItem('UserID');
@@ -168,27 +168,27 @@ export class ImportRADataComponent implements OnInit {
   }
 
   //======= finding summary columns and summary format =======
-  generateSummaryColumns(reportColumns) {
+  generateSummaryColumns(reportColumns: any) {
     const decimalColumns = reportColumns.filter(
-      (col) => col.Type === 'DECIMAL',
+      (col: any) => col.Type === 'DECIMAL',
     );
 
-    const intColumns = reportColumns.filter((col) => col.Type === 'Int32');
+    const intColumns = reportColumns.filter((col: any) => col.Type === 'Int32');
 
     return {
       totalItems: [
-        ...decimalColumns.map((col) =>
+        ...decimalColumns.map((col: any) =>
           this.createSummaryItem(col, false, 'sum', 'decimal'),
         ),
-        ...intColumns.map((col) =>
+        ...intColumns.map((col: any) =>
           this.createSummaryItem(col, false, 'sum', 'count'),
         ),
       ],
       groupItems: [
-        ...decimalColumns.map((col) =>
+        ...decimalColumns.map((col: any) =>
           this.createSummaryItem(col, true, 'sum', 'decimal'),
         ),
-        ...intColumns.map((col) =>
+        ...intColumns.map((col: any) =>
           this.createSummaryItem(col, true, 'sum', 'count'),
         ),
       ],
@@ -196,7 +196,12 @@ export class ImportRADataComponent implements OnInit {
   }
 
   //========== summary format making ========
-  createSummaryItem(col, isGroupItem = false, summaryType = 'sum', formatType) {
+  createSummaryItem(
+    col: any,
+    isGroupItem = false,
+    summaryType = 'sum',
+    formatType: any,
+  ) {
     return {
       column: col.ColumnName,
       summaryType: summaryType,
@@ -243,7 +248,7 @@ export class ImportRADataComponent implements OnInit {
 
     const fileName = `${this.selectedInsuranceName}_RA_Template.xlsx`;
 
-    const headers = this.columnData.map((c) => c.caption);
+    const headers = this.columnData.map((c: any) => c.caption);
     const worksheet = XLSX.utils.aoa_to_sheet([headers]);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Template');
@@ -336,7 +341,7 @@ export class ImportRADataComponent implements OnInit {
       this.excelColumnMismatchMap = {};
       const mismatchMessages: string[] = [];
 
-      this.columnData.forEach((col, index) => {
+      this.columnData.forEach((col: any, index: number) => {
         const expectedCaption = col.caption;
         const expectedField = col.dataField;
 
@@ -386,12 +391,12 @@ export class ImportRADataComponent implements OnInit {
 
       // ================= FORMAT FIELDS =================
       const dateFields = this.columnData
-        .filter((c) => c.type === 'DATETIME')
-        .map((c) => c.dataField);
+        .filter((c: any) => c.type === 'DATETIME')
+        .map((c: any) => c.dataField);
 
       const decimalFields = this.columnData
-        .filter((c) => c.type === 'DECIMAL' || c.type === 'NUMBER')
-        .map((c) => c.dataField);
+        .filter((c: any) => c.type === 'DECIMAL' || c.type === 'NUMBER')
+        .map((c: any) => c.dataField);
 
       mappedData = this.formatDateFields(mappedData, dateFields, decimalFields);
 
@@ -686,7 +691,7 @@ export class ImportRADataComponent implements OnInit {
 
   handleclose() {
     this.ViewDataPopup = false;
-    this.autoProcessPopupscreen = true;
+    // this.autoProcessPopupscreen = true;
   }
 }
 

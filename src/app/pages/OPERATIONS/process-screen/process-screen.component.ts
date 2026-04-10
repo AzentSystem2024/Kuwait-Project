@@ -85,14 +85,14 @@ export class ProcessScreenComponent {
   totalRASelected: any = 0;
   isFilterRowVisible: boolean = false;
   @ViewChild(DxDataGridComponent, { static: true })
-  dataGrid: DxDataGridComponent;
+  dataGrid!: DxDataGridComponent;
 
   @ViewChild(DxDataGridComponent, { static: true })
-  itemsGridRef: DxDataGridComponent;
+  itemsGridRef!: DxDataGridComponent;
 
   @ViewChild('raGrid', { static: false }) raGrid!: DxDataGridComponent;
   @ViewChild('hisGrid', { static: false }) hisGrid!: DxDataGridComponent;
-  @ViewChild('fileInput', { static: false }) fileInput: ElementRef;
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef;
   @ViewChild('distributeGrid', { static: false }) distributeGrid: any;
 
   @Input() LogID: any = null;
@@ -213,8 +213,8 @@ export class ProcessScreenComponent {
   }
   //--------------------login response--------------------
   sessionDetails() {
-    const LoginResponse = JSON.parse(localStorage.getItem('userData') || '{}');
-    this.User_Id = LoginResponse.USER_ID;
+    const LoginResponse = JSON.parse(localStorage.getItem('logData') || '{}');
+    this.User_Id = LoginResponse.UserID;
   }
   //=============select insurance details===========
   fetch_all_column_and_uniqueKey_data() {
@@ -461,14 +461,13 @@ export class ProcessScreenComponent {
       );
       return;
     }
-    this.isLoadingManualProcess = true;
+    this.isLoading = true;
     try {
       this.isLoading = true;
 
       const payload = {
         InsuranceID: this.selectedInsuranceId,
         LogID: this.fetchedData?.ID || this.LogID,
-        USER_ID: this.User_Id,
       };
 
       //  Await API to prevent UI blocking
@@ -477,7 +476,7 @@ export class ProcessScreenComponent {
         .toPromise();
 
       if (response.flag !== '1') return;
-      this.isLoadingManualProcess = false;
+      this.isLoading = false;
       this.isDistributePopupVisible = true;
 
       //  Build HIS Columns (same logic)
@@ -686,6 +685,7 @@ export class ProcessScreenComponent {
 
     // this.isLoadingManualProcess = true;
     const payload = {
+      USER_ID: this.User_Id,
       RA_IDS: this.selectedRAIdsString,
       distributed_data: this.transformPayload(this.selectedDistributeRows),
     };

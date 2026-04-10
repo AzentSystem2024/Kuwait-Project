@@ -49,6 +49,7 @@ import { AdvanceFilterPopupModule } from '../../POP-UP_PAGES/advance-filter-popu
 import { DataService } from 'src/app/services/data.service';
 import CustomStore from 'devextreme/data/custom_store';
 import { PopupStateService } from 'src/app/popupStateService.service';
+import { confirm, custom } from 'devextreme/ui/dialog';
 
 //=====================Excel Exporting Libraries=================
 import { Workbook } from 'exceljs';
@@ -163,7 +164,8 @@ export class RecallProcessComponent {
     onClick: () => this.revoke_process(),
     elementAttr: { class: 'add-button' },
   };
-
+  His_id: any;
+  IS_GROUP_MATCHED: boolean = false;
   constructor(
     private service: ReportService,
     private router: Router,
@@ -730,11 +732,41 @@ export class RecallProcessComponent {
     // this.service.exportDataGrid(event, fileName);
     this.exportLargeData();
   }
-  revoke_process() {
+  async revoke_process() {
+    if (this.IS_GROUP_MATCHED) {
+      const dialog = custom({
+        title: 'Confirmation',
+        messageHtml: `
+          <div style="width:300px; height:100px; font-size:14px; text-align:center; padding:15px; box-sizing:border-box;">
+            <p>Manual processing contains multiple claim records. This action will revoke all. Do you want to continue?</p>
+
+          </div>
+        `,
+        buttons: [
+          {
+            text: 'No',
+            type: 'normal',
+            stylingMode: 'outlined',
+            onClick: () => false,
+          },
+          {
+            text: 'Yes',
+            type: 'default',
+            stylingMode: 'contained',
+            onClick: () => true,
+          },
+        ],
+      });
+
+      const result = await dialog.show();
+      if (!result) return;
+    }
+
     const payload = {
-      HIS_ID: 34,
+      HIS_ID: this.His_id,
     };
     this.service.Revoke_process(payload).subscribe((res: any) => {
+      console.log(res, '=========response from revoke api');
       if (res.flag === '1') {
         notify(
           {
@@ -756,7 +788,21 @@ export class RecallProcessComponent {
     });
   }
   onSelectionChanged(event: any) {
-    console.log(event, '==================');
+    if (event.selectedRowKeys.length > 1) {
+      const lastKey = event.selectedRowKeys[event.selectedRowKeys.length - 1];
+
+      event.component.selectRows([lastKey], false);
+    }
+
+    const selectedData = event.selectedRowsData;
+
+    if (selectedData.length > 0) {
+      const lastRow = selectedData[selectedData.length - 1]; // ✅ last selected row
+      this.His_id = lastRow.HIS_ID;
+      this.IS_GROUP_MATCHED = lastRow.IS_GROUP_MATCHED;
+    }
+
+    console.log(this.His_id, 'Selected HIS_ID');
   }
 }
 @NgModule({

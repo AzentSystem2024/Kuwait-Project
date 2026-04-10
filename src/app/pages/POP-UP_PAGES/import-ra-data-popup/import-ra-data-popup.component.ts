@@ -250,8 +250,8 @@ export class ImportRADataPopupComponent implements OnInit {
   }
 
   sessionDetails() {
-    const LoginResponse = JSON.parse(localStorage.getItem('userData') || '{}');
-    this.User_Id = LoginResponse.USER_ID;
+    const LoginResponse = JSON.parse(localStorage.getItem('logData') || '{}');
+    this.User_Id = LoginResponse.UserID;
   }
   // ============ detailed view ==========
   private async viewDetails(): Promise<void> {
@@ -711,6 +711,7 @@ export class ImportRADataPopupComponent implements OnInit {
         this.get_RA_Columns_Data();
         this.totalRaItems = this.dataSource.length;
         // this.autoProcessPopup = true;
+        this.close();
       } else {
         this.close();
       }
@@ -1076,7 +1077,6 @@ export class ImportRADataPopupComponent implements OnInit {
       const payload = {
         InsuranceID: this.selectedInsuranceId,
         LogID: this.fetchedData?.ID || this.LogID,
-        USER_ID: this.User_Id,
       };
 
       //  Await API to prevent UI blocking
@@ -1497,6 +1497,8 @@ export class ImportRADataPopupComponent implements OnInit {
 
     // this.isLoadingManualProcess = true;
     const payload = {
+      USER_ID: this.User_Id,
+
       RA_IDS: this.selectedRAIdsString,
       distributed_data: this.transformPayload(this.selectedDistributeRows),
     };
