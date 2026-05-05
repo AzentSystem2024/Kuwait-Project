@@ -227,18 +227,8 @@
         [visible]="isFilterOpened"
         [applyFilter]="applyFilter"
       ></dxo-filter-row>
-      <!-- <dxo-export
-        [enabled]="true"
-        [allowExportSelectedData]="true"
-        [formats]="['xlsx']"
-      >
-      </dxo-export> -->
-      <dxo-export
-        [enabled]="true"
-        [allowExportSelectedData]="false"
-        [formats]="['xlsx']"
-      >
-      </dxo-export>
+      <dxo-export [enabled]="true" [formats]="['xlsx']"> </dxo-export>
+
       <dxo-toolbar>
         <dxi-item location="before">
           <div class="grid-header">Revoke Process</div>
@@ -286,12 +276,7 @@
           }"
         ></dxi-item>
 
-        <!-- <dxi-item name="exportButton" [disabled]="isEmptyDatagrid"></dxi-item> -->
-        <dxi-item
-          name="exportButton"
-          location="after"
-          cssClass="custom-export-button"
-        ></dxi-item>
+        <dxi-item name="exportButton" [disabled]="isEmptyDatagrid"></dxi-item>
 
         <!-- <dxi-item
           widget="dxButton"

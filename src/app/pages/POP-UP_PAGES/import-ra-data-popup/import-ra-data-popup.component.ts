@@ -860,6 +860,7 @@ export class ImportRADataPopupComponent implements OnInit {
       const payload = {
         InsuranceID: insurance,
         LogID: 0,
+        UserID: this.User_Id,
         RA_UNIQUE_KEY: this.selecteRAuniqueKeys.join(','),
         HIS_UNIQUE_KEY: this.selecteHISuniqueKeys.join(','),
       };
@@ -1927,6 +1928,23 @@ export class ImportRADataPopupComponent implements OnInit {
         : 0;
     });
   }
+
+  //-------------------Amount Formatting function-------------------
+  formatAmount(value: number): string {
+    if (value == null) return '';
+
+    if (value >= 1_000_000_000_000) {
+      return (value / 1_000_000_000_000).toFixed(2) + 'T';
+    } else if (value >= 1_000_000_000) {
+      return (value / 1_000_000_000).toFixed(2) + 'B';
+    } else if (value >= 1_000_000) {
+      return (value / 1_000_000).toFixed(2) + 'M';
+    } else if (value >= 1_000) {
+      return (value / 1_000).toFixed(2) + 'K';
+    } else {
+      return value.toString();
+    }
+  }
 }
 @NgModule({
   imports: [
@@ -1949,4 +1967,4 @@ export class ImportRADataPopupComponent implements OnInit {
   exports: [ImportRADataPopupComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class ImportRADataPopupModule {}
+export class ImportRADataPopupModule { }

@@ -166,6 +166,7 @@ export class RecallProcessComponent {
   };
   His_id: any;
   IS_GROUP_MATCHED: boolean = false;
+  User_Id: any
   constructor(
     private service: ReportService,
     private router: Router,
@@ -181,6 +182,8 @@ export class RecallProcessComponent {
     console.log(systemInfo);
     this.precision = systemInfo.Data.NUMBER_INFO.DECIMAL_DIGITS;
     console.log(this.precision);
+
+    this.sessionDetails()
 
     // this.loadingVisible = true;
 
@@ -212,6 +215,12 @@ export class RecallProcessComponent {
       }
     });
   }
+  sessionDetails() {
+    const LoginResponse = JSON.parse(localStorage.getItem('logData') || '{}');
+    this.User_Id = LoginResponse.UserID;
+
+  }
+
 
   public exportAsExcelFile(json: any[], excelFileName: string): void {
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
@@ -582,10 +591,10 @@ export class RecallProcessComponent {
       valueFormat:
         formatType === 'decimal'
           ? {
-              style: 'decimal',
-              minimumFractionDigits: 3,
-              maximumFractionDigits: 3,
-            }
+            style: 'decimal',
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3,
+          }
           : null,
       alignByColumn: isGroupItem, // Align by column if it's a group item
       showInGroupFooter: isGroupItem, // Show in group footer for group items
@@ -729,8 +738,8 @@ export class RecallProcessComponent {
   onExporting(event: any) {
     console.log(event, '===========event ====== data');
     const fileName = 'Cliam-Details-Activity';
-    // this.service.exportDataGrid(event, fileName);
-    this.exportLargeData();
+    this.service.exportDataGrid(event, fileName);
+    // this.exportLargeData();
   }
   async revoke_process() {
     if (this.IS_GROUP_MATCHED) {
@@ -763,6 +772,7 @@ export class RecallProcessComponent {
     }
 
     const payload = {
+      UserID: this.User_Id,
       HIS_ID: this.His_id,
     };
     this.service.Revoke_process(payload).subscribe((res: any) => {
@@ -841,4 +851,4 @@ export class RecallProcessComponent {
   exports: [],
   declarations: [RecallProcessComponent],
 })
-export class RecallProcessModule {}
+export class RecallProcessModule { }

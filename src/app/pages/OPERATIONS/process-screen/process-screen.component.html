@@ -28,24 +28,25 @@
     <div class="summary-section">
       <div class="d-flex flex-column gap-2">
         <div>
-          Total EDI: <b>{{ TotalEDI }} </b>
+          Total EDI: <b>{{ formatAmount(TotalEDI) }} </b>
         </div>
         <div>
           RA Identified:
-          <b>{{ identifiedHis }}({{ identifiedPercent }}%)</b>
+          <b>{{ formatAmount(identifiedHis) }} ({{ identifiedPercent }}%)</b>
         </div>
         <div>
           Processed:
-          <b>{{ MatchedTotalHis }} ({{ processedPercent }}%) </b>
+          <b>{{ formatAmount(MatchedTotalHis) }} ({{ processedPercent }}%) </b>
         </div>
 
         <div>
           Require Manual Matching :
-          <b>{{ ManualProcessing }} ({{ manualPercent }}%)</b>
+          <b>{{ formatAmount(ManualProcessing) }} ({{ manualPercent }}%)</b>
         </div>
         <div class="d-flex mb-2" style="justify-content: space-between">
           <div>
-            Not Found: <b>{{ PendignHis }} ({{ notFoundPercent }}%)</b>
+            Not Found:
+            <b>{{ formatAmount(PendignHis) }} ({{ notFoundPercent }}%)</b>
           </div>
           <dx-button
             text="Manual Process"

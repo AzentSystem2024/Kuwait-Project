@@ -215,12 +215,8 @@
         [visible]="isFilterOpened"
         [applyFilter]="applyFilter"
       ></dxo-filter-row>
-      <dxo-export
-        [enabled]="true"
-        [allowExportSelectedData]="true"
-        [formats]="['xlsx']"
-      >
-      </dxo-export>
+      <dxo-export [enabled]="true" [formats]="['xlsx']"> </dxo-export>
+
       <dxo-toolbar>
         <dxi-item location="before">
           <div class="grid-header">Ageing Report</div>
@@ -440,5 +436,17 @@
   [shading]="true"
   [hideOnOutsideClick]="false"
   [message]="'Loading...'"
+>
+</dx-load-panel>
+
+<dx-load-panel
+  #loadPanel
+  shadingColor="rgba(0,0,0,0.0)"
+  [(visible)]="loadingExportVisible"
+  [showIndicator]="true"
+  [showPane]="true"
+  [shading]="true"
+  [hideOnOutsideClick]="false"
+  [message]="'Exporting...'"
 >
 </dx-load-panel>

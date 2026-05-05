@@ -33,7 +33,7 @@ export class ReportService {
   constructor(
     private http: HttpClient,
     private router: Router,
-  ) {}
+  ) { }
 
   //============Share months to component ================
   getMonths(): { name: string; value: number }[] {
@@ -372,5 +372,15 @@ export class ReportService {
     const url = `${BASE_URL}revokeprocess/revoke`;
     const reqBody = item;
     return this.http.post(url, reqBody);
+  }
+  //=========Excel Exporting data========
+
+
+  Excel_Export(item: any) {
+    const url = `${BASE_URL}export/report`;
+    const reqBody = item;
+    return this.http.post(url, reqBody, {
+      responseType: 'blob'   // ✅ FIX
+    });
   }
 }

@@ -166,6 +166,7 @@ export class ProcessScreenComponent {
   totalRaItems: number = 0;
   allowSelectAllFlag: boolean = false;
   User_Id: any;
+
   constructor(
     private dataservice: DataService,
     private masterservice: MasterReportService,
@@ -312,6 +313,7 @@ export class ProcessScreenComponent {
     return new Promise((resolve) => {
       const insurance = this.selectedInsuranceId;
       const payload = {
+        UserID: this.User_Id,
         InsuranceID: insurance,
         RA_UNIQUE_KEY: this.selecteRAuniqueKeys.join(','),
         HIS_UNIQUE_KEY: this.selecteHISuniqueKeys.join(','),
@@ -341,6 +343,7 @@ export class ProcessScreenComponent {
         InsuranceID: insurance,
         RA_UNIQUE_KEY: '',
         HIS_UNIQUE_KEY: '',
+        UserID: this.User_Id,
       };
 
       this.isLoadingManualProcess = true;
@@ -1164,6 +1167,22 @@ export class ProcessScreenComponent {
 
     console.log('Filtered Allow Select All:', this.allowSelectAllFlag);
   }
+  //-------------------Amount Formatting function-------------------
+  formatAmount(value: number): string {
+    if (value == null) return '';
+
+    if (value >= 1_000_000_000_000) {
+      return (value / 1_000_000_000_000).toFixed(2) + 'T';
+    } else if (value >= 1_000_000_000) {
+      return (value / 1_000_000_000).toFixed(2) + 'B';
+    } else if (value >= 1_000_000) {
+      return (value / 1_000_000).toFixed(2) + 'M';
+    } else if (value >= 1_000) {
+      return (value / 1_000).toFixed(2) + 'K';
+    } else {
+      return value.toString();
+    }
+  }
 }
 
 @NgModule({
@@ -1185,4 +1204,4 @@ export class ProcessScreenComponent {
   declarations: [ProcessScreenComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class ProcessScreenModule {}
+export class ProcessScreenModule { }

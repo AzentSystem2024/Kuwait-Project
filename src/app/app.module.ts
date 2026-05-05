@@ -80,7 +80,7 @@ import { RecallProcessModule } from './pages/OPERATIONS/recall-process/recall-pr
     AgedReportModule,
     InsuranceMasterEditModule,
     ProcessScreenModule,
-    RecallProcessModule,
+    RecallProcessModule,//=modules menu is Rovoke
   ],
   providers: [
     AuthService,
@@ -93,4 +93,4 @@ import { RecallProcessModule } from './pages/OPERATIONS/recall-process/recall-pr
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule { }

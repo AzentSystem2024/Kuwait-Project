@@ -231,19 +231,19 @@
       <h6>Process Summary</h6>
       <div class="d-flex flex-column gap-2 mt-2">
         <div>
-          Total claim Records: <b>{{ TotalEDI }}</b>
+          Total claim Records: <b>{{ formatAmount(TotalEDI) }}</b>
         </div>
         <div>
-          Total RA Records: <b>{{ TotalRA }}</b>
+          Total RA Records: <b>{{ formatAmount(TotalRA)  }}</b>
         </div>
         <!-- <div>
           Total Pending Process: <b>{{ totalPendingprocessed }}</b>
         </div> -->
         <div>
-          Total processed claim Records: <b>{{ MatchedTotalHis }}</b>
+          Total processed claim Records: <b>{{ formatAmount(MatchedTotalHis) }}</b>
         </div>
         <div>
-          Total processed RA Records: <b>{{ MatchedTotalRA }}</b>
+          Total processed RA Records: <b>{{ formatAmount(MatchedTotalRA)  }}</b>
         </div>
 
         <div>

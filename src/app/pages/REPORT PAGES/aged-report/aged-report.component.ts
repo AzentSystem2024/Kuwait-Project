@@ -1,4 +1,3 @@
-import { MasterReportService } from 'src/app/pages/MASTER PAGES/master-report.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   ChangeDetectorRef,
@@ -141,9 +140,12 @@ export class AgedReportComponent {
 
   activeDetailGrid: DxDataGridComponent | null = null;
   DetailColumnNames: string[] = [];
+  loadingExportVisible: boolean = false;
   constructor(
     private dataservice: DataService,
     private reportengine: ReportEngineService,
+    private service: ReportService,
+
   ) {
     this.get_searchParameters_Dropdown_Values();
     this.minDate = new Date(2000, 1, 1); // Set the minimum date
@@ -257,8 +259,49 @@ export class AgedReportComponent {
 
   //================Exporting Function===================
   onExporting(event: any) {
-    const fileName = 'Cliam-Details-Activity';
-    // this.service.exportDataGrid(event, fileName);
+    const fileName = 'Ageing Report';
+    const payload = {
+      reportType: 'ageing-rpt',
+      filters: {
+        DATE_FROM: this.formatDate(this.From_Date_Value),
+        DATE_TO: this.formatDate(this.To_Date_Value),
+        AS_ON_DATE: this.formatDate(this.As_on_date),
+
+      }
+
+    }
+    this.loadingExportVisible = true;
+
+    this.service.Excel_Export(payload).subscribe({
+      next: (res: Blob) => {
+        const blob = new Blob([res], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+
+        window.URL.revokeObjectURL(link.href);
+      },
+
+      error: (err) => {
+        console.error('Export error:', err);
+        notify(err + 'failed Export' || 'Export failed', 'error', 2000);
+        // ✅ VERY IMPORTANT
+        this.loadingExportVisible = false;
+
+      },
+
+      complete: () => {
+        // ✅ Also safe place to stop loader
+        this.loadingExportVisible = false;
+      }
+    });
+
+    event.cancel = true;
+
   }
   async get_Datagrid_DataSource() {
     this.loadingVisible = true;
@@ -425,30 +468,30 @@ export class AgedReportComponent {
       valueFormat:
         formatType === 'decimal'
           ? {
-              formatter: (value) => {
-                if (value == null) return '';
+            formatter: (value) => {
+              if (value == null) return '';
 
-                const fixed = value.toFixed(3);
-                const decimals = fixed.split('.')[1] || '000';
+              const fixed = value.toFixed(3);
+              const decimals = fixed.split('.')[1] || '000';
 
-                // Decide 2 or 3 decimal places
-                const decimalPlaces = decimals[2] === '0' ? 2 : 3;
+              // Decide 2 or 3 decimal places
+              const decimalPlaces = decimals[2] === '0' ? 2 : 3;
 
-                // Format number in US style, no currency, no grouping
-                return new Intl.NumberFormat('en-US', {
-                  minimumFractionDigits: decimalPlaces,
-                  maximumFractionDigits: decimalPlaces,
-                }).format(value);
-              },
-            }
-          : {
-              formatter: (value) =>
-                value != null
-                  ? new Intl.NumberFormat('en-US', {
-                      useGrouping: false,
-                    }).format(Number(value))
-                  : '',
+              // Format number in US style, no currency, no grouping
+              return new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: decimalPlaces,
+                maximumFractionDigits: decimalPlaces,
+              }).format(value);
             },
+          }
+          : {
+            formatter: (value) =>
+              value != null
+                ? new Intl.NumberFormat('en-US', {
+                  useGrouping: false,
+                }).format(Number(value))
+                : '',
+          },
       alignByColumn: isGroupItem,
       showInGroupFooter: isGroupItem,
     };
@@ -511,8 +554,8 @@ export class AgedReportComponent {
     DxValidationSummaryModule,
     DxLoadPanelModule,
   ],
-  providers: [],
+  providers: [ReportService],
   declarations: [AgedReportComponent],
   exports: [AgedReportComponent],
 })
-export class AgedReportModule {}
+export class AgedReportModule { }

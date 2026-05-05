@@ -61,6 +61,7 @@ import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 import * as XLSXStyle from 'xlsx-style';
 
+
 @Component({
   selector: 'app-claim-details',
   templateUrl: './claim-details.component.html',
@@ -159,7 +160,7 @@ export class ClaimDetailsComponent implements OnInit {
   private chunks: any[][] = [];
   totalRows: any = 0;
   private chunkSize = 10000;
-
+  loadingExportVisible: boolean = false
   constructor(
     private service: ReportService,
     private router: Router,
@@ -502,6 +503,7 @@ export class ClaimDetailsComponent implements OnInit {
           load: () => Promise.resolve(formattedReportData),
         });
         this.dataGrid.instance.endCustomLoading();
+
         this.isContentVisible = false;
       } else {
         this.dataGrid.instance.endCustomLoading();
@@ -565,10 +567,10 @@ export class ClaimDetailsComponent implements OnInit {
       valueFormat:
         formatType === 'decimal'
           ? {
-              style: 'decimal',
-              minimumFractionDigits: 3,
-              maximumFractionDigits: 3,
-            }
+            style: 'decimal',
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3,
+          }
           : null,
       alignByColumn: isGroupItem, // Align by column if it's a group item
       showInGroupFooter: isGroupItem, // Show in group footer for group items
@@ -802,9 +804,72 @@ export class ClaimDetailsComponent implements OnInit {
   //================Exporting Function===================
   onExporting(event: any) {
     console.log(event, '===========event ====== data');
-    const fileName = 'Cliam-Details-Activity';
+    const fileName = 'Cliam-Details';
     // this.service.exportDataGrid(event, fileName);
-    this.exportLargeData();
+    const payload = {
+      reportType: 'claim-details',
+      filters: {
+        DATE_FROM: this.reportengine.formatDate(this.From_Date_Value),
+        DATE_TO: this.reportengine.formatDate(this.To_Date_Value),
+        INSURANCE_ID: this.Insurance_Value,
+
+      }
+
+    }
+    this.loadingExportVisible = true;
+
+    this.service.Excel_Export(payload).subscribe({
+      next: (res: Blob) => {
+        const blob = new Blob([res], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+
+        window.URL.revokeObjectURL(link.href);
+      },
+
+      error: (err) => {
+        console.error('Export error:', err);
+        notify(err + 'failed Export' || 'Export failed', 'error', 2000);
+        // ✅ VERY IMPORTANT
+        this.loadingExportVisible = false;
+
+      },
+
+      complete: () => {
+        // ✅ Also safe place to stop loader
+        this.loadingExportVisible = false;
+      }
+    });
+
+    event.cancel = true;
+
+
+
+    // this.exportLargeData();
+  }
+
+  exportToExcel(data: any[]) {
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'data': worksheet },
+      SheetNames: ['data']
+    };
+
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+
+    const blob: Blob = new Blob([excelBuffer], {
+      type: 'application/octet-stream'
+    });
+
+    FileSaver.saveAs(blob, 'data.xlsx');
   }
 }
 
@@ -844,4 +909,4 @@ export class ClaimDetailsComponent implements OnInit {
   exports: [],
   declarations: [ClaimDetailsComponent],
 })
-export class ClaimDetailsModule {}
+export class ClaimDetailsModule { }
